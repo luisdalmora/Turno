@@ -86,9 +86,26 @@ main {
   margin-bottom: 15px;
 }
 
+/* ... outros estilos ... */
+
 .calendario-placeholder {
-  /* Estilos para o placeholder do calendário, se necessário */
+  /* Remove a largura máxima que era para a imagem estática */
 }
+
+.calendario-placeholder iframe {
+  width: 100%; /* O iframe ocupa a largura total do container */
+  height: 400px; /* Altura ajustada para não ser excessiva */
+  border: none; /* Já tem a borda no atributo style do iframe */
+}
+
+@media (max-width: 768px) {
+  /* ... outras media queries ... */
+  .calendario-placeholder iframe {
+    height: 600px; /* Aumenta a altura em telas menores, se necessário */
+  }
+}
+
+/* ... restante dos estilos ... */
 
 .tabela-mes table,
 .resumo-colaborador table {
