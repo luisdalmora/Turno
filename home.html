@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escala Trabalho</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="dashboard-container">
+    <div class="sidebar">
+      <h3>Menu</h3>
+      <ul>
+        <li class="active"><a href="#">Dashboard</a></li>
+        <li><a href="#">Item 1</a></li>
+        <li><a href="#">Item 2</a></li>
+        <li><a href="#">Item 3</a></li>
+        <li><a href="#">Item 4</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <header>
+        <h1>Sim Posto</h1>
+      </header>
+      <main>
+        <div class="widget calendario">
+          <h2>Calendário</h2>
+          <div class="calendario-placeholder">
+            <iframe src="https://calendar.google.com/calendar/embed?src=postosim8%40gmail.com&ctz=America%2FSao_Paulo"
+              style="border:solid 1px #777" width="100%" height="400" frameborder="0" scrolling="no"></iframe>
+          </div>
+        </div>
+
+        <div class="widget tabela-mes">
+          <h2>Turnos - Maio 2025</h2>
+          <table id="tabela-maio">
+            <thead>
+              <tr>
+                <th>Dia</th>
+                <th>Hora</th>
+                <th>Colaborador</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input value="03/mai"></td>
+                <td><input class="hora" value="04:00:00"></td>
+                <td><input class="colaborador" value="Roger"></td>
+              </tr>
+              <tr>
+                <td><input value="10/mai"></td>
+                <td><input class="hora" value="04:00:00"></td>
+                <td><input class="colaborador" value="Vinicius"></td>
+              </tr>
+              <tr>
+                <td><input value="17/mai"></td>
+                <td><input class="hora" value="04:00:00"></td>
+                <td><input class="colaborador" value="Luis Henrique"></td>
+              </tr>
+              <tr>
+                <td><input value="24/mai"></td>
+                <td><input class="hora" value="04:00:00"></td>
+                <td><input class="colaborador" value="Roger"></td>
+              </tr>
+              <tr>
+                <td><input value="31/mai"></td>
+                <td><input class="hora" value="04:00:00"></td>
+                <td><input class="colaborador" value="Vinicius"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="widget resumo-colaborador">
+          <h2>Resumo por Colaborador</h2>
+          <table id="resumo-tabela">
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Total Horas</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
