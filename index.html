@@ -12,21 +12,21 @@
   <div class="container">
     <div class="container-login">
       <div class="wrap-login">
-        <form class="login-form">
+        <form class="login-form" method="POST" action="login.php">
           <span class="login-form-title">Faça o login</span>
 
           <div class="wrap-input margin-top-35 margin-bottom-35">
-            <input class="input-form" type="text" name="usuario" autocomplete="off">
+            <input class="input-form" type="text" name="usuario" required autocomplete="off">
             <span class="focus-input-form" data-placeholder="Usuário"></span>
-          </div>
+          </div>>
 
           <div class="wrap-input margin-bottom-35">
-            <input class="input-form" type="password" name="password">
+            <input class="input-form" type="password" name="password" required>
             <span class="focus-input-form" data-placeholder="Senha"></span>
           </div>
 
           <div class="container-login-form-btn">
-            <a class="login-form-btn" href="home.html">Login</a>
+            <button class="login-form-btn" type="submit">Login</button>
           </div>
 
           <ul class="login-utils">
