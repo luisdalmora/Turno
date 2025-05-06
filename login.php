@@ -1,14 +1,20 @@
 <?php
 include"conexao.php";
+
 $usuario = $_POST['usuario'];
-$senha = $_POST['password'];
+$senha = md5($_POST['senha']);
 
-$stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = :usuario AND senha = :senha");
-$stmt->execute(['usuario' => $usuario, 'senha' => $senha]);
+$sql = "SELECT id FROM usuarios WHERE usuario = '$usuario' AND senha = '$senha'";
+$resultado = $conexao->query($sql);
 
-if ($stmt->rowCount() > 0) {
+if ($resultado->num_rows == 1) {
+    echo "Login realizado com sucesso!";
+    // Redirecione para a página home.html ou outra página protegida
     header("Location: home.html");
 } else {
-    echo "<script>alert('Usuário ou senha inválidos'); window.location.href='index.html';</script>";
+    echo "Usuário ou senha incorretos.";
+    header("Location: index.html"); // Redireciona de volta para o login
 }
 
+$conexao->close();
+?>
