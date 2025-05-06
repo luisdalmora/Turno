@@ -1,20 +1,27 @@
 <?php
 include"conexao.php";
 
-$usuario = $_POST['usuario'];
-$senha = md5($_POST['senha']);
+// Recebe os dados do formulário
+$usuario = $_POST['usuario'] ?? '';
+$senha = $_POST['password'] ?? '';
 
-$sql = "SELECT id FROM usuarios WHERE usuario = '$usuario' AND senha = '$senha'";
-$resultado = $conexao->query($sql);
+// Previne SQL Injection
+$usuario = $conn->real_escape_string($usuario);
+$senha = $conn->real_escape_string($senha);
 
-if ($resultado->num_rows == 1) {
-    echo "Login realizado com sucesso!";
-    // Redirecione para a página home.html ou outra página protegida
+// Consulta SQL
+$sql = "SELECT * FROM usuarios WHERE usuario = '$usuario' AND senha = '$senha'";
+$result = $conn->query($sql);
+
+if ($result->num_rows === 1) {
+    // Login bem-sucedido
     header("Location: home.html");
+    exit();
 } else {
-    echo "Usuário ou senha incorretos.";
-    header("Location: index.html"); // Redireciona de volta para o login
+    // Falha no login
+    echo "<script>alert('Usuário ou senha inválidos'); window.location.href='index.html';</script>";
 }
 
-$conexao->close();
+$conn->close();
+?>
 ?>
