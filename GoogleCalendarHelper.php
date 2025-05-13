@@ -3,11 +3,12 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php'; // Para GOOGLE_APPLICATION_NAME, PATH_TO_CLIENT_SECRET_JSON, etc.
-// A classe LogHelper deve ser definida em outro lugar e injetada.
+// A classe LogHelper é injetada via construtor.
 
 use Google\Client as GoogleClient;
 use Google\Service\Calendar as GoogleServiceCalendar;
-use Google\Service\Calendar\Event as GoogleCalendarEvent;
+use Google\Service\Calendar\Event as GoogleCalendarEvent; // Usado para criar eventos
+use Google\Service\Calendar\EventDateTime; // Usado para definir datas/horas de eventos
 use Google\Service\Exception as GoogleServiceException;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 
@@ -22,13 +23,19 @@ class GoogleCalendarHelper {
 
         $this->client = new GoogleClient();
         $this->client->setApplicationName(GOOGLE_APPLICATION_NAME);
-        $this->client->setAuthConfig(PATH_TO_CLIENT_SECRET_JSON); // Carrega client_id, client_secret, etc.
+        try {
+            $this->client->setAuthConfig(PATH_TO_CLIENT_SECRET_JSON); // Carrega client_id, client_secret, etc.
+        } catch (\Google\Exception $e) {
+            $this->logger->log('GCAL_CRITICAL', 'Falha ao carregar arquivo de configuração JSON do Google: ' . $e->getMessage(), ['path' => PATH_TO_CLIENT_SECRET_JSON]);
+            // Você pode querer lançar a exceção ou tratar de forma mais robusta
+            // throw $e; 
+        }
         $this->client->setRedirectUri(GOOGLE_REDIRECT_URI);
         $this->client->setAccessType('offline'); // Necessário para obter refresh_token
         $this->client->setPrompt('select_account consent'); // Força o consentimento e a seleção da conta
         $this->client->setScopes([
-            GoogleServiceCalendar::CALENDAR_READONLY,
-            GoogleServiceCalendar::CALENDAR_EVENTS
+            GoogleServiceCalendar::CALENDAR_EVENTS // Permissão para ler, criar, modificar e deletar eventos
+            // GoogleServiceCalendar::CALENDAR_READONLY // Se você só precisasse ler, mas precisamos de CALENDAR_EVENTS
         ]);
     }
 
@@ -39,19 +46,15 @@ class GoogleCalendarHelper {
     public function exchangeCodeForToken($authCode) {
         try {
             $accessToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
-            // A linha abaixo não é estritamente necessária aqui se $accessToken não for usado imediatamente pelo $this->client
-            // mas é uma boa prática se outras operações do cliente se seguirem imediatamente.
-            // $this->client->setAccessToken($accessToken);
-
+            
             if (isset($accessToken['error'])) {
                 $this->logger->log('GCAL_ERROR', 'Erro ao trocar código por token (resposta do Google).', [
                     'error_details' => $accessToken,
-                    'auth_code_prefix' => substr($authCode, 0, 20) // Logar apenas parte do código por segurança
+                    'auth_code_prefix' => substr($authCode, 0, 20) 
                 ]);
                 return null;
             }
             
-            // O token é válido, vamos defini-lo no cliente para uso futuro e salvá-lo
             $this->client->setAccessToken($accessToken);
 
             if (isset($_SESSION['usuario_id'])) {
@@ -63,51 +66,33 @@ class GoogleCalendarHelper {
             return $accessToken;
 
         } catch (GoogleServiceException $e) {
-            $this->logger->log('GCAL_ERROR', 'Google Service Exception ao trocar código: ' . $e->getMessage(), [
-                'errors' => $e->getErrors(), 
-                'trace' => $e->getTraceAsString(),
-                'auth_code_prefix' => substr($authCode, 0, 20)
-            ]);
+            $this->logger->log('GCAL_ERROR', 'Google Service Exception ao trocar código: ' . $e->getMessage(), ['errors' => $e->getErrors(), 'auth_code_prefix' => substr($authCode, 0, 20)]);
             return null;
-        } catch (GuzzleRequestException $e) {
-            $this->logger->log('GCAL_ERROR', 'Guzzle HTTP Exception ao trocar código: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'auth_code_prefix' => substr($authCode, 0, 20)
-            ]);
+        } catch (GuzzleRequestException $e) { // Erros de HTTP Guzzle
+            $this->logger->log('GCAL_ERROR', 'Guzzle HTTP Exception ao trocar código: ' . $e->getMessage(), ['auth_code_prefix' => substr($authCode, 0, 20)]);
             if ($e->hasResponse()) {
                 $this->logger->log('GCAL_ERROR_RESPONSE', 'Resposta do Guzzle (troca de código): ' . (string) $e->getResponse()->getBody());
             }
             return null;
-        } catch (Exception $e) { // Generic fallback
-            $this->logger->log('GCAL_ERROR', 'Exceção genérica ao trocar código por token: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'auth_code_prefix' => substr($authCode, 0, 20)
-            ]);
+        } catch (Exception $e) { // Captura genérica
+            $this->logger->log('GCAL_ERROR', 'Exceção genérica ao trocar código por token: ' . $e->getMessage(), ['auth_code_prefix' => substr($authCode, 0, 20)]);
             return null;
         }
     }
 
     private function saveTokenForUser($userId, $tokenData) {
         if (!$this->conexao_db) {
+            // Fallback para sessão se não houver conexão com BD (não recomendado para produção)
             $_SESSION['google_access_token_user_' . $userId] = $tokenData;
-            $this->logger->log('GCAL_INFO', 'Token do Google salvo na SESSÃO para user_id: ' . $userId . '. Recomenda-se BD para produção.');
+            $this->logger->log('GCAL_INFO', 'Token do Google salvo na SESSÃO para user_id: ' . $userId . '. BD é recomendado.');
             return;
         }
 
         $accessToken = $tokenData['access_token'];
-        $refreshToken = isset($tokenData['refresh_token']) ? $tokenData['refresh_token'] : null;
-        // expires_in é o número de segundos até a expiração.
-        $expiresIn = isset($tokenData['expires_in']) ? (int) $tokenData['expires_in'] : 3599; // Default para ~1 hora se não vier
-        // 'created' é o timestamp Unix de quando o token foi criado.
-        $createdAt = isset($tokenData['created']) ? (int) $tokenData['created'] : time();
+        $refreshToken = $tokenData['refresh_token'] ?? null; // Refresh token pode não vir em todos os fluxos de refresh
+        $expiresIn = $tokenData['expires_in'] ?? 3599; 
+        $createdAt = $tokenData['created'] ?? time();
 
-        // Lembre-se: a tabela google_user_tokens deve ter user_id como PRIMARY KEY ou UNIQUE para REPLACE INTO funcionar corretamente.
-        // Schema sugerido para google_user_tokens:
-        // user_id INT PRIMARY KEY
-        // access_token TEXT NOT NULL
-        // refresh_token TEXT NULL
-        // expires_in INT NOT NULL
-        // created_at INT NOT NULL 
         $sql = "REPLACE INTO google_user_tokens (user_id, access_token, refresh_token, expires_in, created_at) VALUES (?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conexao_db, $sql);
         if ($stmt) {
@@ -123,14 +108,10 @@ class GoogleCalendarHelper {
 
     public function getAccessTokenForUser($userId) {
         $tokenFromSource = null;
-        $source = 'session'; // Para log
+        $source_log_msg = 'session'; // Para log
 
-        if (!$this->conexao_db) {
-            if (isset($_SESSION['google_access_token_user_' . $userId])) {
-                $tokenFromSource = $_SESSION['google_access_token_user_' . $userId];
-            }
-        } else {
-            $source = 'database';
+        if ($this->conexao_db) {
+            $source_log_msg = 'database';
             $sql = "SELECT access_token, refresh_token, expires_in, created_at FROM google_user_tokens WHERE user_id = ?";
             $stmt = mysqli_prepare($this->conexao_db, $sql);
             if ($stmt) {
@@ -145,154 +126,201 @@ class GoogleCalendarHelper {
                         'access_token' => $tokenDataDb['access_token'],
                         'refresh_token' => $tokenDataDb['refresh_token'],
                         'expires_in' => (int) $tokenDataDb['expires_in'],
-                        'created' => (int) $tokenDataDb['created_at'] // 'created' é o campo esperado pelo Google_Client
+                        'created' => (int) $tokenDataDb['created_at'] 
                     ];
                 }
             } else {
                 $this->logger->log('GCAL_ERROR', 'Falha ao preparar statement para buscar token do Google no BD.', ['user_id' => $userId, 'error' => mysqli_error($this->conexao_db)]);
                 return null;
             }
+        } elseif (isset($_SESSION['google_access_token_user_' . $userId])) { // Fallback para sessão
+            $tokenFromSource = $_SESSION['google_access_token_user_' . $userId];
         }
 
+
         if (!$tokenFromSource) {
-            $this->logger->log('GCAL_INFO', 'Nenhum token encontrado para user_id: ' . $userId . ' (source: ' . $source . ')');
+            $this->logger->log('GCAL_INFO', 'Nenhum token encontrado (' . $source_log_msg . ') para user_id: ' . $userId);
             return null;
         }
 
         $this->client->setAccessToken($tokenFromSource);
 
         if ($this->client->isAccessTokenExpired()) {
-            $this->logger->log('GCAL_INFO', 'Token expirado para user_id: ' . $userId . ' (source: ' . $source . '). Tentando refresh.');
-            $refreshToken = $this->client->getRefreshToken();
-            if ($refreshToken) {
+            $this->logger->log('GCAL_INFO', 'Token (' . $source_log_msg . ') expirado para user_id: ' . $userId . '. Tentando refresh.');
+            $storedRefreshToken = $this->client->getRefreshToken(); // Pega o refresh_token do $tokenFromSource
+
+            if ($storedRefreshToken) {
                 try {
-                    $newToken = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
-                    // $newToken pode não incluir o 'refresh_token'. Devemos mesclar para preservá-lo.
-                    $updatedTokenData = array_merge($tokenFromSource, $newToken);
-                    // Garante que o refresh_token original seja mantido se o novo não o trouxer
-                    if (!isset($newToken['refresh_token']) && isset($tokenFromSource['refresh_token'])) {
-                        $updatedTokenData['refresh_token'] = $tokenFromSource['refresh_token'];
-                    }
-                    // Atualiza o 'created' para o momento do refresh, pois 'expires_in' é relativo a este.
-                    $updatedTokenData['created'] = isset($newToken['created']) ? (int)$newToken['created'] : time();
+                    // Busca um novo token de acesso usando o refresh token
+                    $this->client->fetchAccessTokenWithRefreshToken($storedRefreshToken);
+                    $newAccessTokenArray = $this->client->getAccessToken(); // Pega o token atualizado (que agora inclui o novo access_token)
 
-
-                    $this->client->setAccessToken($updatedTokenData);
+                    // O novo array pode não incluir o refresh_token original se ele não mudou.
+                    // Vamos garantir que o refresh_token seja preservado.
+                    $newAccessTokenArray['refresh_token'] = $storedRefreshToken;
                     
-                    // Salvar o token atualizado
-                    if ($source === 'session') {
-                        $_SESSION['google_access_token_user_' . $userId] = $updatedTokenData;
-                    } else { // database
-                        $this->saveTokenForUser($userId, $updatedTokenData);
-                    }
-                    $this->logger->log('GCAL_INFO', 'Token do Google (' . $source . ') atualizado via refresh token.', ['user_id' => $userId]);
+                    // 'created' deve ser atualizado para o momento do refresh
+                    $newAccessTokenArray['created'] = $newAccessTokenArray['created'] ?? time();
+
+
+                    // Salva o token atualizado (com o novo access_token e o refresh_token antigo)
+                    $this->saveTokenForUser($userId, $newAccessTokenArray);
+                    
+                    $this->logger->log('GCAL_INFO', 'Token do Google (' . $source_log_msg . ') atualizado via refresh token.', ['user_id' => $userId]);
                     return $this->client->getAccessToken(); // Retorna o array completo do token atualizado
                 
                 } catch (GoogleServiceException $e) {
-                    $this->logger->log('GCAL_ERROR', 'Google Service Exception ao atualizar token (' . $source . ') via refresh: ' . $e->getMessage(), ['user_id' => $userId, 'errors' => $e->getErrors(), 'trace' => $e->getTraceAsString()]);
+                    $this->logger->log('GCAL_ERROR', 'Google Service Exception ao ATUALIZAR token via refresh (' . $source_log_msg . '): ' . $e->getMessage(), ['user_id' => $userId, 'errors' => $e->getErrors()]);
                 } catch (GuzzleRequestException $e) {
-                    $this->logger->log('GCAL_ERROR', 'Guzzle HTTP Exception ao atualizar token (' . $source . ') via refresh: ' . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
-                    if ($e->hasResponse()) {
-                        $this->logger->log('GCAL_ERROR_RESPONSE', 'Resposta do Guzzle (refresh ' . $source . '): ' . (string) $e->getResponse()->getBody());
-                    }
+                    $this->logger->log('GCAL_ERROR', 'Guzzle Exception ao ATUALIZAR token via refresh (' . $source_log_msg . '): ' . $e->getMessage(), ['user_id' => $userId]);
                 } catch (Exception $e) {
-                    $this->logger->log('GCAL_ERROR', 'Erro genérico ao atualizar token (' . $source . ') via refresh: ' . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
+                    $this->logger->log('GCAL_ERROR', 'Erro genérico ao ATUALIZAR token via refresh (' . $source_log_msg . '): ' . $e->getMessage(), ['user_id' => $userId]);
                 }
-                // Se o refresh falhou
-                if ($source === 'session') unset($_SESSION['google_access_token_user_' . $userId]);
-                // Para BD, poderíamos deletar o token inválido ou marcar como tal
-                $this->logger->log('GCAL_WARNING', 'Falha ao atualizar token via refresh para user_id: ' . $userId . '. Token removido/invalidado.');
+                // Se o refresh falhou, remove o token inválido e retorna null
+                $this->revokeTokenForUser($userId); // Revoga e remove do DB/sessão para forçar nova autenticação
+                $this->logger->log('GCAL_WARNING', 'Falha ao atualizar token via refresh para user_id: ' . $userId . '. Token revogado. Reautenticação necessária.');
                 return null;
             } else {
-                $this->logger->log('GCAL_WARNING', 'Token (' . $source . ') expirado e sem refresh token para user_id: ' . $userId . '. Reautenticação necessária.');
-                if ($source === 'session') unset($_SESSION['google_access_token_user_' . $userId]);
+                $this->logger->log('GCAL_WARNING', 'Token (' . $source_log_msg . ') expirado e SEM refresh token para user_id: ' . $userId . '. Reautenticação necessária.');
+                if ($this->conexao_db) $this->revokeTokenForUser($userId); // Remove do DB
+                else unset($_SESSION['google_access_token_user_' . $userId]); // Remove da sessão
                 return null;
             }
         }
-        return $this->client->getAccessToken(); // Retorna o array completo do token (pode ser o original se não expirado)
+        return $this->client->getAccessToken(); 
     }
 
-    public function createEvent($userId, $summary, $description, $startDateTime, $endDateTime, $timeZone = 'America/Sao_Paulo', $attendees = []) {
+    public function createEvent($userId, $summary, $description, $startDateTimeRfc3339, $endDateTimeRfc3339, $timeZone = 'America/Sao_Paulo', $attendees = []) {
         $tokenDataArray = $this->getAccessTokenForUser($userId);
 
         if (!$tokenDataArray || !isset($tokenDataArray['access_token'])) {
-            $this->logger->log('GCAL_ERROR', 'Token inválido ou não obtido para criar evento. Reautenticação pode ser necessária.', ['user_id' => $userId]);
-            return null;
+            $this->logger->log('GCAL_ERROR', 'Token inválido ou não obtido para CRIAR evento. Reautenticação pode ser necessária.', ['user_id' => $userId]);
+            return null; 
         }
         // $this->client já foi configurado com o token por getAccessTokenForUser
         
-        // Checagem adicional, embora getAccessTokenForUser deva garantir um token válido
-        if ($this->client->isAccessTokenExpired()) {
-             $this->logger->log('GCAL_ERROR', 'Token expirado mesmo após tentativa de refresh em getAccessTokenForUser. Não foi possível criar evento.', ['user_id' => $userId]);
+        if ($this->client->isAccessTokenExpired()) { // Verificação extra
+             $this->logger->log('GCAL_ERROR', 'Token expirado mesmo após tentativa de refresh. Não foi possível CRIAR evento.', ['user_id' => $userId]);
              return null;
         }
 
         $service = new GoogleServiceCalendar($this->client);
-        $event = new GoogleCalendarEvent([
-            'summary' => $summary,
-            'description' => $description,
-            'start' => [
-                'dateTime' => $startDateTime, // Formato RFC3339: '2025-05-20T09:00:00-03:00'
-                'timeZone' => $timeZone,
-            ],
-            'end' => [
-                'dateTime' => $endDateTime,   // Formato RFC3339: '2025-05-20T17:00:00-03:00'
-                'timeZone' => $timeZone,
-            ],
-            'attendees' => $attendees, // Array de ['email' => 'email@example.com']
-        ]);
+        
+        $event = new GoogleCalendarEvent();
+        $event->setSummary($summary);
+        $event->setDescription($description);
+
+        $start = new EventDateTime();
+        $start->setDateTime($startDateTimeRfc3339);
+        $start->setTimeZone($timeZone);
+        $event->setStart($start);
+
+        $end = new EventDateTime();
+        $end->setDateTime($endDateTimeRfc3339);
+        $end->setTimeZone($timeZone);
+        $event->setEnd($end);
+
+        if (!empty($attendees)) {
+            $event->setAttendees($attendees); // Array de ['email' => 'email@example.com']
+        }
 
         $calendarId = 'primary'; // Agenda principal do usuário autenticado
         try {
             $createdEvent = $service->events->insert($calendarId, $event);
-            $this->logger->log('GCAL_SUCCESS', 'Evento criado no Google Calendar.', ['eventId' => $createdEvent->getId(), 'summary' => $summary, 'user_id' => $userId]);
+            $this->logger->log('GCAL_SUCCESS', 'Evento CRIADO no Google Calendar.', ['eventId' => $createdEvent->getId(), 'summary' => $summary, 'user_id' => $userId]);
             return $createdEvent->getId(); // Retorna o ID do evento criado
         } catch (GoogleServiceException $e) {
-            $this->logger->log('GCAL_ERROR', 'Google Service Exception ao criar evento: ' . $e->getMessage(), [
-                'summary' => $summary, 
-                'user_id' => $userId, 
-                'errors' => $e->getErrors(), 
-                'trace' => $e->getTraceAsString()
+            $this->logger->log('GCAL_ERROR', 'Google Service Exception ao CRIAR evento: ' . $e->getMessage(), [
+                'summary' => $summary, 'user_id' => $userId, 'errors' => $e->getErrors()
             ]);
             return null;
         } catch (Exception $e) {
-            $this->logger->log('GCAL_ERROR', 'Erro genérico ao criar evento no Google Calendar: ' . $e->getMessage(), [
-                'summary' => $summary, 
-                'user_id' => $userId, 
-                'trace' => $e->getTraceAsString()
+            $this->logger->log('GCAL_ERROR', 'Erro genérico ao CRIAR evento no Google Calendar: ' . $e->getMessage(), [
+                'summary' => $summary, 'user_id' => $userId
             ]);
             return null;
         }
     }
     
+    public function deleteEvent($userId, $eventId) {
+        if (empty($eventId)) {
+            $this->logger->log('GCAL_INFO', 'Tentativa de deletar evento com ID vazio.', ['user_id' => $userId]);
+            return false; 
+        }
+
+        $tokenDataArray = $this->getAccessTokenForUser($userId);
+        if (!$tokenDataArray || !isset($tokenDataArray['access_token'])) {
+            $this->logger->log('GCAL_ERROR', 'Token inválido ou não obtido para DELETAR evento do Google Calendar.', ['user_id' => $userId, 'event_id' => $eventId]);
+            return false;
+        }
+        
+        if ($this->client->isAccessTokenExpired()) {
+             $this->logger->log('GCAL_ERROR', 'Token expirado mesmo após refresh. Não foi possível DELETAR evento.', ['user_id' => $userId, 'event_id' => $eventId]);
+             return false;
+        }
+
+        $service = new GoogleServiceCalendar($this->client);
+        $calendarId = 'primary'; 
+        
+        try {
+            $service->events->delete($calendarId, $eventId);
+            $this->logger->log('GCAL_SUCCESS', 'Evento DELETADO do Google Calendar com sucesso.', ['eventId' => $eventId, 'user_id' => $userId]);
+            return true;
+        } catch (GoogleServiceException $e) {
+            $errorMessage = $e->getMessage();
+            $errors = $e->getErrors(); // Array de erros
+            $errorCode = $e->getCode(); // Código HTTP do erro
+
+            // Se o evento não foi encontrado (404) ou já foi deletado (410 Gone), considera como "sucesso" para o nosso sistema, pois o objetivo é que ele não exista mais.
+            if ($errorCode == 404 || $errorCode == 410) {
+                $this->logger->log('GCAL_INFO', 'Evento não encontrado no Google Calendar ao tentar deletar (código ' . $errorCode . '), possivelmente já removido ou ID incorreto.', ['eventId' => $eventId, 'user_id' => $userId]);
+                return true; 
+            }
+            
+            $this->logger->log('GCAL_ERROR', 'Google Service Exception ao DELETAR evento: ' . $errorMessage, [
+                'event_id' => $eventId, 
+                'user_id' => $userId, 
+                'google_errors' => $errors, 
+                'google_error_code' => $errorCode
+            ]);
+            return false;
+        } catch (Exception $e) { 
+            $this->logger->log('GCAL_ERROR', 'Erro genérico ao DELETAR evento no Google Calendar: ' . $e->getMessage(), [
+                'event_id' => $eventId, 
+                'user_id' => $userId, 
+                'trace' => $e->getTraceAsString() // Útil para depurar exceções inesperadas
+            ]);
+            return false;
+        }
+    }
+
     public function revokeTokenForUser($userId) {
-        // getAccessTokenForUser também configura $this->client com o token, se encontrado.
-        $tokenDataArray = $this->getAccessTokenForUser($userId); 
+        $tokenDataArray = $this->getAccessTokenForUser($userId); // Tenta pegar o token atual para revogar
 
         if ($tokenDataArray && isset($tokenDataArray['access_token'])) {
-            // $this->client->setAccessToken($tokenDataArray); // Já feito por getAccessTokenForUser
+            // $this->client->setAccessToken($tokenDataArray); // Já feito por getAccessTokenForUser se encontrou e não expirou
             $tokenToRevoke = $this->client->getAccessToken(); // Pega o token completo (pode ter sido refrescado)
-
-            // O Google recomenda revogar o refresh_token se ele existir, ou o access_token caso contrário.
-            // A biblioteca revokeToken() lida com isso: se o token for um array, ele busca 'refresh_token' ou 'access_token'.
+                                                            // Ou o token original se não expirou.
+            
+            // A biblioteca revokeToken() tenta usar o refresh_token se disponível, senão o access_token.
             try {
                 $this->client->revokeToken($tokenToRevoke); 
                 $this->logger->log('GCAL_INFO', 'Token revogado no Google para user_id: ' . $userId);
             } catch (GoogleServiceException $e) {
-                $this->logger->log('GCAL_ERROR', 'Google Service Exception ao tentar revogar token: ' . $e->getMessage(), ['user_id' => $userId, 'errors' => $e->getErrors(), 'trace' => $e->getTraceAsString()]);
+                $this->logger->log('GCAL_ERROR', 'Google Service Exception ao tentar revogar token: ' . $e->getMessage(), ['user_id' => $userId, 'errors' => $e->getErrors()]);
             } catch (GuzzleRequestException $e) {
-                $this->logger->log('GCAL_ERROR', 'Guzzle HTTP Exception ao tentar revogar token: ' . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
+                $this->logger->log('GCAL_ERROR', 'Guzzle HTTP Exception ao tentar revogar token: ' . $e->getMessage(), ['user_id' => $userId]);
                 if ($e->hasResponse()) {
                     $this->logger->log('GCAL_ERROR_RESPONSE', 'Resposta do Guzzle (revoke): ' . (string) $e->getResponse()->getBody());
                 }
             } catch (Exception $e) {
-                $this->logger->log('GCAL_ERROR', 'Erro genérico ao tentar revogar token no Google: ' . $e->getMessage(), ['user_id' => $userId, 'trace' => $e->getTraceAsString()]);
+                $this->logger->log('GCAL_ERROR', 'Erro genérico ao tentar revogar token no Google: ' . $e->getMessage(), ['user_id' => $userId]);
             }
         } else {
-            $this->logger->log('GCAL_INFO', 'Nenhum token ativo encontrado para revogar para user_id: ' . $userId);
+            $this->logger->log('GCAL_INFO', 'Nenhum token ativo encontrado para revogar (ou já revogado) para user_id: ' . $userId);
         }
 
-        // Remover do banco de dados, independentemente do sucesso da revogação no Google
+        // Remover do banco de dados, independentemente do sucesso da revogação no Google (para garantir que o sistema não tente usá-lo)
         if ($this->conexao_db) {
             $sql = "DELETE FROM google_user_tokens WHERE user_id = ?";
             $stmt = mysqli_prepare($this->conexao_db, $sql);
@@ -309,7 +337,10 @@ class GoogleCalendarHelper {
             }
         }
         // Remover da sessão (fallback ou se usava sessão)
-        unset($_SESSION['google_access_token_user_' . $userId]);
-        $this->logger->log('GCAL_INFO', 'Tentativa de remoção de token da sessão para user_id: ' . $userId . ' (se existia).');
+        if (isset($_SESSION['google_access_token_user_' . $userId])) {
+            unset($_SESSION['google_access_token_user_' . $userId]);
+            $this->logger->log('GCAL_INFO', 'Token removido da SESSÃO para user_id: ' . $userId . ' (se existia).');
+        }
     }
-}
+
+} // Fim da classe GoogleCalendarHelper

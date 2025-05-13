@@ -1,218 +1,252 @@
 <?php
 // salvar_turnos.php
 
-require_once __DIR__ . '/config.php'; // Inclui configurações e inicia sessão
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/conexao.php';
 require_once __DIR__ . '/LogHelper.php';
-require_once __DIR__ . '/GoogleCalendarHelper.php'; // Para integração com Google Calendar
+require_once __DIR__ . '/GoogleCalendarHelper.php';
+
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+// ini_set('error_log', __DIR__ . '/php_errors.log'); // Opcional
 
 $logger = new LogHelper($conexao);
-$gcalHelper = new GoogleCalendarHelper($logger, $conexao); // Passa a conexão com BD
+$gcalHelper = new GoogleCalendarHelper($logger, $conexao); // Passa a conexão
 
 header('Content-Type: application/json');
-
-$json_input = file_get_contents('php://input');
-$dados_turnos_recebidos = json_decode($json_input, true);
-
-$userId = $_SESSION['usuario_id'] ?? null; // Assume que o usuário que salva o turno é o logado
+$userId = $_SESSION['usuario_id'] ?? null;
 
 if (!$userId) {
-    echo json_encode(['success' => false, 'message' => 'Erro: Usuário não autenticado.', 'data' => []]);
-    $logger->log('ERROR', 'Tentativa de salvar turnos sem usuário autenticado.', ['input_data' => $dados_turnos_recebidos]);
+    echo json_encode(['success' => false, 'message' => 'Usuário não autenticado.', 'data' => []]);
+    exit;
+}
+
+// --- LÓGICA PARA CARREGAR TURNOS (GET) ---
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Você pode adicionar filtros de ano/mês aqui se desejar, passados via $_GET
+    // $anoFiltro = $_GET['ano'] ?? date('Y');
+    // $mesFiltro = $_GET['mes'] ?? date('m');
+    // Exemplo de query com filtro:
+    // $sql_select_todos = "SELECT id, DATE_FORMAT(data, '%d/%b') AS data, hora, colaborador, google_calendar_event_id FROM turnos WHERE criado_por_usuario_id = ? AND YEAR(data) = ? AND MONTH(data) = ? ORDER BY data ASC, hora ASC";
+    // $stmt_select = mysqli_prepare($conexao, $sql_select_todos);
+    // mysqli_stmt_bind_param($stmt_select, "isi", $userId, $anoFiltro, $mesFiltro);
+    
+    $sql_select_todos = "SELECT id, DATE_FORMAT(data, '%d/%b') AS data, hora, colaborador, google_calendar_event_id FROM turnos WHERE criado_por_usuario_id = ? ORDER BY data ASC, hora ASC";
+    $stmt_select = mysqli_prepare($conexao, $sql_select_todos);
+
+    if (!$stmt_select) {
+        echo json_encode(['success' => false, 'message' => 'Erro ao preparar consulta de seleção de turnos.', 'data' => []]);
+        exit;
+    }
+    mysqli_stmt_bind_param($stmt_select, "i", $userId);
+    mysqli_stmt_execute($stmt_select);
+    $result_select = mysqli_stmt_get_result($stmt_select);
+    $turnos_carregados = mysqli_fetch_all($result_select, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmt_select);
+
+    echo json_encode(['success' => true, 'message' => 'Turnos carregados com sucesso.', 'data' => $turnos_carregados]);
     mysqli_close($conexao);
     exit;
 }
 
+// --- LÓGICA PARA SALVAR OU EXCLUIR TURNOS (POST) ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $acao = $input['acao'] ?? null;
 
-if (!isset($dados_turnos_recebidos) || empty($dados_turnos_recebidos)) {
-    echo json_encode(['success' => false, 'message' => 'Nenhum dado de turno foi recebido.', 'data' => []]);
-    $logger->log('WARNING', 'salvar_turnos.php chamado sem dados de turno.', ['user_id' => $userId]);
-    mysqli_close($conexao);
-    exit;
-}
+    if ($acao === 'excluir_turnos') {
+        // --- LÓGICA DE EXCLUSÃO ---
+        $idsParaExcluir = $input['ids_turnos'] ?? [];
+        if (empty($idsParaExcluir)) {
+            echo json_encode(['success' => false, 'message' => 'Nenhum ID de turno fornecido para exclusão.']);
+            exit;
+        }
+        $idsValidos = array_filter(array_map('intval', $idsParaExcluir), function($id) { return $id > 0; });
+        if (empty($idsValidos)) {
+            echo json_encode(['success' => false, 'message' => 'IDs de turno inválidos fornecidos.']);
+            exit;
+        }
 
-// Tentar obter o token de acesso do Google para o usuário logado
-$googleAccessToken = $gcalHelper->getAccessTokenForUser($userId);
-if (!$googleAccessToken) {
-    $logger->log('GCAL_INFO', 'Usuário não tem token do Google Calendar ativo. Eventos não serão criados no Google Calendar.', ['user_id' => $userId]);
-    // Não impede o salvamento no sistema, apenas não integra com GCal
-}
+        $placeholders = implode(',', array_fill(0, count($idsValidos), '?'));
+        $tipos_ids = str_repeat('i', count($idsValidos));
+        
+        // 1. Buscar Google Event IDs antes de deletar do banco
+        $sql_get_gcal_ids = "SELECT id, google_calendar_event_id FROM turnos WHERE id IN ($placeholders) AND criado_por_usuario_id = ?";
+        $stmt_get_gcal = mysqli_prepare($conexao, $sql_get_gcal_ids);
+        $params_get_gcal = array_merge($idsValidos, [$userId]);
+        mysqli_stmt_bind_param($stmt_get_gcal, $tipos_ids . 'i', ...$params_get_gcal);
+        mysqli_stmt_execute($stmt_get_gcal);
+        $result_gcal_ids = mysqli_stmt_get_result($stmt_get_gcal);
+        $eventos_google_para_deletar = mysqli_fetch_all($result_gcal_ids, MYSQLI_ASSOC);
+        mysqli_stmt_close($stmt_get_gcal);
 
+        // 2. Deletar eventos do Google Calendar
+        $googleAccessToken = $gcalHelper->getAccessTokenForUser($userId);
+        if ($googleAccessToken) {
+            foreach ($eventos_google_para_deletar as $evento) {
+                if (!empty($evento['google_calendar_event_id'])) {
+                    $gcalHelper->deleteEvent($userId, $evento['google_calendar_event_id']);
+                    // O log da deleção do GCal já acontece dentro do deleteEvent
+                }
+            }
+        } else {
+            $logger->log('GCAL_WARNING', 'Não foi possível deletar eventos do Google Calendar durante a exclusão de turnos: Sem Access Token.', ['user_id' => $userId]);
+        }
 
-// Query para inserir/atualizar turnos e buscar o ID do colaborador se necessário
-// Assumindo que a tabela 'usuarios' tem 'id' e 'nome_completo'
-// E a tabela 'turnos' tem 'colaborador_id' (FK para usuarios.id) em vez de apenas 'colaborador' (nome)
+        // 3. Deletar do banco de dados
+        $sql_delete = "DELETE FROM turnos WHERE id IN ($placeholders) AND criado_por_usuario_id = ?";
+        $stmt_delete = mysqli_prepare($conexao, $sql_delete);
+        $params_delete_db = array_merge($idsValidos, [$userId]);
+        mysqli_stmt_bind_param($stmt_delete, $tipos_ids . 'i', ...$params_delete_db);
+        
+        if (mysqli_stmt_execute($stmt_delete)) {
+            $numLinhasAfetadas = mysqli_stmt_affected_rows($stmt_delete);
+            $logger->log('INFO', "{$numLinhasAfetadas} turno(s) excluído(s) do BD para o usuário {$userId}.", ['ids' => $idsValidos]);
+            echo json_encode(['success' => true, 'message' => "{$numLinhasAfetadas} turno(s) excluído(s) com sucesso."]);
+        } else {
+            $logger->log('ERROR', 'Falha ao executar exclusão de turnos do BD.', ['user_id' => $userId, 'error' => mysqli_stmt_error($stmt_delete)]);
+            echo json_encode(['success' => false, 'message' => 'Erro ao excluir turnos do banco de dados.']);
+        }
+        mysqli_stmt_close($stmt_delete);
 
-// Primeiro, vamos deletar os turnos existentes para este usuário/mês para simplificar
-// Em um sistema real, você faria um UPSERT ou uma lógica mais complexa de merge
-// Esta parte é uma simplificação e pode não ser o ideal para todos os cenários.
-// Por exemplo, se múltiplos usuários podem gerenciar os mesmos colaboradores.
-// Aqui, vamos assumir que os turnos são "propriedade" do usuário logado que os edita.
-// E que a tabela de turnos no HTML é a fonte da verdade para o mês em edição.
+    } elseif ($acao === 'salvar_turnos') {
+        // --- LÓGICA DE SALVAR/INSERIR (EXISTENTE E AJUSTADA) ---
+        $dados_turnos_recebidos = $input['turnos'] ?? [];
 
-// $sql_delete_existentes = "DELETE FROM turnos WHERE MONTH(data) = ? AND YEAR(data) = ? AND ... "; // Adicionar filtro por quem pode editar
+        if (!isset($dados_turnos_recebidos)) { // Checa se a chave 'turnos' existe e não é null
+            echo json_encode(['success' => false, 'message' => 'Nenhum dado de turno recebido ou formato inválido.', 'data' => []]);
+            exit;
+        }
+        
+        // Considerar deletar os turnos do período ANTES de inserir os novos para sincronizar
+        // Ex: Se o $dados_turnos_recebidos for um array vazio, você pode querer deletar todos os turnos do mês/ano atual.
+        // Ou, se receber turnos, deletar os existentes daquele mês/ano e inserir os novos.
+        // Esta lógica de "delete-then-insert" é comum para sincronização.
+        // Por ora, o script apenas insere/atualiza (se o ID for fornecido e a lógica de UPDATE for implementada).
+        // A lógica atual apenas INSERE. Se um turno com ID for enviado, ele ainda tentará INSERIR, o que pode falhar ou não ser o desejado.
+        // Para uma funcionalidade de "Salvar Alterações" completa, você precisaria:
+        // 1. Iterar pelos $dados_turnos_recebidos.
+        // 2. Se um turno tem ID, tentar UPDATE.
+        // 3. Se não tem ID, tentar INSERT.
+        // 4. (Opcional) Turnos que estavam no banco para o período mas não vieram da tela podem ser deletados.
+        // Esta é uma lógica mais complexa. Por simplicidade, a lógica abaixo continua com INSERT.
+        // E a deleção de turnos do período NÃO está implementada aqui para evitar perda de dados acidental.
 
-$sql_insert = "INSERT INTO turnos (data, hora, colaborador, google_calendar_event_id, criado_por_usuario_id) VALUES (?, ?, ?, ?, ?)";
-$stmt_insert = mysqli_prepare($conexao, $sql_insert);
+        $googleAccessToken = $gcalHelper->getAccessTokenForUser($userId);
+        // Assumindo que a tabela 'turnos' tem a coluna 'ano' VARCHAR(4) ou YEAR
+        $sql_insert = "INSERT INTO turnos (data, hora, colaborador, google_calendar_event_id, criado_por_usuario_id, ano) VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt_insert = mysqli_prepare($conexao, $sql_insert);
 
-if ($stmt_insert === false) {
-    $error_msg = 'Erro ao preparar a consulta de inserção de turnos: ' . mysqli_error($conexao);
-    $logger->log('ERROR', $error_msg, ['user_id' => $userId]);
-    echo json_encode(['success' => false, 'message' => $error_msg, 'data' => []]);
-    mysqli_close($conexao);
-    exit;
-}
+        if ($stmt_insert === false) {
+            echo json_encode(['success' => false, 'message' => 'Erro ao preparar consulta de inserção: ' . mysqli_error($conexao), 'data' => []]);
+            exit;
+        }
+        $erros_insercao = [];
 
-$erros_insercao = [];
-$turnos_salvos_com_google_id = [];
+        foreach ($dados_turnos_recebidos as $turno) {
+            $turno_id_original = $turno['id'] ?? null; // ID do turno se estiver sendo editado
+            $data_str = $turno['data'] ?? null;
+            $hora_str = $turno['hora'] ?? null;
+            $colaborador_nome = isset($turno['colaborador']) ? trim($turno['colaborador']) : null;
+            $ano_recebido = $turno['ano'] ?? date('Y');
+            $google_event_id_para_salvar = null;
+            $data_formatada_mysql = null;
 
-foreach ($dados_turnos_recebidos as $turno) {
-    $data_str = isset($turno['data']) ? $turno['data'] : null;
-    $hora_str = isset($turno['hora']) ? $turno['hora'] : null;
-    $colaborador_nome = isset($turno['colaborador']) ? trim($turno['colaborador']) : null;
-    $google_event_id_para_salvar = null; // ID do evento do Google Calendar
+            // Lógica de conversão de data (revisada para dd/Mês ou dd/mm/aaaa)
+            if ($data_str) {
+                $partes_data = explode('/', $data_str);
+                $ano_final_para_data = $ano_recebido; // Usa o ano da tabela como base
+                $dia_str = null; $mes_input_str = null; $ano_input_str = null;
 
-    // Conversão de Data: '03/mai' para 'YYYY-MM-DD'
-    $data_formatada_mysql = null;
-    if ($data_str) {
-        $partes_data = explode('/', $data_str);
-        if (count($partes_data) == 2) {
-            $dia = sprintf('%02d', (int)$partes_data[0]);
-            $mapa_meses = ['jan' => '01', 'fev' => '02', 'mar' => '03', 'abr' => '04', 'mai' => '05', 'jun' => '06', 'jul' => '07', 'ago' => '08', 'set' => '09', 'out' => '10', 'nov' => '11', 'dez' => '12'];
-            $mes_str = strtolower(substr($partes_data[1], 0, 3)); // Pega os 3 primeiros chars do mês
-            $mes_num = $mapa_meses[$mes_str] ?? null;
-            
-            // Tenta pegar o ano do nome da tabela (ex: shifts-table-may-2025) ou usa o atual
-            // Para este exemplo, vamos fixar o ano atual ou um ano específico se fornecido
-            $ano_especifico = date('Y'); // Ou pegar de algum lugar, ex: $turno['ano'] se vier no JSON
-            // No seu HTML, o título da tabela é "Turnos Programados - Maio 2025"
-            // Idealmente, o ano deveria vir do cliente ou ser inferido de forma mais robusta.
-            // Vamos assumir que os turnos são para o ano atual se não especificado.
-            // Se sua tabela `home.html` é "Maio 2025", você precisa enviar este ano para cá.
-            // Por agora, usando o ano atual como fallback:
-            // $ano_atual = date('Y'); 
+                if (count($partes_data) >= 2) $dia_str = trim($partes_data[0]);
+                if (count($partes_data) >= 2) $mes_input_str = trim($partes_data[1]);
+                if (count($partes_data) == 3) $ano_input_str = trim($partes_data[2]);
+                
+                if ($ano_input_str && strlen($ano_input_str) === 4 && ctype_digit($ano_input_str)) {
+                    $ano_final_para_data = $ano_input_str; // Prioriza ano da string de data
+                }
 
-            // Para o exemplo: TENTANDO extrair o ano do título da tabela, se possível (requer JS enviar isso)
-            // Se o nome da tabela no front-end é 'shifts-table-may-2025', o JS deveria enviar o 2025.
-            // Por enquanto, vamos usar o ano atual.
-            $ano_para_data = date('Y'); // Em um sistema real, o ano deve ser mais explícito.
+                $dia_num = ($dia_str && ctype_digit($dia_str)) ? sprintf('%02d', (int)$dia_str) : null;
+                $mes_num = null;
 
+                if ($mes_input_str) {
+                    if (ctype_digit($mes_input_str)) {
+                        $mes_num = sprintf('%02d', (int)$mes_input_str);
+                    } else {
+                        $mapa_meses_universal = [
+                            'jan' => '01', 'feb' => '02', 'mar' => '03', 'apr' => '04', 'may' => '05', 'jun' => '06',
+                            'jul' => '07', 'aug' => '08', 'sep' => '09', 'oct' => '10', 'nov' => '11', 'dec' => '12',
+                            'fev' => '02', 'mai' => '05', 'ago' => '08', 'set' => '09', 'out' => '10', 'dez' => '12'
+                        ];
+                        $mes_str_processar = strtolower(substr($mes_input_str, 0, 3));
+                        $mes_num = $mapa_meses_universal[$mes_str_processar] ?? null;
+                    }
+                }
 
-            if ($dia && $mes_num) {
-                $data_formatada_mysql = "$ano_para_data-$mes_num-$dia";
+                if ($dia_num && $mes_num && $ano_final_para_data && checkdate((int)$mes_num, (int)$dia_num, (int)$ano_final_para_data)) {
+                    $data_formatada_mysql = "$ano_final_para_data-$mes_num-$dia_num";
+                } else {
+                    $logger->log('WARNING', 'Falha ao formatar data para MySQL.', ['data_str' => $data_str, 'dia' => $dia_num, 'mes_input' => $mes_input_str, 'ano_final' => $ano_final_para_data]);
+                }
+            }
+
+            if (!$data_formatada_mysql || !$hora_str || !$colaborador_nome) {
+                $erros_insercao[] = "Dados inválidos ou ausentes para um dos turnos: Data:'{$data_str}', Hora:'{$hora_str}', Colab:'{$colaborador_nome}', Ano Processado:'{$ano_final_para_data}'";
+                continue;
+            }
+
+            // Lógica do Google Calendar (createEvent)
+            if ($googleAccessToken) {
+                try {
+                    $fusoHorario = 'America/Sao_Paulo';
+                    $dateTimeInicio = new DateTime($data_formatada_mysql . ' ' . $hora_str, new DateTimeZone($fusoHorario));
+                    $dateTimeFim = clone $dateTimeInicio;
+                    $duracaoPadraoTurno = 'PT8H'; // Ex: 8 horas. Ajuste conforme necessário!
+                    $dateTimeFim->add(new DateInterval($duracaoPadraoTurno));
+                    $summary = $colaborador_nome;
+                    //$summary = "Turno Sim Posto: " . $colaborador_nome;
+                    $description = "Turno para " . $colaborador_nome . " em " . $dateTimeInicio->format('d/m/Y H:i');
+                    
+                    $google_event_id_para_salvar = $gcalHelper->createEvent(
+                        $userId, $summary, $description,
+                        $dateTimeInicio->format(DateTime::RFC3339),
+                        $dateTimeFim->format(DateTime::RFC3339),
+                        $fusoHorario
+                    );
+                } catch (Exception $e) {
+                    $logger->log('GCAL_ERROR', 'Exceção ao criar evento GCal: ' . $e->getMessage(), ['turno' => $turno, 'user_id' => $userId]);
+                }
+            }
+            // Adicionar ano na inserção
+            mysqli_stmt_bind_param($stmt_insert, "ssssis", $data_formatada_mysql, $hora_str, $colaborador_nome, $google_event_id_para_salvar, $userId, $ano_final_para_data);
+            if (!mysqli_stmt_execute($stmt_insert)) {
+                $erros_insercao[] = "Erro ao inserir turno ({$data_str}): " . mysqli_stmt_error($stmt_insert);
             }
         }
-    }
+        mysqli_stmt_close($stmt_insert);
 
-    if (!$data_formatada_mysql || !$hora_str || !$colaborador_nome) {
-        $erros_insercao[] = "Dados inválidos ou ausentes para um dos turnos: " . json_encode($turno);
-        continue;
-    }
-
-    // **Integração com Google Calendar AQUI**
-    if ($googleAccessToken) {
-        try {
-            $fusoHorario = 'America/Sao_Paulo'; // Ajuste se necessário
-            
-            $dateTimeInicio = new DateTime($data_formatada_mysql . ' ' . $hora_str, new DateTimeZone($fusoHorario));
-            // Assumindo uma duração de turno, por exemplo, 8 horas. Ajuste conforme sua lógica.
-            // Ou se você tiver um campo de hora de término.
-            $dateTimeFim = clone $dateTimeInicio;
-            $duracaoTurno = 'PT8H'; // Exemplo: Período de Tempo de 8 Horas. Ajuste!
-            // Você pode ter uma coluna 'duracao' na sua tabela de turnos ou um horário de fim.
-            // Se '04:00:00' é a duração, a lógica precisa ser diferente.
-            // Se '04:00:00' é o início, você precisa de um fim.
-            // Vamos assumir que $hora_str é o INÍCIO e o turno dura 8h.
-            $dateTimeFim->add(new DateInterval($duracaoTurno)); 
-
-            $summary = "Turno Sim Posto: " . $colaborador_nome;
-            $description = "Turno agendado via Sistema Sim Posto para " . $colaborador_nome . " no dia " . $dateTimeInicio->format('d/m/Y') . " às " . $dateTimeInicio->format('H:i') . ".";
-            
-            // Para 'attendees', você precisaria do e-mail do colaborador.
-            // Se o $colaborador_nome for um usuário do sistema e você tiver o e-mail dele:
-            // $email_colaborador = buscar_email_do_colaborador_pelo_nome($conexao, $colaborador_nome);
-            // $attendees = $email_colaborador ? [['email' => $email_colaborador]] : [];
-            $attendees = []; // Deixe vazio por enquanto ou implemente a busca do e-mail
-
-            $google_event_id_para_salvar = $gcalHelper->createEvent(
-                $googleAccessToken,
-                $summary,
-                $description,
-                $dateTimeInicio->format(DateTime::RFC3339),
-                $dateTimeFim->format(DateTime::RFC3339),
-                $fusoHorario,
-                $attendees
-            );
-
-            if ($google_event_id_para_salvar) {
-                $logger->log('GCAL_SUCCESS', 'Evento de turno criado no Google Calendar.', ['user_id' => $userId, 'turno_data' => $data_formatada_mysql, 'colaborador' => $colaborador_nome, 'google_event_id' => $google_event_id_para_salvar]);
-            } else {
-                $logger->log('GCAL_ERROR', 'Falha ao criar evento de turno no Google Calendar (retornou null).', ['user_id' => $userId, 'turno_data' => $data_formatada_mysql, 'colaborador' => $colaborador_nome]);
-            }
-        } catch (Exception $e) {
-            $logger->log('GCAL_ERROR', 'Exceção ao tentar criar evento no Google Calendar: ' . $e->getMessage(), ['user_id' => $userId, 'turno_data' => $data_formatada_mysql, 'colaborador' => $colaborador_nome]);
+        if (!empty($erros_insercao)) {
+             echo json_encode(['success' => false, 'message' => 'Ocorreram erros ao salvar alguns turnos. Detalhes: ' . implode("; ", $erros_insercao), 'data' => []]);
+             // Não busca dados atualizados se houve erro
+        } else {
+            // Busca todos os turnos para retornar ao cliente
+            $sql_select_depois_op = "SELECT id, DATE_FORMAT(data, '%d/%b') AS data, hora, colaborador, google_calendar_event_id FROM turnos WHERE criado_por_usuario_id = ? ORDER BY data ASC, hora ASC";
+            $stmt_select_depois = mysqli_prepare($conexao, $sql_select_depois_op);
+            mysqli_stmt_bind_param($stmt_select_depois, "i", $userId);
+            mysqli_stmt_execute($stmt_select_depois);
+            $result_select_depois = mysqli_stmt_get_result($stmt_select_depois);
+            $turnos_atualizados = mysqli_fetch_all($result_select_depois, MYSQLI_ASSOC);
+            mysqli_stmt_close($stmt_select_depois);
+            echo json_encode(['success' => true, 'message' => 'Turnos salvos com sucesso!', 'data' => $turnos_atualizados]);
         }
-    }
-    // Fim da Integração Google Calendar
 
-    mysqli_stmt_bind_param($stmt_insert, "ssssi", $data_formatada_mysql, $hora_str, $colaborador_nome, $google_event_id_para_salvar, $userId);
-
-    if (!mysqli_stmt_execute($stmt_insert)) {
-        $erros_insercao[] = "Erro ao inserir turno (" . htmlspecialchars($data_formatada_mysql) . ", " . htmlspecialchars($hora_str) . ", " . htmlspecialchars($colaborador_nome) . "): " . mysqli_stmt_error($stmt_insert);
-        $logger->log('ERROR', 'Falha ao executar insert de turno.', ['user_id' => $userId, 'data' => $data_formatada_mysql, 'colaborador' => $colaborador_nome, 'error' => mysqli_stmt_error($stmt_insert)]);
     } else {
-         $logger->log('INFO', 'Turno salvo no BD.', ['user_id' => $userId, 'data' => $data_formatada_mysql, 'colaborador' => $colaborador_nome, 'google_event_id' => $google_event_id_para_salvar]);
-         // Adicionar ao array de turnos salvos para retorno, se necessário.
+        echo json_encode(['success' => false, 'message' => 'Ação desconhecida ou não fornecida.', 'data' => []]);
     }
-}
-
-mysqli_stmt_close($stmt_insert);
-
-if (!empty($erros_insercao)) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Ocorreram erros ao salvar alguns turnos. Detalhes: ' . implode("; ", $erros_insercao),
-        'data' => []
-    ]);
     mysqli_close($conexao);
     exit;
 }
 
-// Após salvar, busca todos os turnos (ou os relevantes) para retornar ao cliente
-// Modifique esta query para buscar os turnos relevantes para a visualização atual (ex: por mês/ano)
-$sql_select_todos_turnos = "SELECT id, DATE_FORMAT(data, '%d/%b') AS data_formatada, DATE_FORMAT(data, '%Y') AS ano_formatado, hora, colaborador, google_calendar_event_id FROM turnos WHERE criado_por_usuario_id = ? ORDER BY data, hora";
-$stmt_select = mysqli_prepare($conexao, $sql_select_todos_turnos);
-
-if (!$stmt_select) {
-    $error_msg = 'Erro ao preparar consulta de seleção de turnos: ' . mysqli_error($conexao);
-    $logger->log('ERROR', $error_msg, ['user_id' => $userId]);
-    echo json_encode(['success' => true, 'message' => 'Turnos salvos, mas erro ao recarregar: ' . $error_msg, 'data' => []]); // Sucesso no save, erro no reload
-    mysqli_close($conexao);
-    exit;
-}
-
-mysqli_stmt_bind_param($stmt_select, "i", $userId);
-mysqli_stmt_execute($stmt_select);
-$result_select = mysqli_stmt_get_result($stmt_select);
-
-$turnos_atualizados = [];
-while ($row = mysqli_fetch_assoc($result_select)) {
-    // Reformatar a data para incluir o ano se a coluna 'data_formatada' não o fizer
-    // $data_exibicao = $row['data_formatada'] . '/' . $row['ano_formatado']; // Ou ajuste o DATE_FORMAT
-    $turnos_atualizados[] = [
-        'id' => $row['id'],
-        'data' => $row['data_formatada'], // O DATE_FORMAT original é '%d/%b' (ex: 03/Mai)
-        'hora' => $row['hora'],
-        'colaborador' => $row['colaborador'],
-        'google_event_id' => $row['google_calendar_event_id']
-    ];
-}
-mysqli_stmt_close($stmt_select);
-
-echo json_encode([
-    'success' => true,
-    'message' => 'Turnos salvos e dados recuperados com sucesso! ' . ($googleAccessToken ? 'Tentativa de integração com Google Calendar realizada.' : 'Google Calendar não conectado.'),
-    'data' => $turnos_atualizados
-]);
-
-mysqli_close($conexao);
+// Se chegar aqui, método não é GET nem POST, ou algo deu muito errado antes.
+echo json_encode(['success' => false, 'message' => 'Método de requisição inválido.', 'data' => []]);

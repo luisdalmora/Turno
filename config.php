@@ -18,7 +18,7 @@ define('SITE_URL', 'http://localhost/turno'); // Altere para a URL base do seu s
 // Habilitar exibição de erros (para desenvolvimento) - Remova ou comente em produção
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
 
 // Iniciar sessão se ainda não estiver iniciada
 if (session_status() == PHP_SESSION_NONE) {

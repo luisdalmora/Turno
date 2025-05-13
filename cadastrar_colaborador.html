@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastrar Colaborador - Sim Posto</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="login-page-container">
+  <div class="login-content-wrapper">
+    <div class="login-form-wrapper" style="width: 450px;"> <span class="login-form-title">Cadastrar Novo
+        Colaborador</span>
+      <form method="POST" action="processar_cadastro_colaborador.php">
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="text" name="nome_completo" required />
+          <span class="input-focus-effect" data-placeholder="Nome Completo"></span>
+        </div>
+
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="email" name="email" /> <span class="input-focus-effect"
+            data-placeholder="E-mail (Opcional)"></span>
+        </div>
+
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="text" name="cargo" /> <span class="input-focus-effect"
+            data-placeholder="Cargo (Opcional)"></span>
+        </div>
+
+        <div class="input-group margin-bottom-35" style="border-bottom: none;"> <label for="ativo"
+            style="color: var(--primary-text-color); font-size: 16px; display: block; margin-bottom: 8px;">Status:</label>
+          <select name="ativo" id="ativo" class="input-field"
+            style="height: 40px; border: 1px solid var(--input-border-color); border-radius: 4px; padding: 0 5px;">
+            <option value="1" selected>Ativo</option>
+            <option value="0">Inativo</option>
+          </select>
+        </div>
+
+
+        <div class="login-form-button-container" style="margin-top: 45px;">
+          <button class="login-form-button" type="submit">Cadastrar Colaborador</button>
+        </div>
+      </form>
+
+      <ul class="login-utility-links" style="margin-top: 30px;">
+        <li><a href="home.html" class="utility-text-secondary">Voltar para o Dashboard</a></li>
+      </ul>
+    </div>
+  </div>
+</body>
+
+</html>

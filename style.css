@@ -394,3 +394,66 @@ body.dashboard-body-background {
     padding: 0 15px; /* Adiciona padding lateral */
   }
 }
+/* No style.css */
+.widget-google-calendar-integration {
+  padding: 10px;
+  margin-top: 10px; /* Ou conforme necessário */
+  font-size: 0.9em; /* Texto menor */
+  /* Adicione qualquer outra estilização sutil aqui */
+}
+
+.widget-google-calendar-integration h2 {
+  font-size: 1.1em; /* Título menor para este widget */
+  margin-bottom: 8px;
+}
+
+.widget-google-calendar-integration .action-button {
+  padding: 8px 15px;
+  font-size: 0.9em; /* Texto do botão menor */
+}
+
+.widget-google-calendar-integration p {
+  margin-bottom: 8px;
+}
+
+.widget-google-calendar-integration p small {
+  font-size: 0.9em; /* Relativo aos 0.9em do pai, então ainda menor */
+}
+
+/* Esconder a coluna Google Event ID na tabela de turnos */
+#shifts-table-may th:last-child,  /* Esconde o último <th> (Google Event ID) */
+#shifts-table-may td:last-child {
+  /* Esconde a última <td> de cada linha (Google Event ID) */
+  display: none;
+}
+
+/* Ajuste para a coluna de checkbox não ficar muito larga */
+#shifts-table-may th:first-child, /* Coluna do checkbox "Selecionar Todos" */
+#shifts-table-may td:first-child {
+  /* Coluna dos checkboxes individuais */
+  width: 40px; /* Ou um valor que pareça bom */
+  text-align: center;
+}
+/* Agrupamento de botões com espaçamento e responsividade */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* Cores específicas para ações */
+.action-button.green {
+  background-color: #5cb85c;
+}
+
+.action-button.red {
+  background-color: #d9534f;
+}
+
+@media (max-width: 600px) {
+  .button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
