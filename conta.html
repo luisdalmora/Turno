@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criar Conta - Sim Posto</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="login-page-container">
+  <div class="login-content-wrapper">
+    <div class="login-form-wrapper">
+      <span class="login-form-title">Criar Conta</span>
+      <form method="POST" action="cadastrar.php">
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="text" name="nome_completo" required />
+          <span class="input-focus-effect" data-placeholder="Nome Completo"></span>
+        </div>
+
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="email" name="email" required />
+          <span class="input-focus-effect" data-placeholder="E-mail"></span>
+        </div>
+
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="text" name="usuario" required />
+          <span class="input-focus-effect" data-placeholder="Usuário"></span>
+        </div>
+
+        <div class="input-group margin-bottom-35">
+          <input class="input-field" type="password" name="senha" required />
+          <span class="input-focus-effect" data-placeholder="Senha"></span>
+        </div>
+
+        <div class="login-form-button-container">
+          <button class="login-form-button" type="submit">Cadastrar</button>
+        </div>
+      </form>
+
+      <ul class="login-utility-links">
+        <li><a href="index.html" class="utility-text-secondary">Voltar para Login</a></li>
+      </ul>
+    </div>
+
+    <img src="images/login.png" alt="Imagem ilustrativa" class="login-image" />
+  </div>
+</body>
+
+</html>

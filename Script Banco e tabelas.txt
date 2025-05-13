@@ -1,0 +1,130 @@
+-- Script para Criação do Banco de Dados e Tabelas Essenciais
+-- SGBD Alvo: MySQL (ajustes podem ser necessários para SQL Server devido ao `IDENTITY(1,1)`)
+-- Para MySQL, `AUTO_INCREMENT` é usado em vez de `IDENTITY`.
+
+-- -----------------------------------------------------------------------------
+-- Criação do Banco de Dados `simposto`
+-- -----------------------------------------------------------------------------
+-- Em MySQL, geralmente se cria o banco de dados separadamente ou se verifica sua existência.
+CREATE DATABASE IF NOT EXISTS simposto;
+
+-- Comando para selecionar o banco de dados a ser utilizado
+USE simposto;
+
+-- Nota: Os comandos `GO` são específicos do SQL Server Management Studio e ferramentas similares.
+-- Em MySQL, os comandos são geralmente terminados com ponto e vírgula (;) e executados individualmente
+-- ou como um script. Se estiver usando uma ferramenta como phpMyAdmin ou MySQL Workbench,
+-- você pode executar cada bloco CREATE TABLE separadamente.
+
+-- -----------------------------------------------------------------------------
+-- Tabela: `usuarios`
+-- Armazena informações dos usuários do sistema.
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,       -- Identificador único do usuário (auto-incrementável)
+    nome_completo VARCHAR(255) NOT NULL,     -- Nome completo do usuário
+    email VARCHAR(255) UNIQUE NOT NULL,      -- Endereço de e-mail do usuário (deve ser único)
+    usuario VARCHAR(50) UNIQUE NOT NULL,     -- Nome de usuário para login (deve ser único e mais curto)
+    senha VARCHAR(255) NOT NULL,             -- Senha do usuário (DEVE SER ARMAZENADA COMO HASH)
+    ativo BIT NOT NULL DEFAULT 1,            -- Status do usuário (1 = ativo, 0 = inativo)
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Data e hora do cadastro
+);
+-- -----------------------------------------------------------------------------
+-- Tabela: `turnos`
+-- Armazena os registros de turnos de trabalho dos colaboradores.
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS turnos (
+    id INT AUTO_INCREMENT PRIMARY KEY,   -- Identificador único do turno (auto-incrementável)
+    data DATE NOT NULL,                  -- Data do turno
+    hora TIME NOT NULL,                  -- Hora de início do turno
+    -- duracao TIME,                     -- Opcional: Duração do turno, se não for implícita ou calculada
+    colaborador VARCHAR(255) NOT NULL,   -- Nome do colaborador associado ao turno
+    -- id_colaborador INT,               -- Opcional: Chave estrangeira para uma tabela `colaboradores`
+    -- FOREIGN KEY (id_colaborador) REFERENCES colaboradores(id), -- Se houver tabela `colaboradores`
+    observacoes TEXT,                    -- Opcional: Campo para notas ou observações sobre o turno
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data de criação do registro
+    data_modificacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Data da última modificação
+);
+-- -----------------------------------------------------------------------------
+-- Tabela: `ResumoColaborador` (Opcional)
+-- Se você precisar persistir o resumo de horas calculado, esta tabela pode ser usada.
+-- No entanto, geralmente é melhor calcular o resumo dinamicamente a partir da tabela `turnos`
+-- para garantir que os dados estejam sempre atualizados.
+-- Se for usada, precisaria de lógica para ser atualizada (triggers ou via aplicação).
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS ResumoColaborador (
+     id INT AUTO_INCREMENT PRIMARY KEY,        -- Identificador único do registro de resumo
+     colaborador VARCHAR(255) NOT NULL,        -- Nome do colaborador
+     id_colaborador INT UNIQUE,             -- Chave estrangeira para `colaboradores` se existir, e deve ser UNIQUE
+     total_horas_mes DECIMAL(10, 2) NOT NULL,  -- Total de horas no mês (usar DECIMAL para precisão)
+     mes_referencia VARCHAR(7) NOT NULL,       -- Mês de referência (ex: '2025-05')
+     data_ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Última atualização
+);
+
+-- Considerações Adicionais:
+-- 1. Tabela `colaboradores`:
+--    Seria ideal ter uma tabela separada para `colaboradores` com `id`, `nome`, `email`, etc.
+--    A tabela `turnos` então usaria um `id_colaborador` como chave estrangeira.
+CREATE TABLE IF NOT EXISTS colaboradores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome_completo VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE,
+        cargo VARCHAR(100),
+        ativo BIT DEFAULT 1
+);
+
+-- 2. Índices:
+--    Adicionar índices em colunas frequentemente usadas em cláusulas WHERE ou JOIN para otimizar consultas.
+--    Exemplo para a tabela `turnos`:
+    CREATE INDEX idx_turnos_data ON turnos(data);
+    CREATE INDEX idx_turnos_colaborador ON turnos(colaborador); -- ou em id_colaborador se usar FK
+
+-- 3. Segurança de Senhas:
+--    Reiterando: A coluna `senha` na tabela `usuarios` DEVE armazenar hashes de senha (ex: gerados com password_hash() do PHP),
+--    NUNCA senhas em texto plano.
+
+-- 4. Tabela para Logs do Sistema
+CREATE TABLE IF NOT EXISTS system_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    log_level VARCHAR(50) NOT NULL, -- Aumentado para mais flexibilidade (e.g., AUTH_SUCCESS, GCAL_ERROR)
+    message TEXT NOT NULL,
+    context TEXT,
+    ip_address VARCHAR(45),
+    user_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 5. Tabela para Tokens do Google Calendar por Usuário
+CREATE TABLE IF NOT EXISTS google_user_tokens (
+    user_id INT PRIMARY KEY,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT,
+    expires_in INT, -- Duração do token em segundos
+    created_at BIGINT, -- Timestamp UNIX da criação/obtenção do token
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 6. Adicionar Coluna para Google Calendar Event ID na Tabela 'turnos'
+-- Verifique se a coluna já não existe antes de executar
+ALTER TABLE turnos ADD COLUMN google_calendar_event_id VARCHAR(255) NULL DEFAULT NULL AFTER colaborador;
+
+-- 7. (Opcional, mas recomendado) Adicionar Coluna para rastrear quem criou/gerenciou o turno
+-- Verifique se a coluna já não existe antes de executar
+ALTER TABLE turnos ADD COLUMN criado_por_usuario_id INT NULL DEFAULT NULL AFTER google_calendar_event_id;
+ALTER TABLE turnos ADD CONSTRAINT fk_turnos_criado_por FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL;
+
+-- 8. (Opcional) Adicionar coluna para e-mail na tabela 'usuarios' se ainda não existir (login.php agora usa)
+ALTER TABLE usuarios ADD COLUMN email VARCHAR(255) NULL UNIQUE AFTER nome_completo; -- Ajuste conforme sua estrutura
+-- Certifique-se que seu cadastrar.php já insere o email corretamente.
+
+-- 9. (Opcional) Tabela para configurações gerais (ex: site_url para e-mails)
+CREATE TABLE IF NOT EXISTS system_settings (
+   setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value TEXT
+);
+INSERT INTO system_settings (setting_key, setting_value) VALUES ('site_url', 'http://localhost/seu_projeto_raiz') ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value);
+
+
+-- Fim do script.
