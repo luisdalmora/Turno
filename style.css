@@ -1,459 +1,545 @@
 /* Variáveis Globais de Cores e Fontes */
 :root {
-  --primary-color: #407bff; /* Cor principal para botões e destaques */
-  --link-text-color: #666; /* Cor padrão para links */
-  --primary-text-color: #999; /* Cor para texto secundário/placeholder */
-  --highlight-text-color: #333; /* Cor para texto de destaque/títulos */
-  --input-field-text-color: #555; /* Cor do texto dentro dos campos de entrada */
-  --background-color-light: #fff; /* Cor de fundo principal (claro) */
-  --input-border-color: #d9d9d9; /* Cor da borda inferior dos inputs */
-  --sidebar-background-color: #303f9f; /* Cor de fundo da barra lateral */
-  --sidebar-link-hover-color: #283593; /* Cor de hover para links na sidebar */
-  --sidebar-link-active-color: #1a237e; /* Cor de link ativo na sidebar */
-  --table-header-background: #4caf50; /* Cor de fundo para cabeçalhos de tabela */
-  --dashboard-background: #f4f6f9; /* Cor de fundo da área do dashboard */
-  --widget-shadow-color: rgba(0, 0, 0, 0.1); /* Cor da sombra para widgets */
-  --font-family-primary: "Poppins", sans-serif; /* Fonte principal */
+  --primary-color: #407bff; /* Azul primário */
+  --secondary-color: #6c757d; /* Cinza secundário */
+  --success-color: #28a745; /* Verde para sucesso */
+  --danger-color: #dc3545; /* Vermelho para perigo/exclusão */
+  --warning-color: #ffc107; /* Amarelo para alertas */
+  --info-color: #17a2b8; /* Azul claro para informação */
+  --light-color: #f8f9fa; /* Fundo claro */
+  --dark-color: #343a40; /* Texto/fundo escuro */
+
+  --link-text-color: #666;
+  --primary-text-color: #555; /* Cor de texto principal */
+  --secondary-text-color: #999; /* Cor para texto secundário/placeholder */
+  --highlight-text-color: #333;
+  --input-field-text-color: #555;
+  --background-color-light: #fff;
+  --input-border-color: #d9d9d9;
+
+  /* Sidebar */
+  --sidebar-background-color: #2c3e50; /* Azul petróleo escuro */
+  --sidebar-link-color: #ecf0f1; /* Cinza claro para texto */
+  --sidebar-link-hover-bg: #34495e; /* Azul petróleo um pouco mais claro */
+  --sidebar-link-active-bg: var(--primary-color); /* Azul primário */
+  --sidebar-header-color: #ecf0f1;
+
+  --table-header-background: var(
+    --primary-color
+  ); /* Usar primário para cabeçalho da tabela */
+  --dashboard-background: #eef1f5; /* Cinza bem claro para o fundo do dashboard */
+  --widget-background-color: #ffffff;
+  --widget-shadow-color: rgba(0, 0, 0, 0.08);
+  --widget-border-color: #e3e6f0;
+
+  --font-family-primary: "Poppins", sans-serif;
+  --base-font-size: 16px;
+  --border-radius: 6px; /* Raio de borda padrão */
 }
 
 /* Reset Básico de CSS */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Garante que padding e border não aumentem o tamanho do elemento */
+  box-sizing: border-box;
 }
 
 body,
 html {
-  height: 100%; /* Garante que o body e html ocupem toda a altura da viewport */
+  height: 100%;
   font-family: var(--font-family-primary);
+  font-size: var(--base-font-size);
+  color: var(--primary-text-color);
+  background-color: var(--dashboard-background); /* Fundo geral */
 }
+/* ... (restante do seu reset básico e estilos de login) ... */
 
-a {
-  text-decoration: none; /* Remove sublinhado padrão de links */
-  color: var(--link-text-color);
-  transition: color 0.4s ease; /* Transição suave para mudança de cor */
-}
-
-a:hover {
-  color: var(--highlight-text-color); /* Cor do link ao passar o mouse */
-}
-
-ul,
-li {
-  list-style: none; /* Remove marcadores padrão de listas */
-}
-
-/* Estilos da Página de Login (`index.html`) */
+/* Estilos da Página de Login (`index.html`) - Mantidos como antes */
 .login-page-container {
   display: flex;
-  justify-content: center; /* Centraliza conteúdo horizontalmente */
-  align-items: center; /* Centraliza conteúdo verticalmente */
-  min-height: 100vh; /* Altura mínima igual à altura da viewport */
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   padding: 15px;
-  background-color: var(--background-color-light);
+  background-color: var(
+    --background-color-light
+  ); /* ou var(--dashboard-background) se preferir */
 }
 
 .login-content-wrapper {
-  display: flex; /* Alinha formulário e imagem lado a lado */
-  align-items: center; /* Centraliza verticalmente no wrapper */
-  width: 100%;
-  max-width: 1200px; /* Largura máxima para o conteúdo */
-  justify-content: center;
-}
-
-.login-form-wrapper {
-  width: 370px;
-  margin-right: 50px; /* Espaço entre o formulário e a imagem */
-}
-
-.login-form-title {
-  display: block;
-  font-size: 39px;
-  color: var(--highlight-text-color);
-  text-align: center;
-  margin-bottom: 35px;
-}
-
-.input-group {
-  width: 100%;
-  position: relative; /* Necessário para o posicionamento absoluto do span de foco */
-  border-bottom: 2px solid var(--input-border-color);
-}
-
-.input-field {
-  width: 100%;
-  height: 52px;
-  padding: 0 5px;
-  background: transparent; /* Fundo transparente para o input */
-  font-size: 18px;
-  color: var(--input-field-text-color);
-  font-weight: 600;
-  border: none; /* Remove borda padrão do input */
-  outline: none; /* Remove outline ao focar */
-}
-
-.input-focus-effect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none; /* Permite cliques através do elemento */
-}
-
-/* Efeito de placeholder flutuante */
-.input-focus-effect::after {
-  content: attr(
-    data-placeholder
-  ); /* Pega o texto do atributo data-placeholder */
-  position: absolute;
-  top: 15px; /* Posição inicial do placeholder */
-  left: 5px;
-  font-size: 18px;
-  color: var(--primary-text-color);
-  transition: all 0.4s ease; /* Transição suave para o efeito */
-}
-
-.input-field:focus + .input-focus-effect::after,
-.input-field.has-val + .input-focus-effect::after {
-  top: -20px; /* Move o placeholder para cima ao focar ou quando há valor */
-  font-size: 15px;
-}
-
-.login-form-button-container {
   display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.login-form-button {
+  align-items: center;
   width: 100%;
-  height: 50px;
-  background: var(--primary-color);
-  color: var(--background-color-light);
-  font-size: 16px;
-  font-weight: 500;
-  text-transform: uppercase;
-  text-align: center;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  max-width: 1200px;
+  justify-content: center;
+  background-color: var(--widget-background-color);
+  padding: 40px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 25px var(--widget-shadow-color);
 }
-
-.login-form-button:hover {
-  background: var(--highlight-text-color);
-}
-
-.login-utility-links {
-  margin-top: 20px;
-  text-align: center; /* Centraliza os links de utilidade */
-}
-
-.login-utility-links li {
-  margin-bottom: 8px;
-}
-
-.utility-text-primary {
-  font-size: 15px;
-  color: var(--primary-text-color);
-}
-
-.utility-text-secondary {
-  font-size: 15px;
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-.login-image {
-  margin-left: 50px; /* Espaço à esquerda da imagem */
-  max-width: 45%; /* Garante que a imagem seja responsiva */
-  height: auto; /* Mantém a proporção da imagem */
-}
-
-/* Classes de Margem Utilitárias (podem ser usadas em qualquer lugar) */
-.margin-top-35 {
-  margin-top: 35px;
-}
-.margin-bottom-35 {
-  margin-bottom: 35px;
-}
-.margin-bottom-8 {
-  margin-bottom: 8px;
-}
-.margin-top-8 {
-  margin-top: 8px;
-}
+/* ... (Restante dos estilos de login existentes) ... */
 
 /* Estilos da Página do Dashboard (`home.html`) */
 body.dashboard-body-background {
-  /* Aplicar esta classe ao body de home.html se necessário */
   background-color: var(--dashboard-background);
-  display: flex; /* Necessário se o dashboard-layout-container não for o único filho direto */
+  display: flex;
 }
 
 .dashboard-layout-container {
-  display: flex; /* Layout principal com sidebar e conteúdo */
+  display: flex;
   width: 100%;
-  min-height: 100vh; /* Ocupa toda a altura da tela */
+  min-height: 100vh;
 }
 
 .dashboard-sidebar {
   background: var(--sidebar-background-color);
-  color: var(--background-color-light);
-  width: 250px; /* Largura fixa da sidebar */
+  color: var(--sidebar-link-color);
+  width: 260px;
+  padding: 0; /* Removido padding para controlar internamente */
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
   padding: 20px;
-  /* height: 100vh; Removido para permitir que o conteúdo determine a altura caso seja maior */
-  flex-shrink: 0; /* Impede que a sidebar encolha */
+  text-align: center;
+  border-bottom: 1px solid var(--sidebar-link-hover-bg);
+}
+
+.sidebar-logo {
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 10px;
 }
 
 .dashboard-sidebar h3 {
-  margin-bottom: 20px;
-  font-size: 1.5em;
+  margin-bottom: 0; /* Ajustado com o padding do sidebar-header */
+  font-size: 1.4em;
+  color: var(--sidebar-header-color);
+}
+
+.dashboard-sidebar nav {
+  flex-grow: 1; /* Faz a navegação ocupar o espaço disponível */
+  padding: 15px 0;
 }
 
 .dashboard-sidebar ul {
   padding: 0;
+  list-style: none;
 }
 
 .sidebar-nav-item a {
-  display: block; /* Faz o link ocupar toda a largura do li */
-  padding: 10px 15px;
-  color: var(--background-color-light);
-  border-radius: 4px;
-  margin-bottom: 5px;
-  transition: background-color 0.3s ease;
+  display: flex; /* Para alinhar ícone e texto */
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--sidebar-link-color);
+  text-decoration: none;
+  margin: 5px 15px; /* Espaçamento lateral para os itens */
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-nav-item a i {
+  margin-right: 12px; /* Espaço entre ícone e texto */
+  width: 20px; /* Largura fixa para ícones alinharem */
+  text-align: center;
 }
 
 .sidebar-nav-item a:hover {
-  background: var(--sidebar-link-hover-color);
-  color: var(--background-color-light); /* Mantém a cor do texto no hover */
+  background: var(--sidebar-link-hover-bg);
+  color: #fff;
 }
 
 .sidebar-nav-item.active a {
-  /* Estilo para o item de menu ativo */
-  background: var(--sidebar-link-active-color);
-  font-weight: bold;
+  background: var(--sidebar-link-active-bg);
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  padding: 15px 0;
+  border-top: 1px solid var(--sidebar-link-hover-bg);
+}
+
+.sidebar-footer .sidebar-nav-item a {
+  margin-bottom: 0;
 }
 
 .dashboard-main-content {
-  flex-grow: 1; /* Permite que a área de conteúdo principal cresça para preencher o espaço */
-  padding: 20px;
-  background-color: var(--dashboard-background); /* Fundo da área de conteúdo */
+  flex-grow: 1;
+  padding: 25px;
+  background-color: var(--dashboard-background);
+  overflow-y: auto; /* Scroll se o conteúdo for maior */
 }
 
 .dashboard-header {
-  background: var(--background-color-light);
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 8px;
+  background: var(--widget-background-color);
+  padding: 15px 25px;
+  margin-bottom: 25px;
+  border-radius: var(--border-radius);
   box-shadow: 0 2px 4px var(--widget-shadow-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .dashboard-header h1 {
-  font-size: 1.8em;
+  font-size: 1.7em;
   color: var(--highlight-text-color);
+  margin: 0;
+}
+
+.user-profile-area {
+  font-size: 0.95em;
+  color: var(--primary-text-color);
+}
+.user-profile-area i {
+  margin-left: 8px;
+  color: var(--primary-color);
 }
 
 .dashboard-grid {
   display: grid;
-  /* Define duas colunas de tamanho igual, permitindo que se ajustem */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px; /* Espaçamento entre os widgets */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
 }
 
 .dashboard-widget {
-  background: var(--background-color-light);
-  padding: 20px; /* Aumentado o padding para mais respiro */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px var(--widget-shadow-color);
+  background: var(--widget-background-color);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 5px var(--widget-shadow-color);
+  border: 1px solid var(--widget-border-color);
 }
 
-.dashboard-widget h2 {
-  margin-bottom: 15px;
-  font-size: 1.3em;
+.dashboard-widget h2,
+.dashboard-widget h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 1.25em;
   color: var(--highlight-text-color);
-  border-bottom: 1px solid #eee; /* Linha sutil abaixo do título do widget */
+  border-bottom: 1px solid #eee;
   padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+.dashboard-widget h2 i,
+.dashboard-widget h3 i {
+  margin-right: 10px;
+  color: var(--primary-color);
 }
 
 .calendar-integration-placeholder iframe {
   width: 100%;
-  /* height: 400px; Altura pode ser ajustada conforme necessário */
-  border: none; /* Remove a borda do iframe se a propriedade style for removida do HTML */
-  border-radius: 4px; /* Adiciona bordas arredondadas ao iframe */
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius);
+}
+
+.widget-google-calendar-integration {
+  padding-top: 15px; /* Espaçamento se for dentro do mesmo widget */
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+}
+.widget-google-calendar-integration h3 {
+  font-size: 1.1em;
+  border-bottom: none; /* Remover borda se já houver uma no h2 do widget pai */
+  padding-bottom: 5px;
+}
+.gcal-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+.gcal-button i {
+  margin-right: 8px;
+}
+
+/* Botões de Ação */
+.button-group {
+  display: flex;
+  flex-wrap: wrap; /* Quebra linha em telas menores */
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.action-button {
+  background-color: var(--primary-color);
+  color: var(--background-color-light);
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+  display: inline-flex; /* Para alinhar ícones com texto */
+  align-items: center;
+  justify-content: center;
+  text-decoration: none; /* Para links com classe action-button */
+}
+.action-button i {
+  margin-right: 8px;
+}
+
+.action-button:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-button.primary {
+  /* Para "Salvar Turnos" */
+  background-color: var(--primary-color);
+}
+.action-button.primary:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+}
+
+.action-button.green {
+  background-color: var(--success-color);
+}
+.action-button.green:hover {
+  background-color: color-mix(in srgb, var(--success-color) 85%, black);
+}
+
+.action-button.red {
+  background-color: var(--danger-color);
+}
+.action-button.red:hover {
+  background-color: color-mix(in srgb, var(--danger-color) 85%, black);
 }
 
 /* Estilos para Tabelas nos Widgets */
+.table-responsive {
+  overflow-x: auto; /* Permite scroll horizontal se a tabela for muito larga */
+}
+
 .widget-shifts-table table,
 .widget-employee-summary table {
   width: 100%;
-  border-collapse: collapse; /* Remove espaços entre as bordas das células */
+  border-collapse: collapse;
   margin-top: 10px;
+  font-size: 0.9em;
 }
 
 .widget-shifts-table th,
 .widget-shifts-table td,
 .widget-employee-summary th,
 .widget-employee-summary td {
-  border: 1px solid #ddd; /* Borda mais sutil para as células */
-  padding: 10px; /* Mais padding para melhor legibilidade */
-  text-align: left; /* Alinha o texto à esquerda por padrão */
+  border: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
 }
 
 .widget-shifts-table th,
 .widget-employee-summary th {
   background: var(--table-header-background);
   color: var(--background-color-light);
-  text-align: center; /* Centraliza o texto do cabeçalho */
+  text-align: center;
   font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
 }
 
 /* Inputs dentro da tabela de turnos */
 .widget-shifts-table input[type="text"],
 .widget-shifts-table input[type="time"],
 .widget-shifts-table input[type="date"] {
-  /* Adicionado type="date" se for usar */
   width: 100%;
   padding: 8px;
-  box-sizing: border-box; /* Padding e borda não aumentam o tamanho */
+  box-sizing: border-box;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   font-family: var(--font-family-primary);
   font-size: 0.95em;
 }
+.widget-shifts-table input[type="text"]:focus,
+.widget-shifts-table input[type="time"]:focus,
+.widget-shifts-table input[type="date"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color), 0.25);
+  outline: none;
+}
 
-/* Botão de Ação (ex: Salvar Turnos) */
-.action-button {
-  background-color: var(--primary-color);
-  color: var(--background-color-light);
-  padding: 10px 20px;
+/* Coluna de Ações na Tabela de Turnos */
+.widget-shifts-table td.actions-cell {
+  text-align: center;
+  white-space: nowrap; /* Impede que os botões quebrem linha */
+}
+.btn-table-action {
+  background: none;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
-  font-size: 1em;
-  font-weight: 500;
-  text-transform: uppercase;
-  margin-top: 15px;
-  transition: background-color 0.3s ease;
+  padding: 5px 8px;
+  margin: 0 3px;
+  font-size: 1.1em; /* Tamanho do ícone */
+  border-radius: var(--border-radius);
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+.btn-table-action.edit {
+  color: var(--info-color);
+}
+.btn-table-action.edit:hover {
+  background-color: color-mix(in srgb, var(--info-color) 15%, transparent);
 }
 
-.action-button:hover {
-  background-color: var(
-    --sidebar-link-hover-color
-  ); /* Reutilizando uma cor mais escura */
+.btn-table-action.delete {
+  color: var(--danger-color);
+}
+.btn-table-action.delete:hover {
+  background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);
 }
 
-/* Ajuste para o widget de resumo ocupar a largura total se for o último em uma linha ímpar em telas maiores 
-.widget-employee-summary {
-   Por padrão, ele já se estica com grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-   Se um comportamento específico de span for necessário, pode ser ativado via media query 
-}*/
+/* Esconder a coluna Google Event ID na tabela de turnos */
+/* Se você adicionou a coluna de Ações no final, ajuste o :nth-child ou use uma classe específica */
+#shifts-table-may th:nth-child(5),  /* Assumindo que GCal ID é a 5a coluna */
+#shifts-table-may td:nth-child(5) {
+  display: none;
+}
+
+/* Ajuste para a coluna de checkbox não ficar muito larga */
+#shifts-table-may th:first-child,
+#shifts-table-may td:first-child {
+  width: 40px;
+  text-align: center;
+}
+#shifts-table-may th:last-child, /* Coluna de Ações */
+#shifts-table-may td:last-child {
+  width: 100px; /* Ajuste conforme necessário para os botões */
+  text-align: center;
+}
+
+/* Resumo de Colaboradores */
+.summary-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite quebrar se não couber */
+  gap: 20px;
+}
+.summary-table-container {
+  flex: 1 1 300px; /* Ocupa espaço, base de 300px */
+}
+.summary-chart-container {
+  flex: 1 1 300px; /* Ocupa espaço, base de 300px */
+  min-height: 250px; /* Altura mínima para o gráfico */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#employee-hours-chart {
+  max-width: 100%;
+  max-height: 300px; /* Ajuste conforme necessário */
+}
 
 /* Media Queries para Responsividade */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
 @media (max-width: 992px) {
   /* Telas médias, como tablets */
-  .dashboard-grid {
-    grid-template-columns: 1fr; /* Uma coluna para widgets */
-  }
   .login-content-wrapper {
-    flex-direction: column; /* Empilha formulário e imagem */
+    flex-direction: column;
   }
   .login-form-wrapper {
     margin-right: 0;
-    margin-bottom: 30px; /* Espaço abaixo do formulário */
+    margin-bottom: 30px;
   }
   .login-image {
     margin-left: 0;
-    max-width: 80%; /* Ajusta o tamanho da imagem */
+    max-width: 80%;
+  }
+  .dashboard-sidebar {
+    width: 220px; /* Sidebar um pouco menor */
+  }
+  .summary-container {
+    flex-direction: column; /* Empilha tabela e gráfico */
   }
 }
 
 @media (max-width: 768px) {
   /* Telas menores, como smartphones */
-  .dashboard-sidebar {
-    width: 100%; /* Sidebar ocupa toda a largura */
-    height: auto; /* Altura automática */
-    position: static; /* Remove posicionamento fixo se houver */
-  }
   .dashboard-layout-container {
-    flex-direction: column; /* Empilha sidebar e conteúdo */
+    flex-direction: column;
+  }
+  .dashboard-sidebar {
+    width: 100%;
+    height: auto;
+    /* Para um menu hamburguer, seria preciso mais JS e CSS */
   }
   .dashboard-main-content {
-    padding: 15px; /* Reduz padding em telas menores */
+    padding: 15px;
+  }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   .dashboard-header h1 {
-    font-size: 1.5em;
+    font-size: 1.4em;
   }
-  .dashboard-widget h2 {
+  .dashboard-widget h2,
+  .dashboard-widget h3 {
     font-size: 1.1em;
   }
-  .login-form-wrapper {
-    width: 100%; /* Formulário ocupa toda a largura disponível */
-    padding: 0 15px; /* Adiciona padding lateral */
-  }
-}
-/* No style.css */
-.widget-google-calendar-integration {
-  padding: 10px;
-  margin-top: 10px; /* Ou conforme necessário */
-  font-size: 0.9em; /* Texto menor */
-  /* Adicione qualquer outra estilização sutil aqui */
-}
-
-.widget-google-calendar-integration h2 {
-  font-size: 1.1em; /* Título menor para este widget */
-  margin-bottom: 8px;
-}
-
-.widget-google-calendar-integration .action-button {
-  padding: 8px 15px;
-  font-size: 0.9em; /* Texto do botão menor */
-}
-
-.widget-google-calendar-integration p {
-  margin-bottom: 8px;
-}
-
-.widget-google-calendar-integration p small {
-  font-size: 0.9em; /* Relativo aos 0.9em do pai, então ainda menor */
-}
-
-/* Esconder a coluna Google Event ID na tabela de turnos */
-#shifts-table-may th:last-child,  /* Esconde o último <th> (Google Event ID) */
-#shifts-table-may td:last-child {
-  /* Esconde a última <td> de cada linha (Google Event ID) */
-  display: none;
-}
-
-/* Ajuste para a coluna de checkbox não ficar muito larga */
-#shifts-table-may th:first-child, /* Coluna do checkbox "Selecionar Todos" */
-#shifts-table-may td:first-child {
-  /* Coluna dos checkboxes individuais */
-  width: 40px; /* Ou um valor que pareça bom */
-  text-align: center;
-}
-/* Agrupamento de botões com espaçamento e responsividade */
-.button-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-/* Cores específicas para ações */
-.action-button.green {
-  background-color: #5cb85c;
-}
-
-.action-button.red {
-  background-color: #d9534f;
-}
-
-@media (max-width: 600px) {
   .button-group {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: column; /* Empilha os botões */
+    align-items: stretch; /* Estica os botões */
   }
+  .action-button {
+    width: 100%; /* Botões ocupam largura total */
+    margin-bottom: 5px; /* Espaçamento se empilhados */
+  }
+  .login-form-wrapper {
+    width: 100%;
+    padding: 0 15px;
+  }
+}
+
+/* Estilos para placeholder flutuante - Mantidos como antes */
+.input-group {
+  width: 100%;
+  position: relative;
+  border-bottom: 2px solid var(--input-border-color);
+}
+.input-field {
+  /* Este é para os inputs de login, pode precisar de ajustes se reutilizado */
+  width: 100%;
+  height: 52px;
+  padding: 0 5px;
+  background: transparent;
+  font-size: 18px;
+  color: var(--input-field-text-color);
+  font-weight: 600;
+  border: none;
+  outline: none;
+}
+.input-focus-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.input-focus-effect::after {
+  content: attr(data-placeholder);
+  position: absolute;
+  top: 15px;
+  left: 5px;
+  font-size: 18px;
+  color: var(--secondary-text-color); /* Alterado para secondary */
+  transition: all 0.4s ease;
+}
+.input-field:focus + .input-focus-effect::after,
+.input-field.has-val + .input-focus-effect::after {
+  top: -20px;
+  font-size: 15px;
 }

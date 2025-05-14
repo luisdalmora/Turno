@@ -5,31 +5,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cadastrar Colaborador - Sim Posto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body class="login-page-container">
   <div class="login-content-wrapper">
-    <div class="login-form-wrapper" style="width: 450px;"> <span class="login-form-title">Cadastrar Novo
-        Colaborador</span>
+    <div class="login-form-wrapper" style="width: 450px;">
+      <span class="login-form-title"><i class="fas fa-user-plus"></i> Cadastrar Novo Colaborador</span>
       <form method="POST" action="processar_cadastro_colaborador.php">
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="text" name="nome_completo" required />
+          <input class="input-field" type="text" name="nome_completo" required aria-label="Nome Completo" />
           <span class="input-focus-effect" data-placeholder="Nome Completo"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="email" name="email" /> <span class="input-focus-effect"
-            data-placeholder="E-mail (Opcional)"></span>
+          <input class="input-field" type="email" name="email" aria-label="E-mail (Opcional)" />
+          <span class="input-focus-effect" data-placeholder="E-mail (Opcional)"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="text" name="cargo" /> <span class="input-focus-effect"
-            data-placeholder="Cargo (Opcional)"></span>
+          <input class="input-field" type="text" name="cargo" aria-label="Cargo (Opcional)" />
+          <span class="input-focus-effect" data-placeholder="Cargo (Opcional)"></span>
         </div>
 
-        <div class="input-group margin-bottom-35" style="border-bottom: none;"> <label for="ativo"
-            style="color: var(--primary-text-color); font-size: 16px; display: block; margin-bottom: 8px;">Status:</label>
+        <div class="input-group margin-bottom-35" style="border-bottom: none;">
+          <label for="ativo"
+            style="color: var(--primary-text-color); font-size: 16px; display: block; margin-bottom: 8px;">
+            <i class="fas fa-toggle-on"></i> Status:</label>
           <select name="ativo" id="ativo" class="input-field"
             style="height: 40px; border: 1px solid var(--input-border-color); border-radius: 4px; padding: 0 5px;">
             <option value="1" selected>Ativo</option>
@@ -37,14 +43,16 @@
           </select>
         </div>
 
-
         <div class="login-form-button-container" style="margin-top: 45px;">
-          <button class="login-form-button" type="submit">Cadastrar Colaborador</button>
+          <button class="login-form-button" type="submit">
+            <i class="fas fa-check-circle"></i> Cadastrar Colaborador
+          </button>
         </div>
       </form>
 
       <ul class="login-utility-links" style="margin-top: 30px;">
-        <li><a href="home.html" class="utility-text-secondary">Voltar para o Dashboard</a></li>
+        <li><a href="home.html" class="utility-text-secondary"><i class="fas fa-arrow-left"></i> Voltar para o
+            Dashboard</a></li>
       </ul>
     </div>
   </div>

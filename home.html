@@ -4,90 +4,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Escala de Trabalho</title>
+  <title>Dashboard - Gestão de Turnos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body>
+<body class="dashboard-body-background">
   <div class="dashboard-layout-container">
     <aside class="dashboard-sidebar">
-      <h3>Menu Principal</h3>
+      <div class="sidebar-header">
+        <h3><i class="fas fa-bars"></i> Menu Principal</h3>
+      </div>
       <nav>
         <ul>
-          <li class="sidebar-nav-item active"><a href="#">Dashboard</a></li>
-          <li class="sidebar-nav-item"><a href="#">Gerenciar Turnos</a></li>
-          <li class="sidebar-nav-item"><a href="#">Colaboradores</a></li>
-          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.html">Cadastrar Colaborador</a></li>
-          <li class="sidebar-nav-item"><a href="#google-calendar-section">Google Calendar</a></li>
-          <li class="sidebar-nav-item"><a href="index.html" id="logout-link">Sair</a></li>
+          <li class="sidebar-nav-item active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+          <li class="sidebar-nav-item"><a href="#"><i class="fas fa-calendar-alt"></i> Gerenciar Turnos</a></li>
+          <li class="sidebar-nav-item"><a href="#"><i class="fas fa-users"></i> Colaboradores</a></li>
+          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.html"><i class="fas fa-user-plus"></i> Cadastrar
+              Colaborador</a></li>
+          <li class="sidebar-nav-item"><a href="#google-calendar-section"><i class="fab fa-google"></i> Google
+              Calendar</a></li>
         </ul>
       </nav>
+      <div class="sidebar-footer">
+        <a href="index.html" id="logout-link" class="sidebar-nav-item"><i class="fas fa-sign-out-alt"></i> Sair</a>
+      </div>
     </aside>
 
     <div class="dashboard-main-content">
       <header class="dashboard-header">
-        <h1>Sim Posto - Gestão de Turnos</h1>
-        <div id="user-info" style="float: right; padding-top: 10px;"></div>
+        <div class="header-title-container">
+          <h1><i class="fas fa-gas-pump"></i> Sim Posto - Gestão de Turnos</h1>
+        </div>
+        <div id="user-info" class="user-profile-area">
+          <i class="fas fa-user-circle"></i> Admin
+        </div>
       </header>
 
       <main class="dashboard-grid">
         <section class="dashboard-widget widget-calendar">
-          <h2>Calendário de Eventos (Google)</h2>
+          <h2><i class="fas fa-calendar-check"></i> Calendário de Eventos (Google)</h2>
           <div class="calendar-integration-placeholder">
             <iframe src="https://calendar.google.com/calendar/embed?src=postosim8%40gmail.com&ctz=America%2FSao_Paulo"
-              style="border:solid 1px #777" width="100%" height="400" frameborder="0" scrolling="no"></iframe>
+              style="border:solid 1px #777" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
           </div>
-          <section id="google-calendar-section" class="dashboard-widget widget-google-calendar-integration">
-            <h2>Integração com Google Calendar</h2>
+          <section id="google-calendar-section" class="widget-google-calendar-integration">
+            <h3><i class="fab fa-google"></i> Integração com Google Calendar</h3>
             <p id="gcal-status-message"></p>
-            <a href="google_auth_redirect.php" class="action-button" id="connect-gcal-btn">Conectar com Google
-              Calendar</a>
-            <button id="disconnect-gcal-btn" class="action-button red" style="display: none;">Desconectar Google
-              Calendar</button>
+            <div class="gcal-buttons">
+              <a href="google_auth_redirect.php" class="action-button gcal-button" id="connect-gcal-btn">
+                <i class="fab fa-google"></i> Conectar
+              </a>
+              <button id="disconnect-gcal-btn" class="action-button red gcal-button" style="display: none;">
+                <i class="fas fa-unlink"></i> Desconectar
+              </button>
+            </div>
             <p><small>Permitir que o Sim Posto adicione seus turnos à sua agenda Google.</small></p>
           </section>
         </section>
 
         <section class="dashboard-widget widget-shifts-table">
-          <h2>Turnos Programados - <span id="current-month-year">Maio 2025</span> <small>(Exemplo)</small></h2>
+          <h2><i class="fas fa-tasks"></i> Turnos Programados - <span id="current-month-year">Maio 2025</span></h2>
 
-          <!-- Botões reorganizados -->
           <div class="button-group">
-            <button id="add-shift-row-button" class="action-button green">Adicionar Novo Turno</button>
-            <button id="delete-selected-shifts-button" class="action-button red">Excluir Selecionados</button>
+            <button id="add-shift-row-button" class="action-button green"><i class="fas fa-plus-circle"></i> Adicionar
+              Turno</button>
+            <button id="delete-selected-shifts-button" class="action-button red"><i class="fas fa-trash-alt"></i>
+              Excluir Selecionados</button>
+            <button id="save-shifts-button" class="action-button primary"><i class="fas fa-save"></i> Salvar
+              Alterações</button>
           </div>
 
-          <table id="shifts-table-may">
-            <thead>
-              <tr>
-                <th><input type="checkbox" id="select-all-shifts" title="Selecionar Todos"></th>
-                <th>Dia</th>
-                <th>Turno (Início)</th>
-                <th>Colaborador</th>
-                <th>Google Event ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Linhas serão populadas dinamicamente -->
-            </tbody>
-          </table>
-
-          <button id="save-shifts-button" class="action-button">Salvar Alterações nos Turnos</button>
+          <div class="table-responsive">
+            <table id="shifts-table-may">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="select-all-shifts" title="Selecionar Todos"></th>
+                  <th>Dia</th>
+                  <th>Turno (Início)</th>
+                  <th>Colaborador</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </section>
 
         <section class="dashboard-widget widget-employee-summary">
-          <h2>Resumo de Horas por Colaborador</h2>
-          <table id="employee-summary-table">
-            <thead>
-              <tr>
-                <th>Colaborador</th>
-                <th>Total de Horas (Mês Atual)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Linhas serão populadas dinamicamente -->
-            </tbody>
-          </table>
+          <h2><i class="fas fa-chart-bar"></i> Resumo de Horas por Colaborador (<span id="employee-summary-period">Mês
+              Atual</span>)</h2>
+          <div class="summary-container">
+            <div class="summary-table-container">
+              <table id="employee-summary-table">
+                <thead>
+                  <tr>
+                    <th>Colaborador</th>
+                    <th>Total de Horas</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="summary-chart-container">
+              <canvas id="employee-hours-chart"></canvas>
+            </div>
+          </div>
         </section>
       </main>
     </div>

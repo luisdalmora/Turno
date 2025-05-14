@@ -5,41 +5,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Criar Conta - Sim Posto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body class="login-page-container">
   <div class="login-content-wrapper">
     <div class="login-form-wrapper">
-      <span class="login-form-title">Criar Conta</span>
+      <span class="login-form-title"><i class="fas fa-user-plus"></i> Criar Conta</span>
       <form method="POST" action="cadastrar.php">
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="text" name="nome_completo" required />
+          <input class="input-field" type="text" name="nome_completo" required aria-label="Nome Completo" />
           <span class="input-focus-effect" data-placeholder="Nome Completo"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="email" name="email" required />
+          <input class="input-field" type="email" name="email" required aria-label="E-mail" />
           <span class="input-focus-effect" data-placeholder="E-mail"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="text" name="usuario" required />
+          <input class="input-field" type="text" name="usuario" required aria-label="Usuário" />
           <span class="input-focus-effect" data-placeholder="Usuário"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="password" name="senha" required />
+          <input class="input-field" type="password" name="senha" required aria-label="Senha" />
           <span class="input-focus-effect" data-placeholder="Senha"></span>
         </div>
 
         <div class="login-form-button-container">
-          <button class="login-form-button" type="submit">Cadastrar</button>
+          <button class="login-form-button" type="submit">
+            <i class="fas fa-user-plus"></i> Cadastrar
+          </button>
         </div>
       </form>
 
       <ul class="login-utility-links">
-        <li><a href="index.html" class="utility-text-secondary">Voltar para Login</a></li>
+        <li><a href="index.html" class="utility-text-secondary"><i class="fas fa-arrow-left"></i> Voltar para Login</a>
+        </li>
       </ul>
     </div>
 
