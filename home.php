@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php'; // Garante que a sessão está iniciada e carrega configurações
 
+// Verificar se o usuário está logado, redirecionar para o login se não estiver
 if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
         header('Content-Type: application/json');
@@ -10,7 +11,23 @@ if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
     header('Location: index.html?erro=' . urlencode('Acesso negado. Faça login primeiro.'));
     exit;
 }
+
+// Gerar um token CSRF se não existir um na sessão, ou se for GET e quisermos um novo.
+// Para POST, o token será validado e um novo será enviado na resposta JSON.
+if (empty($_SESSION['csrf_token']) || $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_token'];
+
 $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
+
+// Determinar o ano e mês a serem exibidos (pode vir de GET parameters no futuro)
+$anoExibicao = date('Y');
+$mesExibicao = date('m'); // Mês como número (01-12)
+
+$nomesMeses = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+$nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -36,7 +53,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
       <nav>
         <ul>
           <li class="sidebar-nav-item active"><a href="home.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-          <li class="sidebar-nav-item"><a href="relatorio_turnos.php"><i class="fas fa-calendar-alt"></i> Gerenciar Turnos</a></li>
+          <li class="sidebar-nav-item"><a href="relatorio_turnos.php"><i class="fas fa-file-alt"></i> Relatórios</a></li>
           <li class="sidebar-nav-item"><a href="#"><i class="fas fa-users"></i> Colaboradores</a></li> 
           <li class="sidebar-nav-item"><a href="cadastrar_colaborador.php"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
           <li class="sidebar-nav-item"><a href="calendario_fullscreen.php"><i class="fab fa-google"></i> Google Calendar</a></li>
@@ -61,7 +78,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         <section class="dashboard-widget widget-calendar">
           <h2><i class="fas fa-calendar-check"></i> Calendário de Eventos (Google)</h2>
           <div class="calendar-integration-placeholder">
-            <iframe src="https://calendar.google.com/calendar/embed?src=postosim8%40gmail.com&src=pt-br.brazilian%23holiday%40group.v.calendar.google.com&ctz=America%2FSao_Paulo"
+            <iframe src="https://calendar.google.com/calendar/embed?src=<?php echo urlencode($_SESSION['usuario_email'] ?? 'primary'); ?>&src=pt-br.brazilian%23holiday%40group.v.calendar.google.com&ctz=America%2FSao_Paulo"
               style="border:solid 1px #777" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
           </div>
           <section id="google-calendar-section" class="widget-google-calendar-integration">
@@ -80,12 +97,16 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         </section>
 
         <section class="dashboard-widget widget-shifts-table">
-          <h2><i class="fas fa-tasks"></i> Turnos Programados - <span id="current-month-year">Maio <?php echo date('Y'); ?></span></h2>
-           <div class="input-group" style="margin-bottom: 15px; border-bottom: none; padding: 5px; background-color: #f0f0f0; border-radius: var(--border-radius);">
-             <label for="shift-info-label" style="font-weight:bold; font-size:0.9em; color: #555;">Informar Duração:</label>
-             <span id="shift-info-label" style="font-style:italic; font-size:0.85em; color: #555; margin-left: 8px;">No campo "Turno", insira a duração (Ex: 04:00 para 4 horas).</span>
-          </div>
+          <input type="hidden" id="csrf-token-shifts" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
+          <div class="shifts-table-navigation">
+            <button id="prev-month-button" class="action-button"><i class="fas fa-chevron-left"></i> Anterior</button>
+            <h2 id="current-month-year-display" data-year="<?php echo $anoExibicao; ?>" data-month="<?php echo $mesExibicao; ?>">
+                <i class="fas fa-tasks"></i> Turnos - <?php echo $nomeMesExibicao . ' ' . $anoExibicao; ?>
+            </h2>
+            <button id="next-month-button" class="action-button">Próximo <i class="fas fa-chevron-right"></i></button>
+          </div>
+          
           <div class="button-group">
             <button id="add-shift-row-button" class="action-button green"><i class="fas fa-plus-circle"></i> Adicionar Turno</button>
             <button id="delete-selected-shifts-button" class="action-button red"><i class="fas fa-trash-alt"></i> Excluir Selecionados</button>
@@ -93,12 +114,12 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
           </div>
 
           <div class="table-responsive">
-            <table id="shifts-table-may">
-              <thead>
+            <table id="shifts-table-main"> <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all-shifts" title="Selecionar Todos"></th>
-                  <th>Dia</th>
-                  <th>Turno (Duração HH:MM)</th>
+                  <th>Dia (dd/Mês)</th>
+                  <th>Início (HH:MM)</th>
+                  <th>Fim (HH:MM)</th>
                   <th>Colaborador</th>
                   <th>Ações</th>
                 </tr>
@@ -113,7 +134,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
           <h2>
             <i class="fas fa-chart-bar"></i>
             <span class="widget-title-text">Resumo de Horas por Colaborador</span>
-            (<span id="employee-summary-period">Mês Atual</span>)
+            (<span id="employee-summary-period"><?php echo $nomeMesExibicao; ?></span>)
           </h2>
           <div class="summary-container">
             <div class="summary-table-container">
@@ -124,8 +145,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
                     <th>Total de Horas</th>
                   </tr>
                 </thead>
-                <tbody>
-                  </tbody>
+                <tbody></tbody>
               </table>
             </div>
             <div class="summary-chart-container">
