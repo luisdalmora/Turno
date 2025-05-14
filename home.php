@@ -1,13 +1,15 @@
 <?php
 require_once __DIR__ . '/config.php'; // Garante que a sessão está iniciada e carrega configurações
 
-// Verificar se o usuário está logado, redirecionar para o login se não estiver
 if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Sessão expirada ou acesso negado.', 'action' => 'redirect', 'location' => 'index.html']);
+        exit;
+    }
     header('Location: index.html?erro=' . urlencode('Acesso negado. Faça login primeiro.'));
     exit;
 }
-
-// Pegar o nome completo do usuário da sessão para exibição
 $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
 ?>
 <!DOCTYPE html>
@@ -35,7 +37,8 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         <ul>
           <li class="sidebar-nav-item active"><a href="home.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
           <li class="sidebar-nav-item"><a href="relatorio_turnos.php"><i class="fas fa-calendar-alt"></i> Gerenciar Turnos</a></li>
-          <li class="sidebar-nav-item"><a href="#"><i class="fas fa-users"></i> Colaboradores</a></li> <li class="sidebar-nav-item"><a href="cadastrar_colaborador.html"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
+          <li class="sidebar-nav-item"><a href="#"><i class="fas fa-users"></i> Colaboradores</a></li> 
+          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.php"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
           <li class="sidebar-nav-item"><a href="calendario_fullscreen.php"><i class="fab fa-google"></i> Google Calendar</a></li>
         </ul>
       </nav>
@@ -100,13 +103,18 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
                   <th>Ações</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                </tbody>
             </table>
           </div>
         </section>
 
         <section class="dashboard-widget widget-employee-summary">
-          <h2><i class="fas fa-chart-bar"></i> Resumo de Horas por Colaborador (<span id="employee-summary-period">Mês Atual</span>)</h2>
+          <h2>
+            <i class="fas fa-chart-bar"></i>
+            <span class="widget-title-text">Resumo de Horas por Colaborador</span>
+            (<span id="employee-summary-period">Mês Atual</span>)
+          </h2>
           <div class="summary-container">
             <div class="summary-table-container">
               <table id="employee-summary-table">
@@ -116,7 +124,8 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
                     <th>Total de Horas</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                  </tbody>
               </table>
             </div>
             <div class="summary-chart-container">
@@ -127,7 +136,6 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
       </main>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,11 +1,6 @@
 <?php
-require_once __DIR__ . '/config.php'; // Garante que a sessão está iniciada
-
-// Destruir todas as variáveis de sessão.
-$_SESSION = array();
-
-// Se é desejável destruir a sessão completamente, apague também o cookie de sessão.
-// Nota: Isso destruirá a sessão, e não apenas os dados da sessão!
+require_once __DIR__ . '/config.php'; // Inicia a sessão para poder destruí-la
+$_SESSION = array(); // Limpa todas as variáveis de sessão
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -13,10 +8,6 @@ if (ini_get("session.use_cookies")) {
         $params["secure"], $params["httponly"]
     );
 }
-
-// Finalmente, destruir a sessão.
-session_destroy();
-
-// Redirecionar para a página de login
-header('Location: index.html');
+session_destroy(); // Destrói a sessão
+header('Location: index.html'); // Redireciona para a página de login
 exit;

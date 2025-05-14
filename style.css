@@ -1,103 +1,86 @@
 /* Variáveis Globais de Cores e Fontes */
 :root {
-  --primary-color: #407bff; /* Azul primário */
-  --secondary-color: #6c757d; /* Cinza secundário */
-  --success-color: #28a745; /* Verde para sucesso */
-  --danger-color: #dc3545; /* Vermelho para perigo/exclusão */
-  --warning-color: #ffc107; /* Amarelo para alertas */
-  --info-color: #17a2b8; /* Azul claro para informação */
-  --light-color: #f8f9fa; /* Fundo claro */
-  --dark-color: #343a40; /* Texto/fundo escuro */
-
+  --primary-color: #407bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
   --link-text-color: #666;
-  --primary-text-color: #555; /* Cor de texto principal */
-  --secondary-text-color: #999; /* Cor para texto secundário/placeholder */
+  --primary-text-color: #555;
+  --secondary-text-color: #999;
   --highlight-text-color: #333;
   --input-field-text-color: #555;
   --background-color-light: #fff;
   --input-border-color: #d9d9d9;
-
-  /* Sidebar */
-  --sidebar-background-color: #2c3e50; /* Azul petróleo escuro */
-  --sidebar-link-color: #ecf0f1; /* Cinza claro para texto */
-  --sidebar-link-hover-bg: #34495e; /* Azul petróleo um pouco mais claro */
-  --sidebar-link-active-bg: var(--primary-color); /* Azul primário */
+  --sidebar-background-color: #2c3e50;
+  --sidebar-link-color: #ecf0f1;
+  --sidebar-link-hover-bg: #34495e;
+  --sidebar-link-active-bg: var(--primary-color);
   --sidebar-header-color: #ecf0f1;
-
-  --table-header-background: var(
-    --primary-color
-  ); /* Usar primário para cabeçalho da tabela */
-  --dashboard-background: #eef1f5; /* Cinza bem claro para o fundo do dashboard */
+  --table-header-background: var(--primary-color);
+  --dashboard-background: #eef1f5;
   --widget-background-color: #ffffff;
   --widget-shadow-color: rgba(0, 0, 0, 0.08);
   --widget-border-color: #e3e6f0;
-
   --font-family-primary: "Poppins", sans-serif;
   --base-font-size: 16px;
-  --border-radius: 6px; /* Raio de borda padrão */
-  --spacing-medium: 40px; /* Variável para espaçamento principal */
+  --border-radius: 6px;
+  --spacing-medium: 40px;
 }
-
-/* Reset Básico de CSS */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
 body,
 html {
   height: 100%;
   font-family: var(--font-family-primary);
   font-size: var(--base-font-size);
   color: var(--primary-text-color);
-  background-color: var(--dashboard-background); /* Fundo geral padrão */
+  background-color: var(--dashboard-background);
 }
 
-/* Estilos da Página de Login e Cadastro */
+/* Estilos Login/Cadastro */
 .login-page-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 15px; /* Espaçamento das bordas da tela */
-  background-color: var(
-    --background-color-light
-  ); /* Fundo específico para login/cadastro */
+  padding: 15px;
+  background-color: var(--background-color-light);
 }
-
 .login-content-wrapper {
   display: flex;
-  align-items: center; /* Alinha verticalmente o formulário e a imagem */
+  align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: 1100px; /* Largura máxima do conteúdo de login/cadastro */
+  max-width: 1100px;
   background-color: var(--widget-background-color);
   padding: var(--spacing-medium);
   border-radius: var(--border-radius);
   box-shadow: 0 10px 25px var(--widget-shadow-color);
-  gap: var(--spacing-medium); /* Espaçamento entre o formulário e a imagem */
+  gap: var(--spacing-medium);
 }
-
 .login-form-wrapper {
-  flex: 1 1 450px; /* Base de 450px, pode crescer/encolher */
-  max-width: 500px; /* Largura máxima para o formulário */
+  flex: 1 1 450px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
 }
-
 .login-image {
-  flex: 1 1 50%; /* Pode crescer/encolher, com base em 50% do espaço flexível restante */
-  max-width: 550px; /* Largura máxima para a imagem */
-  height: auto; /* Mantém a proporção da imagem */
-  object-fit: contain; /* Garante que toda a imagem seja visível. 'cover' preenche e pode cortar. */
+  flex: 1 1 50%;
+  max-width: 550px;
+  height: auto;
+  object-fit: contain;
   border-radius: var(--border-radius);
 }
-
 .login-form {
-  width: 100%; /* Formulário ocupa todo o espaço do seu wrapper */
+  width: 100%;
 }
-
 .login-form-title {
   font-size: 2em;
   color: var(--highlight-text-color);
@@ -105,20 +88,17 @@ html {
   text-align: center;
   display: block;
 }
-
 .input-group {
   width: 100%;
   position: relative;
   border-bottom: 2px solid var(--input-border-color);
 }
-/* Classes de margem utilitárias para os input-group, se usadas no HTML */
 .input-group.margin-top-35 {
   margin-top: 35px;
 }
 .input-group.margin-bottom-35 {
   margin-bottom: 35px;
 }
-
 .input-field {
   width: 100%;
   height: 52px;
@@ -130,7 +110,6 @@ html {
   border: none;
   outline: none;
 }
-
 .input-focus-effect {
   position: absolute;
   top: 0;
@@ -139,7 +118,6 @@ html {
   height: 100%;
   pointer-events: none;
 }
-
 .input-focus-effect::after {
   content: attr(data-placeholder);
   position: absolute;
@@ -149,18 +127,15 @@ html {
   color: var(--secondary-text-color);
   transition: all 0.4s ease;
 }
-
 .input-field:focus + .input-focus-effect::after,
 .input-field.has-val + .input-focus-effect::after {
   top: -20px;
   font-size: 15px;
 }
-
 .login-form-button-container {
   margin-top: 30px;
   width: 100%;
 }
-
 .login-form-button {
   background-color: var(--primary-color);
   color: var(--background-color-light);
@@ -181,12 +156,10 @@ html {
 .login-form-button i {
   margin-right: 8px;
 }
-
 .login-form-button:hover {
   background-color: color-mix(in srgb, var(--primary-color) 85%, black);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
 .login-utility-links {
   list-style: none;
   padding: 0;
@@ -210,101 +183,86 @@ html {
   text-decoration: underline;
 }
 
-/* Estilos da Página do Dashboard (`home.html`) */
+/* Estilos Dashboard */
 body.dashboard-body-background {
   background-color: var(--dashboard-background);
-  display: flex; /* Mantém o display flex para o layout do dashboard */
+  display: flex;
 }
-
 .dashboard-layout-container {
   display: flex;
   width: 100%;
   min-height: 100vh;
 }
-
 .dashboard-sidebar {
   background: var(--sidebar-background-color);
   color: var(--sidebar-link-color);
   width: 260px;
-  padding: 0; /* Removido padding para controlar internamente */
+  padding: 0;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
-
 .sidebar-header {
   padding: 20px;
   text-align: center;
   border-bottom: 1px solid var(--sidebar-link-hover-bg);
 }
-
 .sidebar-logo {
   max-width: 80%;
   height: auto;
   margin-bottom: 10px;
 }
-
 .dashboard-sidebar h3 {
-  margin-bottom: 0; /* Ajustado com o padding do sidebar-header */
+  margin-bottom: 0;
   font-size: 1.4em;
   color: var(--sidebar-header-color);
 }
-
 .dashboard-sidebar nav {
-  flex-grow: 1; /* Faz a navegação ocupar o espaço disponível */
+  flex-grow: 1;
   padding: 15px 0;
 }
-
 .dashboard-sidebar ul {
   padding: 0;
   list-style: none;
 }
-
 .sidebar-nav-item a {
-  display: flex; /* Para alinhar ícone e texto */
+  display: flex;
   align-items: center;
   padding: 12px 20px;
   color: var(--sidebar-link-color);
   text-decoration: none;
-  margin: 5px 15px; /* Espaçamento lateral para os itens */
+  margin: 5px 15px;
   border-radius: var(--border-radius);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 .sidebar-nav-item a i {
-  margin-right: 12px; /* Espaço entre ícone e texto */
-  width: 20px; /* Largura fixa para ícones alinharem */
+  margin-right: 12px;
+  width: 20px;
   text-align: center;
 }
-
 .sidebar-nav-item a:hover {
   background: var(--sidebar-link-hover-bg);
   color: #fff;
 }
-
 .sidebar-nav-item.active a {
   background: var(--sidebar-link-active-bg);
   color: #fff;
   font-weight: 600;
 }
-
 .sidebar-footer {
   padding: 15px 0;
   border-top: 1px solid var(--sidebar-link-hover-bg);
 }
-
 .sidebar-footer .sidebar-nav-item a {
   margin-bottom: 0;
 }
-
 .dashboard-main-content {
   flex-grow: 1;
   padding: 25px;
   background-color: var(--dashboard-background);
-  overflow-y: auto; /* Scroll se o conteúdo for maior */
+  overflow-y: auto;
 }
-
 .dashboard-header {
   background: var(--widget-background-color);
   padding: 15px 25px;
@@ -315,13 +273,11 @@ body.dashboard-body-background {
   justify-content: space-between;
   align-items: center;
 }
-
 .dashboard-header h1 {
   font-size: 1.7em;
   color: var(--highlight-text-color);
   margin: 0;
 }
-
 .user-profile-area {
   font-size: 0.95em;
   color: var(--primary-text-color);
@@ -330,13 +286,11 @@ body.dashboard-body-background {
   margin-left: 8px;
   color: var(--primary-color);
 }
-
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 25px;
-}
-
+} /* Aumentado minmax base */
 .dashboard-widget {
   background: var(--widget-background-color);
   padding: 20px;
@@ -344,7 +298,6 @@ body.dashboard-body-background {
   box-shadow: 0 2px 5px var(--widget-shadow-color);
   border: 1px solid var(--widget-border-color);
 }
-
 .dashboard-widget h2,
 .dashboard-widget h3 {
   margin-top: 0;
@@ -361,21 +314,26 @@ body.dashboard-body-background {
   margin-right: 10px;
   color: var(--primary-color);
 }
-
+.dashboard-widget h2 .widget-title-text {
+  margin-right: 0.3em;
+} /* Espaço antes do (Mês Atual) */
+.dashboard-widget h2 span#employee-summary-period {
+  font-weight: normal;
+  font-size: 0.9em;
+}
 .calendar-integration-placeholder iframe {
   width: 100%;
   border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
 }
-
 .widget-google-calendar-integration {
-  padding-top: 15px; /* Espaçamento se for dentro do mesmo widget */
+  padding-top: 15px;
   margin-top: 15px;
   border-top: 1px solid #eee;
 }
 .widget-google-calendar-integration h3 {
   font-size: 1.1em;
-  border-bottom: none; /* Remover borda se já houver uma no h2 do widget pai */
+  border-bottom: none;
   padding-bottom: 5px;
 }
 .gcal-buttons {
@@ -386,16 +344,13 @@ body.dashboard-body-background {
 .gcal-button i {
   margin-right: 8px;
 }
-
-/* Botões de Ação */
 .button-group {
   display: flex;
-  flex-wrap: wrap; /* Quebra linha em telas menores */
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 15px;
   align-items: center;
 }
-
 .action-button {
   background-color: var(--primary-color);
   color: var(--background-color-light);
@@ -408,349 +363,61 @@ body.dashboard-body-background {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: background-color 0.3s ease, box-shadow 0.2s ease;
-  display: inline-flex; /* Para alinhar ícones com texto */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-decoration: none; /* Para links com classe action-button */
+  text-decoration: none;
 }
 .action-button i {
   margin-right: 8px;
 }
-
 .action-button:hover {
   background-color: color-mix(in srgb, var(--primary-color) 85%, black);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
 .action-button.primary {
-  /* Para "Salvar Turnos" */
   background-color: var(--primary-color);
 }
 .action-button.primary:hover {
   background-color: color-mix(in srgb, var(--primary-color) 85%, black);
 }
-
 .action-button.green {
   background-color: var(--success-color);
 }
 .action-button.green:hover {
   background-color: color-mix(in srgb, var(--success-color) 85%, black);
 }
-
 .action-button.red {
   background-color: var(--danger-color);
 }
 .action-button.red:hover {
   background-color: color-mix(in srgb, var(--danger-color) 85%, black);
 }
-
-/* Estilos para Tabelas nos Widgets */
 .table-responsive {
-  overflow-x: auto; /* Permite scroll horizontal se a tabela for muito larga */
+  overflow-x: auto;
 }
-
 .widget-shifts-table table,
-.widget-employee-summary table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 0.9em;
-}
-
-.widget-shifts-table th,
-.widget-shifts-table td,
-.widget-employee-summary th,
-.widget-employee-summary td {
-  border: 1px solid #e0e0e0;
-  padding: 10px 12px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.widget-shifts-table th,
-.widget-employee-summary th {
-  background: var(--table-header-background);
-  color: var(--background-color-light);
-  text-align: center;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.85em;
-  letter-spacing: 0.5px;
-}
-
-/* Inputs dentro da tabela de turnos */
-.widget-shifts-table input[type="text"],
-.widget-shifts-table input[type="time"],
-.widget-shifts-table input[type="date"] {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: var(--border-radius);
-  font-family: var(--font-family-primary);
-  font-size: 0.95em;
-}
-.widget-shifts-table input[type="text"]:focus,
-.widget-shifts-table input[type="time"]:focus,
-.widget-shifts-table input[type="date"]:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(var(--primary-color), 0.25);
-  outline: none;
-}
-
-/* Coluna de Ações na Tabela de Turnos */
-.widget-shifts-table td.actions-cell {
-  text-align: center;
-  white-space: nowrap; /* Impede que os botões quebrem linha */
-}
-.btn-table-action {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px 8px;
-  margin: 0 3px;
-  font-size: 1.1em; /* Tamanho do ícone */
-  border-radius: var(--border-radius);
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-.btn-table-action.edit {
-  color: var(--info-color);
-}
-.btn-table-action.edit:hover {
-  background-color: color-mix(in srgb, var(--info-color) 15%, transparent);
-}
-
-.btn-table-action.delete {
-  color: var(--danger-color);
-}
-.btn-table-action.delete:hover {
-  background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);
-}
-
-/* Esconder a coluna Google Event ID na tabela de turnos */
-#shifts-table-may th:nth-child(5),
-#shifts-table-may td:nth-child(5) {
-  display: none;
-}
-
-/* Ajuste para a coluna de checkbox não ficar muito larga */
-#shifts-table-may th:first-child,
-#shifts-table-may td:first-child {
-  width: 40px;
-  text-align: center;
-}
-#shifts-table-may th:last-child, /* Coluna de Ações */
-#shifts-table-may td:last-child {
-  width: 100px; /* Ajuste conforme necessário para os botões */
-  text-align: center;
-}
-
-/* Resumo de Colaboradores */
-.summary-container {
-  display: flex;
-  flex-wrap: wrap; /* Permite quebrar se não couber */
-  gap: 20px;
-}
-.summary-table-container {
-  flex: 1 1 300px; /* Ocupa espaço, base de 300px */
-}
-.summary-chart-container {
-  flex: 1 1 300px; /* Ocupa espaço, base de 300px */
-  min-height: 250px; /* Altura mínima para o gráfico */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#employee-hours-chart {
-  max-width: 100%;
-  max-height: 300px; /* Ajuste conforme necessário */
-}
-
-/* Media Queries para Responsividade */
-@media (max-width: 1200px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-}
-
-@media (max-width: 992px) {
-  /* Telas médias (tablets) */
-  .login-content-wrapper {
-    flex-direction: column; /* Empilha o formulário e a imagem */
-    /* 'gap' definido anteriormente ainda aplicará espaçamento vertical aqui */
-  }
-
-  .login-form-wrapper {
-    width: 100%; /* Ocupa a largura total no modo coluna */
-    max-width: 500px; /* Mantém uma largura máxima razoável */
-    order: 1; /* Garante que o formulário venha primeiro se a ordem natural mudar */
-  }
-
-  .login-image {
-    width: 100%; /* Ocupa a largura total no modo coluna */
-    max-width: 80%; /* Controla o tamanho máximo da imagem quando empilhada */
-    margin-top: 0; /* 'gap' no container deve cuidar disso */
-    order: 2; /* Garante que a imagem venha depois do formulário */
-  }
-
-  .dashboard-sidebar {
-    width: 220px; /* Sidebar um pouco menor */
-  }
-  .summary-container {
-    flex-direction: column; /* Empilha tabela e gráfico */
-  }
-}
-
-@media (max-width: 768px) {
-  /* Telas menores (smartphones) */
-  .login-content-wrapper {
-    padding: 20px; /* Menor padding em telas pequenas */
-    gap: 20px; /* Menor espaçamento vertical quando empilhado */
-  }
-  /* .login-form-wrapper herda de 992px ou pode ter ajustes específicos */
-  .login-image {
-    max-width: 90%; /* Imagem pode ser um pouco maior em proporção à largura do form */
-    /* margin-top já tratado pelo gap ou pode ser ajustado aqui se necessário */
-  }
-
-  .dashboard-layout-container {
-    flex-direction: column;
-  }
-  .dashboard-sidebar {
-    width: 100%;
-    height: auto;
-    /* Para um menu hamburguer, seria preciso mais JS e CSS */
-  }
-  .dashboard-main-content {
-    padding: 15px;
-  }
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .dashboard-header h1 {
-    font-size: 1.4em;
-  }
-  .dashboard-widget h2,
-  .dashboard-widget h3 {
-    font-size: 1.1em;
-  }
-  .button-group {
-    flex-direction: column; /* Empilha os botões */
-    align-items: stretch; /* Estica os botões */
-  }
-  .action-button {
-    width: 100%; /* Botões ocupam largura total */
-    margin-bottom: 5px; /* Espaçamento se empilhados */
-  }
-  /* .login-form-wrapper já deve ser width: 100% de resoluções maiores */
-}
-/* Estilos para a Página de Calendário em Tela Cheia */
-
-.calendar-fullscreen-main-content {
-  padding: 0; /* Remove o padding padrão do .dashboard-main-content para ocupar mais espaço */
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Faz o conteúdo principal ocupar toda a altura da viewport */
-}
-
-.calendar-fullscreen-main-content .calendar-fullscreen-header {
-  flex-shrink: 0; /* Impede que o header encolha */
-  margin-bottom: 0; /* Remove a margem inferior padrão do header */
-  border-radius: 0; /* Remove o border-radius se o header tocar as bordas */
-  border-bottom: 1px solid var(--widget-border-color); /* Adiciona uma linha sutil abaixo do header */
-}
-
-.fullscreen-calendar-iframe-container {
-  flex-grow: 1; /* Faz este container ocupar todo o espaço vertical restante */
-  width: 100%;
-  overflow: hidden; /* Garante que o iframe não cause scroll indesejado no container */
-}
-
-.fullscreen-calendar-iframe-container iframe {
-  width: 100%;
-  height: 100%; /* Faz o iframe preencher completamente seu container */
-  border: none; /* Remove qualquer borda do iframe */
-}
-
-/* Em telas menores, o header da página de calendário pode precisar de ajustes */
-@media (max-width: 768px) {
-  .calendar-fullscreen-main-content .calendar-fullscreen-header {
-    padding: 10px 15px; /* Menor padding no header em telas pequenas */
-  }
-  .calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
-    font-size: 1.2em; /* Menor tamanho de fonte para o título */
-  }
-}
-/* Estilos para a Página de Relatório de Turnos */
-.report-page-main {
-  display: grid;
-  gap: 25px; /* Espaçamento entre widgets de filtro e resultado */
-}
-
-.filters-form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  align-items: end; /* Alinha os itens (especialmente o botão) ao final */
-}
-
-.filters-form-grid .form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.filters-form-grid .form-group label {
-  margin-bottom: 5px;
-  font-weight: 500;
-  font-size: 0.9em;
-}
-
-.form-control-filter {
-  padding: 8px 10px;
-  border: 1px solid var(--input-border-color);
-  border-radius: var(--border-radius);
-  font-family: var(--font-family-primary);
-  font-size: 0.95em;
-  background-color: #fff; /* Fundo branco para inputs */
-}
-
-.filters-form-grid .form-group-submit {
-  /* O botão já usa .action-button, que deve se ajustar */
-  /* Se precisar de alinhamento específico para o botão: */
-  /* display: flex; justify-content: flex-start; padding-top:20px; */ /* Exemplo */
-}
-
-.report-summary-info {
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: var(--light-color);
-  border: 1px solid var(--widget-border-color);
-  border-radius: var(--border-radius);
-  font-size: 0.95em;
-}
-.report-summary-info p {
-  margin: 5px 0;
-  font-weight: 500;
-}
-
-/* Reutilizando .widget-table ou uma classe específica para tabelas de relatório */
+.widget-employee-summary table,
 #report-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 0.9em;
 }
-
+.widget-shifts-table th,
+.widget-shifts-table td,
+.widget-employee-summary th,
+.widget-employee-summary td,
 #report-table th,
 #report-table td {
   border: 1px solid #e0e0e0;
-  padding: 10px 12px;
+  padding: 8px 5px;
   text-align: left;
   vertical-align: middle;
+  white-space: nowrap;
 }
-
+.widget-shifts-table th,
+.widget-employee-summary th,
 #report-table th {
   background: var(--table-header-background);
   color: var(--background-color-light);
@@ -760,94 +427,143 @@ body.dashboard-body-background {
   font-size: 0.85em;
   letter-spacing: 0.5px;
 }
-
-.report-actions {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end; /* Alinha botões de exportação à direita */
-}
-/* Estilos para a Página de Calendário em Tela Cheia (da etapa anterior, se ainda não adicionou) */
-.calendar-fullscreen-main-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-.calendar-fullscreen-main-content .calendar-fullscreen-header {
-  flex-shrink: 0;
-  margin-bottom: 0;
-  border-radius: 0;
-  border-bottom: 1px solid var(--widget-border-color);
-}
-.fullscreen-calendar-iframe-container {
-  flex-grow: 1;
+.widget-shifts-table input[type="text"],
+.widget-shifts-table input[type="time"],
+.widget-shifts-table input[type="date"],
+.widget-shifts-table .shift-employee-select {
   width: 100%;
-  overflow: hidden;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  font-family: var(--font-family-primary);
+  font-size: 0.9em;
+  background-color: #fff;
+  min-height: 38px;
 }
-.fullscreen-calendar-iframe-container iframe {
-  width: 100%;
-  height: 100%;
+.widget-shifts-table input[type="text"]:focus,
+.widget-shifts-table input[type="time"]:focus,
+.widget-shifts-table input[type="date"]:focus,
+.widget-shifts-table .shift-employee-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--primary-color) 25%, transparent);
+  outline: none;
+}
+#shifts-table-may th:nth-child(1),
+#shifts-table-may td:nth-child(1) {
+  width: 40px;
+  min-width: 40px;
+  text-align: center;
+} /* Checkbox */
+#shifts-table-may th:nth-child(2),
+#shifts-table-may td:nth-child(2) {
+  min-width: 100px;
+} /* Dia */
+#shifts-table-may th:nth-child(3),
+#shifts-table-may td:nth-child(3) {
+  min-width: 110px;
+} /* Turno (Duração) */
+#shifts-table-may th:nth-child(4),
+#shifts-table-may td:nth-child(4) {
+  min-width: 200px;
+  width: auto;
+} /* Colaborador - mais espaço */
+#shifts-table-may th:nth-child(5),
+#shifts-table-may td:nth-child(5) {
+  display: none;
+} /* GCal ID */
+#shifts-table-may th:nth-child(6),
+#shifts-table-may td:nth-child(6) {
+  width: 100px;
+  min-width: 100px;
+  text-align: center;
+} /* Ações */
+.widget-shifts-table td.actions-cell {
+  text-align: center;
+  white-space: nowrap;
+}
+.btn-table-action {
+  background: none;
   border: none;
+  cursor: pointer;
+  padding: 5px 8px;
+  margin: 0 3px;
+  font-size: 1.1em;
+  border-radius: var(--border-radius);
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
-@media (max-width: 768px) {
-  .calendar-fullscreen-main-content .calendar-fullscreen-header {
-    padding: 10px 15px;
-  }
-  .calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
-    font-size: 1.2em;
-  }
+.btn-table-action.edit {
+  color: var(--info-color);
+}
+.btn-table-action.edit:hover {
+  background-color: color-mix(in srgb, var(--info-color) 15%, transparent);
+}
+.btn-table-action.delete {
+  color: var(--danger-color);
+}
+.btn-table-action.delete:hover {
+  background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);
+}
+.summary-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.summary-table-container,
+.summary-chart-container {
+  flex: 1 1 280px;
+  min-height: 250px;
+}
+.summary-chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#employee-hours-chart {
+  max-width: 100%;
+  max-height: 300px;
+}
+.widget-employee-summary {
+  /* max-width: 450px; */ /* Se quiser limitar explicitamente */
 }
 
-/* Estilos para a Página de Relatório de Turnos */
+/* Estilos Página de Relatório */
 .report-page-main {
   display: grid;
   gap: 25px;
 }
-
-.report-filters-widget,
-.report-display-widget {
-  /* Herda estilos de .dashboard-widget, mas pode adicionar específicos se necessário */
-}
-
 .filters-form-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(220px, 1fr)
-  ); /* Ajustado para mais colunas se necessário */
-  gap: 20px; /* Espaçamento entre os campos de filtro */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
   align-items: end;
 }
-
 .filters-form-grid .form-group {
   display: flex;
   flex-direction: column;
 }
-
 .filters-form-grid .form-group label {
   margin-bottom: 8px;
   font-weight: 500;
   font-size: 0.9em;
   color: var(--primary-text-color);
 }
-
 .form-control-filter {
   padding: 10px 12px;
   border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
   font-family: var(--font-family-primary);
-  font-size: 1em; /* Tamanho de fonte consistente */
+  font-size: 1em;
   background-color: #fff;
   box-sizing: border-box;
-  width: 100%; /* Ocupa todo o espaço do grid cell */
+  width: 100%;
 }
 .filters-form-grid .form-group-submit button.action-button {
-  padding-top: 12px; /* Ajuste para alinhar melhor com inputs */
+  padding-top: 12px;
   padding-bottom: 12px;
-  width: 100%; /* Botão ocupa toda a célula do grid */
+  width: 100%;
 }
-
 .report-summary-info {
   margin-bottom: 20px;
   padding: 15px;
@@ -870,40 +586,114 @@ body.dashboard-body-background {
   font-size: 0.85em;
   color: var(--secondary-text-color);
 }
-
-#report-table {
-  /* Reutilizando estilos de tabela já existentes, se houver widget-table */
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-  font-size: 0.9em;
-}
-
-#report-table th,
-#report-table td {
-  border: 1px solid #e0e0e0;
-  padding: 10px 12px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-#report-table th {
-  background: var(--table-header-background);
-  color: var(--background-color-light);
-  text-align: center; /* Centraliza cabeçalhos */
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.85em;
-  letter-spacing: 0.5px;
-}
 #report-table td:nth-child(3) {
-  /* Duração */
   text-align: center;
-}
-
+} /* Duração no relatório */
 .report-actions {
   margin-top: 25px;
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+/* Estilos Página Calendário Fullscreen */
+.calendar-fullscreen-main-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.calendar-fullscreen-main-content .calendar-fullscreen-header {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--widget-border-color);
+}
+.fullscreen-calendar-iframe-container {
+  flex-grow: 1;
+  width: 100%;
+  overflow: hidden;
+}
+.fullscreen-calendar-iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Media Queries */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  } /* Ajustado para widgets um pouco menores */
+}
+@media (max-width: 992px) {
+  .login-content-wrapper {
+    flex-direction: column;
+  }
+  .login-form-wrapper {
+    width: 100%;
+    max-width: 500px;
+    order: 1;
+  }
+  .login-image {
+    width: 100%;
+    max-width: 80%;
+    margin-top: var(--spacing-medium);
+    order: 2;
+  }
+  .dashboard-sidebar {
+    width: 220px;
+  }
+  .summary-container {
+    flex-direction: column;
+  }
+}
+@media (max-width: 768px) {
+  .login-content-wrapper {
+    padding: 20px;
+    gap: 20px;
+  }
+  .login-image {
+    max-width: 90%;
+    margin-top: 20px;
+  }
+  .dashboard-layout-container {
+    flex-direction: column;
+  }
+  .dashboard-sidebar {
+    width: 100%;
+    height: auto;
+  }
+  .dashboard-main-content {
+    padding: 15px;
+  }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .dashboard-header h1 {
+    font-size: 1.4em;
+  }
+  .dashboard-widget h2,
+  .dashboard-widget h3 {
+    font-size: 1.1em;
+  }
+  .button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .action-button {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+  .filters-form-grid {
+    grid-template-columns: 1fr;
+  } /* Filtros do relatório empilhados */
+  .calendar-fullscreen-main-content .calendar-fullscreen-header {
+    padding: 10px 15px;
+  }
+  .calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
+    font-size: 1.2em;
+  }
 }
