@@ -28,7 +28,7 @@ class GoogleCalendarHelper {
         } catch (\Google\Exception $e) {
             $this->logger->log('GCAL_CRITICAL', 'Falha ao carregar arquivo de configuração JSON do Google: ' . $e->getMessage(), ['path' => PATH_TO_CLIENT_SECRET_JSON]);
             // Você pode querer lançar a exceção ou tratar de forma mais robusta
-            // throw $e; 
+            // throw $e;
         }
         $this->client->setRedirectUri(GOOGLE_REDIRECT_URI);
         $this->client->setAccessType('offline'); // Necessário para obter refresh_token
@@ -46,15 +46,15 @@ class GoogleCalendarHelper {
     public function exchangeCodeForToken($authCode) {
         try {
             $accessToken = $this->client->fetchAccessTokenWithAuthCode($authCode);
-            
+
             if (isset($accessToken['error'])) {
                 $this->logger->log('GCAL_ERROR', 'Erro ao trocar código por token (resposta do Google).', [
                     'error_details' => $accessToken,
-                    'auth_code_prefix' => substr($authCode, 0, 20) 
+                    'auth_code_prefix' => substr($authCode, 0, 20)
                 ]);
                 return null;
             }
-            
+
             $this->client->setAccessToken($accessToken);
 
             if (isset($_SESSION['usuario_id'])) {
@@ -90,7 +90,7 @@ class GoogleCalendarHelper {
 
         $accessToken = $tokenData['access_token'];
         $refreshToken = $tokenData['refresh_token'] ?? null; // Refresh token pode não vir em todos os fluxos de refresh
-        $expiresIn = $tokenData['expires_in'] ?? 3599; 
+        $expiresIn = $tokenData['expires_in'] ?? 3599;
         $createdAt = $tokenData['created'] ?? time();
 
         $sql = "REPLACE INTO google_user_tokens (user_id, access_token, refresh_token, expires_in, created_at) VALUES (?, ?, ?, ?, ?)";
@@ -126,7 +126,7 @@ class GoogleCalendarHelper {
                         'access_token' => $tokenDataDb['access_token'],
                         'refresh_token' => $tokenDataDb['refresh_token'],
                         'expires_in' => (int) $tokenDataDb['expires_in'],
-                        'created' => (int) $tokenDataDb['created_at'] 
+                        'created' => (int) $tokenDataDb['created_at']
                     ];
                 }
             } else {
@@ -158,17 +158,17 @@ class GoogleCalendarHelper {
                     // O novo array pode não incluir o refresh_token original se ele não mudou.
                     // Vamos garantir que o refresh_token seja preservado.
                     $newAccessTokenArray['refresh_token'] = $storedRefreshToken;
-                    
+
                     // 'created' deve ser atualizado para o momento do refresh
                     $newAccessTokenArray['created'] = $newAccessTokenArray['created'] ?? time();
 
 
                     // Salva o token atualizado (com o novo access_token e o refresh_token antigo)
                     $this->saveTokenForUser($userId, $newAccessTokenArray);
-                    
+
                     $this->logger->log('GCAL_INFO', 'Token do Google (' . $source_log_msg . ') atualizado via refresh token.', ['user_id' => $userId]);
                     return $this->client->getAccessToken(); // Retorna o array completo do token atualizado
-                
+
                 } catch (GoogleServiceException $e) {
                     $this->logger->log('GCAL_ERROR', 'Google Service Exception ao ATUALIZAR token via refresh (' . $source_log_msg . '): ' . $e->getMessage(), ['user_id' => $userId, 'errors' => $e->getErrors()]);
                 } catch (GuzzleRequestException $e) {
@@ -187,7 +187,7 @@ class GoogleCalendarHelper {
                 return null;
             }
         }
-        return $this->client->getAccessToken(); 
+        return $this->client->getAccessToken();
     }
 
     public function createEvent($userId, $summary, $description, $startDateTimeRfc3339, $endDateTimeRfc3339, $timeZone = 'America/Sao_Paulo', $attendees = []) {
@@ -195,17 +195,17 @@ class GoogleCalendarHelper {
 
         if (!$tokenDataArray || !isset($tokenDataArray['access_token'])) {
             $this->logger->log('GCAL_ERROR', 'Token inválido ou não obtido para CRIAR evento. Reautenticação pode ser necessária.', ['user_id' => $userId]);
-            return null; 
+            return null;
         }
         // $this->client já foi configurado com o token por getAccessTokenForUser
-        
+
         if ($this->client->isAccessTokenExpired()) { // Verificação extra
              $this->logger->log('GCAL_ERROR', 'Token expirado mesmo após tentativa de refresh. Não foi possível CRIAR evento.', ['user_id' => $userId]);
              return null;
         }
 
         $service = new GoogleServiceCalendar($this->client);
-        
+
         $event = new GoogleCalendarEvent();
         $event->setSummary($summary);
         $event->setDescription($description);
@@ -241,11 +241,11 @@ class GoogleCalendarHelper {
             return null;
         }
     }
-    
+
     public function deleteEvent($userId, $eventId) {
         if (empty($eventId)) {
             $this->logger->log('GCAL_INFO', 'Tentativa de deletar evento com ID vazio.', ['user_id' => $userId]);
-            return false; 
+            return false;
         }
 
         $tokenDataArray = $this->getAccessTokenForUser($userId);
@@ -253,15 +253,15 @@ class GoogleCalendarHelper {
             $this->logger->log('GCAL_ERROR', 'Token inválido ou não obtido para DELETAR evento do Google Calendar.', ['user_id' => $userId, 'event_id' => $eventId]);
             return false;
         }
-        
+
         if ($this->client->isAccessTokenExpired()) {
              $this->logger->log('GCAL_ERROR', 'Token expirado mesmo após refresh. Não foi possível DELETAR evento.', ['user_id' => $userId, 'event_id' => $eventId]);
              return false;
         }
 
         $service = new GoogleServiceCalendar($this->client);
-        $calendarId = 'primary'; 
-        
+        $calendarId = 'primary';
+
         try {
             $service->events->delete($calendarId, $eventId);
             $this->logger->log('GCAL_SUCCESS', 'Evento DELETADO do Google Calendar com sucesso.', ['eventId' => $eventId, 'user_id' => $userId]);
@@ -274,25 +274,85 @@ class GoogleCalendarHelper {
             // Se o evento não foi encontrado (404) ou já foi deletado (410 Gone), considera como "sucesso" para o nosso sistema, pois o objetivo é que ele não exista mais.
             if ($errorCode == 404 || $errorCode == 410) {
                 $this->logger->log('GCAL_INFO', 'Evento não encontrado no Google Calendar ao tentar deletar (código ' . $errorCode . '), possivelmente já removido ou ID incorreto.', ['eventId' => $eventId, 'user_id' => $userId]);
-                return true; 
+                return true;
             }
-            
+
             $this->logger->log('GCAL_ERROR', 'Google Service Exception ao DELETAR evento: ' . $errorMessage, [
-                'event_id' => $eventId, 
-                'user_id' => $userId, 
-                'google_errors' => $errors, 
+                'event_id' => $eventId,
+                'user_id' => $userId,
+                'google_errors' => $errors,
                 'google_error_code' => $errorCode
             ]);
             return false;
-        } catch (Exception $e) { 
+        } catch (Exception $e) {
             $this->logger->log('GCAL_ERROR', 'Erro genérico ao DELETAR evento no Google Calendar: ' . $e->getMessage(), [
-                'event_id' => $eventId, 
-                'user_id' => $userId, 
+                'event_id' => $eventId,
+                'user_id' => $userId,
                 'trace' => $e->getTraceAsString() // Útil para depurar exceções inesperadas
             ]);
             return false;
         }
     }
+
+    /**
+     * Lista eventos de um calendário específico.
+     *
+     * @param int $userId ID do usuário para obter o token de acesso.
+     * @param string $calendarId ID do calendário (ex: 'primary' ou email do calendário).
+     * @param array $optParams Parâmetros opcionais para a API (ex: timeMin, timeMax, singleEvents).
+     * @return array|null Array de objetos Google_Service_Calendar_Event ou null em caso de erro.
+     */
+    public function listEventsFromCalendar($userId, $calendarId, $optParams = []) {
+        $tokenDataArray = $this->getAccessTokenForUser($userId);
+
+        if (!$tokenDataArray || !isset($tokenDataArray['access_token'])) {
+            $this->logger->log('GCAL_ERROR', 'Token inválido ou não obtido para LISTAR eventos de ' . $calendarId, ['user_id' => $userId]);
+            return null;
+        }
+
+        if ($this->client->isAccessTokenExpired()) {
+             $this->logger->log('GCAL_ERROR', 'Token expirado mesmo após tentativa de refresh. Não foi possível LISTAR eventos.', ['user_id' => $userId, 'calendar_id' => $calendarId]);
+             return null;
+        }
+
+        $service = new GoogleServiceCalendar($this->client);
+
+        try {
+            // Verifica se $this->client é uma instância válida de GoogleClient
+            if (!$this->client instanceof \Google\Client) {
+                $this->logger->log('GCAL_CRITICAL', 'Google Client não inicializado corretamente em listEventsFromCalendar.', ['user_id' => $userId]);
+                return null;
+            }
+            $events = $service->events->listEvents($calendarId, $optParams);
+            return $events->getItems(); // Retorna um array de objetos Google_Service_Calendar_Event
+        } catch (GoogleServiceException $e) { // Erro específico da API do Google
+            $this->logger->log('GCAL_ERROR', 'Google Service Exception ao LISTAR eventos de ' . $calendarId . ': ' . $e->getMessage(), [
+                'user_id' => $userId, 'calendar_id' => $calendarId, 'errors' => $e->getErrors()
+            ]);
+             // Se o erro for de autenticação (ex: token inválido), pode ser útil retornar algo que o frontend possa interpretar
+            if (is_array($e->getErrors()) && !empty($e->getErrors())) {
+                foreach ($e->getErrors() as $error) {
+                    if (isset($error['reason']) && ($error['reason'] == 'authError' || $error['reason'] == 'forbidden' || $error['reason'] == 'invalidCredentials')) {
+                        $this->logger->log('GCAL_AUTH_FAILURE', 'Falha de autenticação/permissão ao listar eventos GCal.', ['user_id' => $userId, 'calendar_id' => $calendarId]);
+                        // Você pode querer chamar revokeTokenForUser aqui se for um erro persistente de token
+                        // $this->revokeTokenForUser($userId);
+                    }
+                }
+            }
+            return null;
+        } catch (\Google\Exception $e) { // Outras exceções da biblioteca Google
+             $this->logger->log('GCAL_ERROR', 'Google Library Exception ao LISTAR eventos de ' . $calendarId . ': ' . $e->getMessage(), [
+                'user_id' => $userId, 'calendar_id' => $calendarId
+            ]);
+            return null;
+        } catch (Exception $e) { // Exceções genéricas
+            $this->logger->log('GCAL_ERROR', 'Erro genérico ao LISTAR eventos de ' . $calendarId . ': ' . $e->getMessage(), [
+                'user_id' => $userId, 'calendar_id' => $calendarId, 'trace' => $e->getTraceAsString()
+            ]);
+            return null;
+        }
+    }
+
 
     public function revokeTokenForUser($userId) {
         $tokenDataArray = $this->getAccessTokenForUser($userId); // Tenta pegar o token atual para revogar
@@ -301,10 +361,10 @@ class GoogleCalendarHelper {
             // $this->client->setAccessToken($tokenDataArray); // Já feito por getAccessTokenForUser se encontrou e não expirou
             $tokenToRevoke = $this->client->getAccessToken(); // Pega o token completo (pode ter sido refrescado)
                                                             // Ou o token original se não expirou.
-            
+
             // A biblioteca revokeToken() tenta usar o refresh_token se disponível, senão o access_token.
             try {
-                $this->client->revokeToken($tokenToRevoke); 
+                $this->client->revokeToken($tokenToRevoke);
                 $this->logger->log('GCAL_INFO', 'Token revogado no Google para user_id: ' . $userId);
             } catch (GoogleServiceException $e) {
                 $this->logger->log('GCAL_ERROR', 'Google Service Exception ao tentar revogar token: ' . $e->getMessage(), ['user_id' => $userId, 'errors' => $e->getErrors()]);

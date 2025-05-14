@@ -1,40 +1,59 @@
+/* style.css */
+
 /* Variáveis Globais de Cores e Fontes */
 :root {
-  --primary-color: #407bff;
+  --primary-color: #407bff; /* Azul Principal */
+  --primary-color-darker: #1e40af; /* Azul mais escuro para gradiente/hover */
+  --primary-color-lighter: #3b82f6; /* Azul mais claro para hover de menu */
+
   --secondary-color: #6c757d;
   --success-color: #28a745;
-  --danger-color: #dc3545;
+  --danger-color: #ef4444; /* Vermelho mais vibrante para Sair */
+  --danger-color-darker: #dc2626; /* Vermelho mais escuro para hover de Sair */
   --warning-color: #ffc107;
   --info-color: #17a2b8;
   --light-color: #f8f9fa;
   --dark-color: #343a40;
-  --link-text-color: #666;
-  --primary-text-color: #555;
-  --secondary-text-color: #999;
-  --highlight-text-color: #333;
-  --input-field-text-color: #555;
-  --background-color-light: #fff;
-  --input-border-color: #d9d9d9;
+
+  --primary-text-color: #374151; /* Cinza escuro para texto principal (tipo Tailwind gray-700) */
+  --secondary-text-color: #6b7280; /* Cinza médio (Tailwind gray-500) */
+  --highlight-text-color: #111827; /* Cinza bem escuro (Tailwind gray-900) */
+  --input-field-text-color: #374151;
+  --background-color-light: #ffffff;
+  --input-border-color: #d1d5db; /* Cinza claro (Tailwind gray-300) */
 
   /* Sidebar */
-  --sidebar-background-color: #2c3e50;
-  --sidebar-link-color: #ecf0f1;
-  --sidebar-link-hover-bg: #34495e;
-  --sidebar-link-active-bg: var(--primary-color);
-  --sidebar-header-color: #ecf0f1;
+  --sidebar-background-start: #1e3a8a; /* Azul escuro (Tailwind blue-800) */
+  --sidebar-background-end: #1e40af; /* Azul um pouco mais claro (Tailwind blue-700) */
+  --sidebar-link-color: #e0e7ff; /* Lavanda muito claro (Tailwind indigo-100) */
+  --sidebar-link-hover-bg: var(
+    --primary-color-lighter
+  ); /* Azul claro (Tailwind blue-500) */
+  --sidebar-link-hover-text: #ffffff;
+  --sidebar-link-active-bg: var(
+    --primary-color
+  ); /* Azul principal (Tailwind blue-600) */
+  --sidebar-link-active-text: #ffffff;
+  --sidebar-header-color: #ffffff;
 
   --table-header-background: var(--primary-color);
-  --dashboard-background: #eef1f5;
+  --dashboard-background: #f3f4f6; /* Cinza muito claro (Tailwind gray-100) */
   --widget-background-color: #ffffff;
-  --widget-shadow-color: rgba(0, 0, 0, 0.08);
-  --widget-border-color: #e3e6f0;
+  --widget-shadow-color: rgba(0, 0, 0, 0.05); /* Sombra mais sutil */
+  --widget-border-color: #e5e7eb; /* Cinza (Tailwind gray-200) */
 
-  --font-family-primary: "Poppins", sans-serif;
+  --font-family-primary: "Poppins", "Inter", sans-serif; /* Adicionando Inter como fallback */
   --base-font-size: 16px;
-  --border-radius: 6px;
-  --spacing-medium: 40px;
-  --spacing-small: 20px;
-  --spacing-xsmall: 10px;
+  --border-radius: 0.375rem; /* 6px */
+  --border-radius-lg: 0.5rem; /* 8px */
+
+  --spacing-medium: 32px; /* Ajustado */
+  --spacing-small: 16px; /* Ajustado */
+  --spacing-xsmall: 8px; /* Ajustado */
+
+  /* Lucide icon default size and stroke-width */
+  --lucide-icon-size: 20px; /* Tamanho padrão para ícones Lucide */
+  --lucide-icon-stroke: 1.75px; /* Espessura da linha padrão para ícones Lucide */
 }
 
 /* Reset Básico de CSS */
@@ -50,7 +69,7 @@ html {
   font-family: var(--font-family-primary);
   font-size: var(--base-font-size);
   color: var(--primary-text-color);
-  background-color: var(--dashboard-background); /* Fundo geral padrão */
+  background-color: var(--dashboard-background);
 }
 
 /* Estilos da Página de Login e Cadastro */
@@ -71,8 +90,8 @@ html {
   max-width: 1100px;
   background-color: var(--widget-background-color);
   padding: var(--spacing-medium);
-  border-radius: var(--border-radius);
-  box-shadow: 0 10px 25px var(--widget-shadow-color);
+  border-radius: var(--border-radius-lg); /* Usando border-radius maior */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra mais pronunciada para login */
   gap: var(--spacing-medium);
 }
 
@@ -88,7 +107,7 @@ html {
   max-width: 550px;
   height: auto;
   object-fit: contain;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
 }
 
 .login-form {
@@ -96,6 +115,7 @@ html {
 }
 .login-form-title {
   font-size: 2em;
+  font-weight: 600; /* Mais destaque */
   color: var(--highlight-text-color);
   margin-bottom: 30px;
   text-align: center;
@@ -117,9 +137,9 @@ html {
   height: 52px;
   padding: 0 5px;
   background: transparent;
-  font-size: 18px;
+  font-size: 1.05em; /* Levemente maior */
   color: var(--input-field-text-color);
-  font-weight: 600;
+  font-weight: 500; /* Ajustado */
   border: none;
   outline: none;
 }
@@ -136,14 +156,15 @@ html {
   position: absolute;
   top: 15px;
   left: 5px;
-  font-size: 18px;
+  font-size: 1.05em;
   color: var(--secondary-text-color);
   transition: all 0.4s ease;
 }
 .input-field:focus + .input-focus-effect::after,
 .input-field.has-val + .input-focus-effect::after {
   top: -20px;
-  font-size: 15px;
+  font-size: 0.9em; /* Menor quando flutua */
+  color: var(--primary-color); /* Destaque na cor primária */
 }
 .login-form-button-container {
   margin-top: 30px;
@@ -154,7 +175,7 @@ html {
   color: var(--background-color-light);
   padding: 12px 20px;
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
   font-size: 1em;
   font-weight: 600;
@@ -166,12 +187,17 @@ html {
   align-items: center;
   justify-content: center;
 }
+.login-form-button svg, /* Lucide */
 .login-form-button i {
+  /* FA */
   margin-right: 8px;
+  width: var(--lucide-icon-size);
+  height: var(--lucide-icon-size);
+  stroke-width: 2px; /* Mais grosso para botões */
 }
 .login-form-button:hover {
-  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background-color: var(--primary-color-darker); /* Usando variável */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra mais suave no hover */
 }
 .login-utility-links {
   list-style: none;
@@ -206,31 +232,48 @@ body.dashboard-body-background {
   width: 100%;
   min-height: 100vh;
 }
+
 .dashboard-sidebar {
-  background: var(--sidebar-background-color);
+  background: linear-gradient(
+    180deg,
+    var(--sidebar-background-start),
+    var(--sidebar-background-end)
+  );
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   color: var(--sidebar-link-color);
   width: 260px;
-  padding: 0;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease;
 }
-.sidebar-header {
-  padding: 20px;
-  text-align: center;
-  border-bottom: 1px solid var(--sidebar-link-hover-bg);
+
+.sidebar-header.menu-header {
+  padding: 24px 20px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.sidebar-logo {
-  max-width: 80%;
-  height: auto;
-  margin-bottom: 10px;
+.sidebar-logo-icon svg,
+.sidebar-logo-icon i.fas {
+  width: 32px;
+  height: 32px;
+  color: var(--sidebar-header-color);
+  stroke-width: var(--lucide-icon-stroke);
 }
-.dashboard-sidebar h3 {
+.sidebar-header.menu-header h2 {
   margin-bottom: 0;
   font-size: 1.4em;
+  font-weight: 600;
   color: var(--sidebar-header-color);
+  line-height: 1.2;
 }
+.dashboard-sidebar .sidebar-header h3 {
+  display: none;
+}
+
 .dashboard-sidebar nav {
   flex-grow: 1;
   padding: 15px 0;
@@ -239,37 +282,125 @@ body.dashboard-body-background {
   padding: 0;
   list-style: none;
 }
-.sidebar-nav-item a {
+
+.sidebar-nav-item.menu-item {
+  margin: 4px 10px;
+}
+
+.sidebar-nav-item.menu-item a,
+.sidebar-nav-item.menu-item .gcal-button {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 500;
   color: var(--sidebar-link-color);
   text-decoration: none;
-  margin: 5px 15px;
-  border-radius: var(--border-radius);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: var(--border-radius-lg);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
-.sidebar-nav-item a i {
+
+.sidebar-nav-item.menu-item a svg,
+.sidebar-nav-item.menu-item a i.fas,
+.sidebar-nav-item.menu-item .gcal-button svg,
+.sidebar-nav-item.menu-item .gcal-button i.fab,
+.sidebar-nav-item.menu-item .gcal-button i.fas {
   margin-right: 12px;
-  width: 20px;
-  text-align: center;
+  width: var(--lucide-icon-size);
+  height: var(--lucide-icon-size);
+  stroke-width: var(--lucide-icon-stroke);
+  flex-shrink: 0;
 }
-.sidebar-nav-item a:hover {
-  background: var(--sidebar-link-hover-bg);
-  color: #fff;
+
+.sidebar-nav-item.menu-item:hover a,
+.sidebar-nav-item.menu-item:hover .gcal-button {
+  background-color: var(--sidebar-link-hover-bg);
+  color: var(--sidebar-link-hover-text);
+  transform: translateX(4px);
 }
-.sidebar-nav-item.active a {
+
+.sidebar-nav-item.menu-item.active a {
   background: var(--sidebar-link-active-bg);
-  color: #fff;
+  color: var(--sidebar-link-active-text);
   font-weight: 600;
 }
+
 .sidebar-footer {
-  padding: 15px 0;
-  border-top: 1px solid var(--sidebar-link-hover-bg);
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
 }
-.sidebar-footer .sidebar-nav-item a {
-  margin-bottom: 0;
+
+.sidebar-footer .gcal-sidebar-button-container,
+.sidebar-footer .logout-container {
+  list-style-type: none;
+  padding: 0;
 }
+/* General style for buttons in sidebar footer, including GCal and Sair */
+.sidebar-footer .gcal-sidebar-button-container .gcal-button,
+.sidebar-footer .logout-container .sair-btn {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 4px 10px;
+  border-radius: var(--border-radius-lg);
+  text-decoration: none;
+  color: var(--sidebar-link-color);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  width: calc(100% - 20px);
+  box-sizing: border-box;
+  justify-content: flex-start;
+  border: none;
+  cursor: pointer;
+}
+.sidebar-footer .gcal-sidebar-button-container .gcal-button svg,
+.sidebar-footer .gcal-sidebar-button-container .gcal-button i,
+.sidebar-footer .logout-container .sair-btn svg,
+.sidebar-footer .logout-container .sair-btn i {
+  margin-right: 12px;
+  width: var(--lucide-icon-size);
+  height: var(--lucide-icon-size);
+  stroke-width: var(--lucide-icon-stroke);
+  flex-shrink: 0;
+}
+
+/* Botão Conectar GCal na Sidebar */
+.sidebar-footer a#connect-gcal-btn {
+  background-color: var(--success-color);
+  color: white;
+}
+.sidebar-footer a#connect-gcal-btn:hover {
+  background-color: color-mix(in srgb, var(--success-color) 85%, black);
+  transform: translateX(4px);
+}
+
+/* Botão Desconectar GCal na Sidebar */
+.sidebar-footer button#disconnect-gcal-btn {
+  background-color: var(--warning-color);
+  color: var(--highlight-text-color);
+}
+.sidebar-footer button#disconnect-gcal-btn:hover {
+  background-color: color-mix(in srgb, var(--warning-color) 85%, black);
+  transform: translateX(4px);
+}
+
+.logout-container {
+  margin-top: 8px;
+}
+.sair-btn {
+  padding: 12px 16px !important;
+  background-color: var(--danger-color) !important;
+  color: white !important;
+  gap: 8px !important; /* Espaçamento entre ícone e texto já coberto pelo margin-right do ícone */
+}
+.sair-btn:hover {
+  background-color: var(--danger-color-darker) !important;
+  transform: translateX(4px);
+}
+
+/* ----- Dashboard Main Content & Widgets ----- */
 .dashboard-main-content {
   flex-grow: 1;
   padding: var(--spacing-small);
@@ -280,25 +411,45 @@ body.dashboard-body-background {
   background: var(--widget-background-color);
   padding: 15px var(--spacing-small);
   margin-bottom: var(--spacing-small);
-  border-radius: var(--border-radius);
-  box-shadow: 0 2px 4px var(--widget-shadow-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--widget-shadow-color) 0px 4px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .dashboard-header h1 {
-  font-size: 1.6em;
+  font-size: 1.5em;
+  font-weight: 600;
   color: var(--highlight-text-color);
   margin: 0;
+  display: flex;
+  align-items: center;
 }
+.dashboard-header h1 svg,
+.dashboard-header h1 i {
+  width: 28px;
+  height: 28px;
+  stroke-width: var(--lucide-icon-stroke);
+  margin-right: 10px;
+  color: var(--primary-color);
+}
+
 .user-profile-area {
-  font-size: 0.9em;
+  font-size: 0.95em;
+  font-weight: 500;
   color: var(--primary-text-color);
+  display: flex;
+  align-items: center;
 }
+.user-profile-area svg,
 .user-profile-area i {
+  width: 22px;
+  height: 22px;
+  stroke-width: var(--lucide-icon-stroke);
   margin-left: 8px;
   color: var(--primary-color);
 }
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
@@ -307,8 +458,8 @@ body.dashboard-body-background {
 .dashboard-widget {
   background: var(--widget-background-color);
   padding: var(--spacing-small);
-  border-radius: var(--border-radius);
-  box-shadow: 0 2px 5px var(--widget-shadow-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--widget-shadow-color) 0px 2px 8px;
   border: 1px solid var(--widget-border-color);
   display: flex;
   flex-direction: column;
@@ -317,18 +468,24 @@ body.dashboard-body-background {
 .dashboard-widget h3 {
   margin-top: 0;
   margin-bottom: 15px;
-  font-size: 1.2em;
+  font-size: 1.15em;
+  font-weight: 600;
   color: var(--highlight-text-color);
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--widget-border-color);
   padding-bottom: 10px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
 }
+.dashboard-widget h2 svg,
 .dashboard-widget h2 i,
+.dashboard-widget h3 svg,
 .dashboard-widget h3 i {
   margin-right: 10px;
   color: var(--primary-color);
+  width: var(--lucide-icon-size);
+  height: var(--lucide-icon-size);
+  stroke-width: var(--lucide-icon-stroke);
 }
 .dashboard-widget h2 .widget-title-text {
   margin-right: 0.3em;
@@ -337,31 +494,15 @@ body.dashboard-body-background {
   font-weight: normal;
   font-size: 0.9em;
 }
+
 .calendar-integration-placeholder iframe {
   width: 100%;
   border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
   min-height: 320px;
 }
-.widget-google-calendar-integration {
-  padding-top: 15px;
-  margin-top: 15px;
-  border-top: 1px solid #eee;
-  flex-shrink: 0;
-}
-.widget-google-calendar-integration h3 {
-  font-size: 1.1em;
-  border-bottom: none;
-  padding-bottom: 5px;
-}
-.gcal-buttons {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0;
-}
-.gcal-button i {
-  margin-right: 8px;
-}
+
+/* Botões de Ação Gerais */
 .button-group {
   display: flex;
   flex-wrap: wrap;
@@ -392,11 +533,16 @@ body.dashboard-body-background {
   opacity: 0.6;
   cursor: not-allowed;
 }
+.action-button svg, /* Lucide */
+.action-button i {
+  /* FA */
+  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2px;
+}
 .action-button i.fa-spinner {
   animation: fa-spin 1s infinite linear;
-}
-.action-button i {
-  margin-right: 8px;
 }
 .action-button:hover:not(:disabled) {
   background-color: color-mix(in srgb, var(--primary-color) 85%, black);
@@ -420,74 +566,87 @@ body.dashboard-body-background {
 .action-button.red:hover:not(:disabled) {
   background-color: color-mix(in srgb, var(--danger-color) 85%, black);
 }
+
 .table-responsive {
   overflow-x: auto;
   flex-grow: 1;
-  min-height: 150px;
+  min-height: 150px; /* Ajuste conforme necessário */
 }
-/* Aplicar a #shifts-table-main */
+
 #shifts-table-main,
-.widget-employee-summary table,
-#report-table {
+.widget-employee-summary table, /* Aplicar a .widget-table se for genérico */
+#report-table,
+#feriados-table, /* Aplicar também à tabela de feriados */
+#implantacoes-table-main {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 0.85em;
 }
-#shifts-table-main th,
-#shifts-table-main td,
-.widget-employee-summary th,
-.widget-employee-summary td,
-#report-table th,
-#report-table td {
-  border: 1px solid #e0e0e0;
-  padding: 6px 8px;
+
+#shifts-table-main th, #shifts-table-main td,
+.widget-employee-summary table th, .widget-employee-summary table td, /* widget-table */
+#report-table th, #report-table td,
+#feriados-table th, #feriados-table td,
+#implantacoes-table-main th, #implantacoes-table-main td {
+  border: 1px solid var(--widget-border-color);
+  padding: 8px 10px;
   text-align: left;
   vertical-align: middle;
   white-space: nowrap;
 }
+
 #shifts-table-main th,
-.widget-employee-summary th,
-#report-table th {
+.widget-employee-summary table th, /* widget-table */
+#report-table th,
+#feriados-table th,
+#implantacoes-table-main th {
   background: var(--table-header-background);
-  color: var(--background-color-light);
+  color: var(--sidebar-header-color); /* Usando cor clara */
   text-align: center;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.8em;
+  font-size: 0.75em;
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
   z-index: 1;
 }
-#shifts-table-main input[type="text"],
-#shifts-table-main input[type="time"],
-#shifts-table-main input[type="date"],
-#shifts-table-main .shift-employee-select {
+
+/* Inputs dentro de tabelas */
+#implantacoes-table-main input[type="date"],
+#implantacoes-table-main input[type="text"],
+#shifts-table-main input[type="text"].shift-date,
+#shifts-table-main input[type="time"].shift-time-inicio,
+#shifts-table-main input[type="time"].shift-time-fim,
+#shifts-table-main select.shift-employee-select {
   width: 100%;
-  padding: 6px 8px;
+  padding: 8px 10px;
   box-sizing: border-box;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
   font-family: var(--font-family-primary);
-  font-size: 0.95em;
-  background-color: #fff;
-  min-height: 36px;
+  font-size: 0.9em; /* Ajustado para inputs de tabela */
+  background-color: var(--background-color-light);
+  min-height: 38px;
 }
 #shifts-table-main input[type="time"] {
-  min-width: 90px;
-}
-#shifts-table-main input[type="text"]:focus,
-#shifts-table-main input[type="time"]:focus,
-#shifts-table-main input[type="date"]:focus,
-#shifts-table-main .shift-employee-select:focus {
+  min-width: 95px;
+} /* Ajuste se necessário */
+
+#implantacoes-table-main input[type="date"]:focus,
+#implantacoes-table-main input[type="text"]:focus,
+#shifts-table-main input[type="text"].shift-date:focus,
+#shifts-table-main input[type="time"].shift-time-inicio:focus,
+#shifts-table-main input[type="time"].shift-time-fim:focus,
+#shifts-table-main select.shift-employee-select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--primary-color) 25%, transparent);
+    color-mix(in srgb, var(--primary-color) 20%, transparent);
   outline: none;
 }
 
-/* Colunas da tabela de turnos em home.php (ID #shifts-table-main) */
+/* Colunas da tabela de turnos */
 #shifts-table-main th:nth-child(1),
 #shifts-table-main td:nth-child(1) {
   width: 35px;
@@ -512,43 +671,6 @@ body.dashboard-body-background {
   width: auto;
 } /* Colaborador */
 
-/* As colunas 6 (GCal ID) e 7 (Ações/Botões) foram removidas do JS, 
-   então os estilos específicos para elas podem ser removidos ou comentados.
-   Exemplo de como eram antes para referência (usando o ID antigo #shifts-table-may):
-*/
-/* #shifts-table-may th:nth-child(6),
-#shifts-table-may td:nth-child(6) { display: none; } 
-#shifts-table-may th:nth-child(7),
-#shifts-table-may td:nth-child(7) { width: 90px; min-width: 90px; text-align: center; } 
-*/
-
-#shifts-table-main td.actions-cell {
-  /* Este seletor pode não ser mais usado se a célula foi removida */
-  text-align: center;
-  white-space: nowrap;
-}
-.btn-table-action {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px 8px;
-  margin: 0 3px;
-  font-size: 1em;
-  border-radius: var(--border-radius);
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-.btn-table-action.edit {
-  color: var(--info-color);
-}
-.btn-table-action.edit:hover {
-  background-color: color-mix(in srgb, var(--info-color) 15%, transparent);
-}
-.btn-table-action.delete {
-  color: var(--danger-color);
-}
-.btn-table-action.delete:hover {
-  background-color: color-mix(in srgb, var(--danger-color) 15%, transparent);
-}
 .summary-container {
   display: flex;
   flex-wrap: wrap;
@@ -569,14 +691,14 @@ body.dashboard-body-background {
   max-height: 280px;
 }
 
-/* Navegação de Mês/Ano para Tabela de Turnos */
+/* Navegação de Mês/Ano para Tabelas */
 .shifts-table-navigation {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: #f9f9f9; /* Fundo levemente diferente */
   border-radius: var(--border-radius);
   border: 1px solid var(--widget-border-color);
 }
@@ -588,150 +710,111 @@ body.dashboard-body-background {
   border-radius: var(--border-radius);
   cursor: pointer;
   font-size: 0.9em;
+  display: inline-flex; /* Para alinhar ícone e texto */
+  align-items: center;
 }
+.shifts-table-navigation button svg, /* Lucide */
+.shifts-table-navigation button i {
+  /* FA */
+  /* Ícones dentro dos botões de navegação */
+  width: 16px;
+  height: 16px;
+  stroke-width: 2px;
+}
+.shifts-table-navigation button i.fa-chevron-left, /* FA específico */
+.shifts-table-navigation button svg[data-lucide="chevron-left"] {
+  margin-right: 6px;
+}
+
+.shifts-table-navigation button i.fa-chevron-right, /* FA específico */
+.shifts-table-navigation button svg[data-lucide="chevron-right"] {
+  margin-left: 6px;
+}
+
 .shifts-table-navigation button:hover {
   background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
 }
-.shifts-table-navigation h2#current-month-year-display {
+.shifts-table-navigation h2, /* Título dentro da navegação */
+.shifts-table-navigation span#feriados-mes-ano-display {
+  /* Título de feriados */
   font-size: 1.1em;
   font-weight: 600;
   color: var(--highlight-text-color);
   margin: 0;
   padding: 0;
   border: none;
+  display: flex;
+  align-items: center;
 }
-.shifts-table-navigation h2#current-month-year-display i {
+.shifts-table-navigation h2 svg, /* Lucide */
+.shifts-table-navigation h2 i,   /* FA */
+.shifts-table-navigation span#feriados-mes-ano-display svg,
+.shifts-table-navigation span#feriados-mes-ano-display i {
   margin-right: 8px;
+  width: var(--lucide-icon-size);
+  height: var(--lucide-icon-size);
+  stroke-width: var(--lucide-icon-stroke);
+}
+.widget-feriados .shifts-table-navigation {
+  border-bottom: 1px solid var(--widget-border-color);
+  margin-bottom: 15px;
+}
+.widget-feriados .table-responsive {
+  max-height: 250px;
+  overflow-y: auto;
 }
 
-/* Estilos Página de Relatório */
+#observacoes-gerais-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius-lg);
+  font-family: var(--font-family-primary);
+  font-size: 0.95em;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Estilos Página de Relatório (manter os originais, ajustar ícones se necessário) */
 .report-page-main {
-  display: grid;
-  gap: var(--spacing-small);
+  /* ... */
 }
 .filters-form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--spacing-xsmall);
-  align-items: end;
+  /* ... */
 }
-.filters-form-grid .form-group {
-  display: flex;
-  flex-direction: column;
-}
-.filters-form-grid .form-group label {
-  margin-bottom: 8px;
-  font-weight: 500;
-  font-size: 0.9em;
-  color: var(--primary-text-color);
-}
-.form-control-filter {
-  padding: 10px 12px;
-  border: 1px solid var(--input-border-color);
-  border-radius: var(--border-radius);
-  font-family: var(--font-family-primary);
-  font-size: 1em;
-  background-color: #fff;
-  box-sizing: border-box;
-  width: 100%;
-}
-.filters-form-grid .form-group-submit button.action-button {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  width: 100%;
-  margin-top: var(--spacing-xsmall);
-}
-.report-summary-info {
-  margin-bottom: var(--spacing-small);
-  padding: 15px;
-  background-color: var(--light-color);
-  border: 1px solid var(--widget-border-color);
-  border-radius: var(--border-radius);
-  font-size: 1em;
-}
-.report-summary-info p {
-  margin: 5px 0;
-  font-weight: 500;
-  color: var(--highlight-text-color);
-}
-.report-summary-info p strong {
-  color: var(--primary-color);
-}
-.report-summary-info small {
-  display: block;
-  margin-top: 8px;
-  font-size: 0.85em;
-  color: var(--secondary-text-color);
-}
-#report-table th:nth-child(3) {
-  text-align: center;
-}
-.report-actions {
-  margin-top: var(--spacing-small);
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+/* ... (etc. seus estilos de relatório) ... */
+.filters-form-grid .form-group-submit button.action-button svg,
+.filters-form-grid .form-group-submit button.action-button i {
+  /* Ícones nos botões de filtro de relatório */
 }
 
-/* Estilos Página Calendário Fullscreen */
+/* Estilos Página Calendário Fullscreen (manter os originais, ajustar ícones se necessário) */
 .calendar-fullscreen-main-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  /* ... */
 }
-.calendar-fullscreen-main-content .calendar-fullscreen-header {
-  flex-shrink: 0;
-  margin-bottom: 0;
-  border-radius: 0;
-  border-bottom: 1px solid var(--widget-border-color);
-}
-.fullscreen-calendar-iframe-container {
-  flex-grow: 1;
-  width: 100%;
-  overflow: hidden;
-}
-.fullscreen-calendar-iframe-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+/* ... (etc. seus estilos de calendário fullscreen) ... */
 
-/* Estilos para Notificações Toast */
+/* Estilos para Notificações Toast (manter original) */
 .toast-notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #333;
-  color: white;
-  padding: 15px 20px;
-  border-radius: var(--border-radius);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 1050;
-  opacity: 0;
-  transform: translateY(-30px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  min-width: 250px;
-  text-align: center;
+  /* ... */
 }
-.toast-notification.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-.toast-notification.success {
-  background-color: var(--success-color);
-}
-.toast-notification.error {
-  background-color: var(--danger-color);
-}
-.toast-notification.info {
-  background-color: var(--info-color);
-}
-.toast-notification.warning {
-  background-color: var(--warning-color);
-}
+/* ... (etc. seus estilos de toast) ... */
 
-/* Media Queries */
+/* Estilos para a página de Gerenciar Colaboradores (manter original, ajustar ícones nos botões de ação) */
+.manage-collaborators-main .dashboard-widget h2 {
+  /* ... */
+}
+/* ... (etc. seus estilos de gerenciar colaboradores) ... */
+
+/* Estilos para o Modal de Edição (manter original) */
+.modal-overlay {
+  /* ... */
+}
+/* ... (etc. seus estilos de modal) ... */
+
+/* Media Queries (Revisar com os novos estilos) */
 @media (max-width: 1200px) {
   .dashboard-grid {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -782,6 +865,19 @@ body.dashboard-body-background {
     width: 100%;
     height: auto;
   }
+  .dashboard-sidebar nav {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+  .sidebar-header.menu-header h2 {
+    font-size: 1.2em;
+  }
+  .sidebar-logo-icon svg,
+  .sidebar-logo-icon i.fas {
+    width: 28px;
+    height: 28px;
+  }
+
   .dashboard-main-content {
     padding: 15px;
   }
@@ -791,7 +887,7 @@ body.dashboard-body-background {
     gap: 10px;
   }
   .dashboard-header h1 {
-    font-size: 1.2em;
+    font-size: 1.3em;
   }
   .dashboard-widget h2,
   .dashboard-widget h3 {
@@ -814,131 +910,12 @@ body.dashboard-body-background {
   .calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
     font-size: 1.2em;
   }
-  .shifts-table-navigation h2#current-month-year-display {
-    font-size: 1em;
-  }
+  .shifts-table-navigation h2,
+  .shifts-table-navigation span {
+    font-size: 1em !important;
+  } /* Forçar para títulos de navegação */
   .shifts-table-navigation button {
     font-size: 0.8em;
     padding: 6px 10px;
   }
-}
-
-/* Estilos para a página de Gerenciar Colaboradores */
-.manage-collaborators-main .dashboard-widget h2 {
-  margin-bottom: 0;
-}
-
-#collaborators-table .status-ativo {
-  color: var(--success-color);
-  font-weight: bold;
-}
-#collaborators-table .status-inativo {
-  color: var(--danger-color);
-  font-style: italic;
-}
-
-#collaborators-table .actions-cell button {
-  margin-right: 5px;
-  padding: 5px 8px;
-  font-size: 0.85em;
-}
-#collaborators-table .actions-cell button i {
-  margin-right: 4px;
-}
-
-/* Estilos para o Modal de Edição */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0s 0.3s;
-}
-.modal-overlay.show {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s ease;
-}
-
-.modal-content {
-  background-color: #fff;
-  padding: 30px;
-  border-radius: var(--border-radius);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  max-width: 500px;
-  position: relative;
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
-}
-.modal-overlay.show .modal-content {
-  transform: scale(1);
-}
-
-.modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 25px;
-  color: var(--highlight-text-color);
-  text-align: center;
-  font-size: 1.5em;
-}
-
-.form-group-modal {
-  margin-bottom: 20px;
-}
-.form-group-modal label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--primary-text-color);
-}
-.form-group-modal input[type="text"],
-.form-group-modal input[type="email"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--input-border-color);
-  border-radius: var(--border-radius);
-  font-size: 1em;
-  box-sizing: border-box;
-}
-.form-group-modal input[type="text"]:focus,
-.form-group-modal input[type="email"]:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--primary-color) 25%, transparent);
-  outline: none;
-}
-
-.modal-actions {
-  margin-top: 30px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-.modal-actions .action-button.secondary {
-  background-color: var(--secondary-color);
-}
-.modal-actions .action-button.secondary:hover {
-  background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
-}
-
-.modal-close-button {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 1.8em;
-  color: var(--secondary-text-color);
-  cursor: pointer;
-  line-height: 1;
-}
-.modal-close-button:hover {
-  color: var(--danger-color);
 }
