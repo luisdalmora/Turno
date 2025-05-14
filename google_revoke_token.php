@@ -17,5 +17,5 @@ $userId = $_SESSION['usuario_id'];
 $gcalHelper = new GoogleCalendarHelper($logger, $conexao);
 $gcalHelper->revokeTokenForUser($userId);
 
-header('Location: home.html?gcal_status=disconnected');
+header('Location: home.php?gcal_status=disconnected');
 exit;

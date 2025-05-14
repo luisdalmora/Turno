@@ -114,7 +114,7 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
           </div>
 
           <div class="table-responsive">
-            <table id="shifts-table-main"> <thead>
+             <table id="shifts-table-main"> <thead>
                 <tr>
                   <th><input type="checkbox" id="select-all-shifts" title="Selecionar Todos"></th>
                   <th>Dia (dd/Mês)</th>
