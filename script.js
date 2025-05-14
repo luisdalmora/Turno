@@ -8,19 +8,15 @@ function popularTabelaTurnos(turnos) {
   const cabecalhoCheckbox = document.getElementById("select-all-shifts");
 
   if (!corpoTabelaTurnos) {
-    console.error(
-      "Elemento tbody da tabela de turnos (#shifts-table-may) não encontrado."
-    );
     return;
   }
-  corpoTabelaTurnos.innerHTML = ""; // Limpa a tabela
+  corpoTabelaTurnos.innerHTML = "";
   if (cabecalhoCheckbox) cabecalhoCheckbox.checked = false;
 
   if (!turnos || turnos.length === 0) {
     const linhaVazia = corpoTabelaTurnos.insertRow();
     const celulaVazia = linhaVazia.insertCell();
-    // Colspan agora inclui a coluna de Ações
-    celulaVazia.colSpan = 6; // Checkbox + Dia + Hora + Colab + GCalID (oculto) + Ações
+    celulaVazia.colSpan = 6;
     celulaVazia.textContent =
       "Nenhum turno programado para este período ou filtro.";
     celulaVazia.style.textAlign = "center";
@@ -31,7 +27,6 @@ function popularTabelaTurnos(turnos) {
     const novaLinha = corpoTabelaTurnos.insertRow();
     novaLinha.setAttribute("data-turno-id", turno.id);
 
-    // Célula Checkbox
     const celulaCheckbox = novaLinha.insertCell();
     const inputCheckbox = document.createElement("input");
     inputCheckbox.type = "checkbox";
@@ -39,23 +34,21 @@ function popularTabelaTurnos(turnos) {
     inputCheckbox.value = turno.id;
     celulaCheckbox.appendChild(inputCheckbox);
 
-    // Célula Data
     const celulaData = novaLinha.insertCell();
     const inputData = document.createElement("input");
-    inputData.type = "text"; // Poderia ser 'date' para melhor UX, mas requer formatação dd/Mês
+    inputData.type = "text";
     inputData.className = "shift-date";
-    inputData.value = turno.data; // Espera-se que 'turno.data' já venha formatado como dd/Mês
+    inputData.value = turno.data;
+    inputData.placeholder = "dd/Mês";
     celulaData.appendChild(inputData);
 
-    // Célula Hora
-    const celulaHora = novaLinha.insertCell();
-    const inputHora = document.createElement("input");
-    inputHora.type = "time";
-    inputHora.className = "shift-time";
-    inputHora.value = turno.hora;
-    celulaHora.appendChild(inputHora);
+    const celulaHoraDuracao = novaLinha.insertCell();
+    const inputHoraDuracao = document.createElement("input");
+    inputHoraDuracao.type = "time";
+    inputHoraDuracao.className = "shift-time";
+    inputHoraDuracao.value = turno.hora;
+    celulaHoraDuracao.appendChild(inputHoraDuracao);
 
-    // Célula Colaborador
     const celulaColaborador = novaLinha.insertCell();
     const inputColaborador = document.createElement("input");
     inputColaborador.type = "text";
@@ -63,12 +56,10 @@ function popularTabelaTurnos(turnos) {
     inputColaborador.value = turno.colaborador;
     celulaColaborador.appendChild(inputColaborador);
 
-    // Célula Google Event ID (será oculta via CSS)
     const celulaGoogleEventId = novaLinha.insertCell();
     celulaGoogleEventId.className = "shift-google-event-id";
     celulaGoogleEventId.textContent = turno.google_calendar_event_id || "N/A";
 
-    // Célula de Ações
     const celulaAcoes = novaLinha.insertCell();
     celulaAcoes.className = "actions-cell";
 
@@ -77,15 +68,12 @@ function popularTabelaTurnos(turnos) {
     btnEditar.title = "Editar Turno";
     btnEditar.className = "btn-table-action edit";
     btnEditar.onclick = function () {
-      // Lógica de edição para este turno (ex: abrir modal, transformar linha em editável)
       console.log("Editar turno ID:", turno.id);
       alert(
         "Funcionalidade de editar turno ID: " +
           turno.id +
-          " a ser implementada."
+          " a ser implementada com mais detalhes (ex: modal)."
       );
-      // Você precisaria de uma função para habilitar edição inline ou abrir um modal
-      // e depois uma forma de salvar a alteração específica.
     };
     celulaAcoes.appendChild(btnEditar);
 
@@ -94,23 +82,17 @@ function popularTabelaTurnos(turnos) {
     btnExcluirLinha.title = "Excluir Turno";
     btnExcluirLinha.className = "btn-table-action delete";
     btnExcluirLinha.onclick = function () {
-      // Reutiliza a função de exclusão, mas para um único ID
       excluirTurnosNoServidor([turno.id]);
     };
     celulaAcoes.appendChild(btnExcluirLinha);
   });
 }
 
-/**
- * Função para salvar os dados dos turnos no servidor.
- * (Lógica de salvar permanece a mesma, mas o backend precisaria de lógica de UPDATE se IDs forem enviados)
- */
 function salvarDadosTurnosNoServidor(dadosTurnos) {
   const payload = {
     acao: "salvar_turnos",
     turnos: dadosTurnos,
   };
-  // ... (restante da função como antes) ...
   fetch("salvar_turnos.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -133,12 +115,14 @@ function salvarDadosTurnosNoServidor(dadosTurnos) {
     })
     .then((data) => {
       if (data.success) {
-        alert("Sucesso: " + data.message); // Melhorar feedback visual aqui
+        alert("Sucesso: " + (data.message || "Turnos salvos!"));
         popularTabelaTurnos(data.data);
         atualizarTabelaResumoColaboradores(data.data);
-        atualizarGraficoResumoHoras(data.data); // Adicionado para atualizar gráfico
+        atualizarGraficoResumoHoras(data.data);
       } else {
-        alert("Erro ao salvar: " + data.message);
+        alert(
+          "Erro ao salvar: " + (data.message || "Ocorreu um erro desconhecido.")
+        );
       }
     })
     .catch((error) => {
@@ -150,12 +134,7 @@ function salvarDadosTurnosNoServidor(dadosTurnos) {
     });
 }
 
-/**
- * Função para coletar os dados dos turnos da tabela HTML.
- * (A coleta permanece a mesma, mas a função salvar precisaria diferenciar novos de existentes)
- */
 function coletarDadosDaTabelaDeTurnos() {
-  // ... (função como antes, lembrando que agora temos uma coluna de ações) ...
   const linhasTabelaTurnos = document.querySelectorAll(
     "#shifts-table-may tbody tr"
   );
@@ -169,43 +148,41 @@ function coletarDadosDaTabelaDeTurnos() {
   }
 
   linhasTabelaTurnos.forEach((linha) => {
-    // Verificar se é a linha "Nenhum turno..."
     if (linha.cells.length === 1 && linha.cells[0].colSpan > 1) return;
 
     const dataInput = linha.querySelector(".shift-date");
-    const horaInput = linha.querySelector(".shift-time");
+    const horaDuracaoInput = linha.querySelector(".shift-time");
     const colaboradorInput = linha.querySelector(".shift-employee");
     const turnoIdOriginal = linha.getAttribute("data-turno-id");
 
     if (
       dataInput &&
-      horaInput &&
+      horaDuracaoInput &&
       colaboradorInput &&
       dataInput.value.trim() !== "" &&
-      horaInput.value.trim() !== "" &&
+      horaDuracaoInput.value.trim() !== "" &&
       colaboradorInput.value.trim() !== ""
     ) {
       dadosTurnosParaSalvar.push({
         id:
           turnoIdOriginal && !turnoIdOriginal.startsWith("new-")
-            ? turnoIdOriginal // Envia ID se for um turno existente
-            : null, // null para novos turnos (o backend tratará como INSERT)
+            ? turnoIdOriginal
+            : null,
         data: dataInput.value.trim(),
-        hora: horaInput.value.trim(),
+        hora: horaDuracaoInput.value.trim(),
         colaborador: colaboradorInput.value.trim(),
-        ano: anoTabela, // O backend já usa o ano da data se fornecido, mas pode ser um fallback
+        ano: anoTabela,
       });
     } else if (
-      // Se algum campo estiver preenchido mas não todos (exceto a linha de placeholder)
       !(
         dataInput.value.trim() === "" &&
-        horaInput.value.trim() === "" &&
+        horaDuracaoInput.value.trim() === "" &&
         colaboradorInput.value.trim() === ""
       )
     ) {
       console.warn("Linha de turno com dados incompletos não será salva.", {
         data: dataInput.value,
-        hora: horaInput.value,
+        hora_duracao: horaDuracaoInput.value,
         colaborador: colaboradorInput.value,
       });
     }
@@ -213,19 +190,15 @@ function coletarDadosDaTabelaDeTurnos() {
   return dadosTurnosParaSalvar;
 }
 
-/**
- * Função para atualizar a tabela de resumo de horas por colaborador.
- */
 function atualizarTabelaResumoColaboradores(turnos) {
-  // ... (função como antes) ...
   const corpoTabelaResumo = document.querySelector(
     "#employee-summary-table tbody"
   );
   if (!corpoTabelaResumo) {
-    console.error("Elemento tbody da tabela de resumo não encontrado.");
     return;
   }
-  corpoTabelaResumo.innerHTML = ""; // Limpa tabela
+  corpoTabelaResumo.innerHTML = "";
+
   if (!turnos || turnos.length === 0) {
     const linhaVazia = corpoTabelaResumo.insertRow();
     const celulaVazia = linhaVazia.insertCell();
@@ -235,73 +208,79 @@ function atualizarTabelaResumoColaboradores(turnos) {
     return;
   }
 
-  const resumoHoras = {}; // Objeto para armazenar { colaborador: totalMinutos }
+  const resumoHoras = {};
   turnos.forEach((turno) => {
-    if (!turno.colaborador || !turno.hora) return; // Ignora turnos sem colaborador ou hora
+    if (!turno.colaborador || !turno.hora) return;
 
     if (!resumoHoras[turno.colaborador]) {
       resumoHoras[turno.colaborador] = 0;
     }
-    // Assumindo que turno.hora é uma string "HH:MM"
-    // E que a duração implícita do turno é o que você quer somar.
-    // Para este exemplo, vamos assumir que CADA entrada de turno.hora representa a DURAÇÃO do turno.
-    // Se turno.hora é apenas o INÍCIO, você precisaria de uma HORA DE FIM ou DURAÇÃO para calcular.
-    // O código original somava as horas de início, o que é incomum para um resumo de "total de horas".
-    // VAMOS ASSUMIR QUE CADA TURNO TEM UMA DURAÇÃO PADRÃO DE 8 HORAS PARA ESTE EXEMPLO DE RESUMO.
-    // VOCÊ PRECISA AJUSTAR ISSO PARA A LÓGICA CORRETA DE DURAÇÃO DO TURNO.
-    const duracaoTurnoEmMinutos = 8 * 60; // Exemplo: 8 horas
-    // Se você tiver um campo de duração ou hora de fim, use-o aqui.
-    // Exemplo, se turno.hora fosse a duração "08:00":
-    // const partesHora = turno.hora.split(':').map(Number);
-    // let minutosTurno = 0;
-    // if (partesHora.length >= 2) minutosTurno = partesHora[0] * 60 + partesHora[1];
-    resumoHoras[turno.colaborador] += duracaoTurnoEmMinutos;
+
+    const horaStr = String(turno.hora);
+    const partesHora = horaStr.split(":").map(Number);
+    let horasTurno = 0;
+    let minutosTurno = 0;
+
+    if (partesHora.length >= 1) horasTurno = partesHora[0];
+    if (partesHora.length >= 2) minutosTurno = partesHora[1];
+
+    const duracaoDecimalTurno = horasTurno + minutosTurno / 60.0;
+    resumoHoras[turno.colaborador] += duracaoDecimalTurno;
   });
 
   for (const colaborador in resumoHoras) {
-    const totalHorasCalculadas = (resumoHoras[colaborador] / 60).toFixed(2); // Converte minutos para horas
+    const totalHorasCalculadas = resumoHoras[colaborador].toFixed(2);
     const novaLinha = corpoTabelaResumo.insertRow();
     novaLinha.insertCell(0).textContent = colaborador;
-    novaLinha.insertCell(1).textContent = totalHorasCalculadas + "h";
+    novaLinha.insertCell(1).textContent =
+      totalHorasCalculadas.replace(".", ",") + "h";
   }
 }
 
-/**
- * Função para atualizar o gráfico de resumo de horas.
- */
-let employeeHoursChartInstance = null; // Variável global para a instância do gráfico
+let employeeHoursChartInstance = null;
 
 function atualizarGraficoResumoHoras(turnos) {
   const ctx = document.getElementById("employee-hours-chart");
   if (!ctx) {
-    console.warn(
-      "Elemento canvas do gráfico de resumo de horas não encontrado."
-    );
     return;
   }
 
   if (!turnos || turnos.length === 0) {
     if (employeeHoursChartInstance) {
-      employeeHoursChartInstance.destroy(); // Destroi gráfico anterior se não há dados
+      employeeHoursChartInstance.destroy();
       employeeHoursChartInstance = null;
     }
-    // Poderia exibir uma mensagem no lugar do gráfico
+    const context = ctx.getContext("2d");
+    context.clearRect(0, 0, ctx.width, ctx.height);
+    context.textAlign = "center";
+    context.fillText(
+      "Sem dados para exibir no gráfico.",
+      ctx.width / 2,
+      ctx.height / 2
+    );
     return;
   }
 
-  const resumoHoras = {}; // { colaborador: totalMinutos }
+  const resumoHoras = {};
   turnos.forEach((turno) => {
     if (!turno.colaborador || !turno.hora) return;
     if (!resumoHoras[turno.colaborador]) resumoHoras[turno.colaborador] = 0;
-    // ASSUMINDO DURAÇÃO PADRÃO DE 8 HORAS POR TURNO PARA O GRÁFICO. AJUSTE CONFORME SUA LÓGICA.
-    const duracaoTurnoEmMinutos = 8 * 60;
-    resumoHoras[turno.colaborador] += duracaoTurnoEmMinutos;
+
+    const horaStr = String(turno.hora);
+    const partesHora = horaStr.split(":").map(Number);
+    let horasTurno = 0;
+    let minutosTurno = 0;
+    if (partesHora.length >= 1) horasTurno = partesHora[0];
+    if (partesHora.length >= 2) minutosTurno = partesHora[1];
+
+    const duracaoDecimalTurno = horasTurno + minutosTurno / 60.0;
+    resumoHoras[turno.colaborador] += duracaoDecimalTurno;
   });
 
   const labels = Object.keys(resumoHoras);
   const dataPoints = labels.map((label) =>
-    (resumoHoras[label] / 60).toFixed(2)
-  ); // Horas
+    parseFloat(resumoHoras[label].toFixed(2))
+  );
 
   if (employeeHoursChartInstance) {
     employeeHoursChartInstance.data.labels = labels;
@@ -309,7 +288,7 @@ function atualizarGraficoResumoHoras(turnos) {
     employeeHoursChartInstance.update();
   } else {
     employeeHoursChartInstance = new Chart(ctx.getContext("2d"), {
-      type: "bar", // ou 'pie', 'doughnut'
+      type: "bar",
       data: {
         labels: labels,
         datasets: [
@@ -317,12 +296,11 @@ function atualizarGraficoResumoHoras(turnos) {
             label: "Total de Horas Trabalhadas",
             data: dataPoints,
             backgroundColor: [
-              // Cores para as barras/fatias
-              "rgba(64, 123, 255, 0.7)", // --primary-color com alpha
-              "rgba(40, 167, 69, 0.7)", // --success-color com alpha
-              "rgba(255, 193, 7, 0.7)", // --warning-color com alpha
-              "rgba(23, 162, 184, 0.7)", // --info-color com alpha
-              "rgba(108, 117, 125, 0.7)", // --secondary-color com alpha
+              "rgba(64, 123, 255, 0.7)",
+              "rgba(40, 167, 69, 0.7)",
+              "rgba(255, 193, 7, 0.7)",
+              "rgba(23, 162, 184, 0.7)",
+              "rgba(108, 117, 125, 0.7)",
             ],
             borderColor: [
               "rgba(64, 123, 255, 1)",
@@ -339,22 +317,23 @@ function atualizarGraficoResumoHoras(turnos) {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          y: {
-            beginAtZero: true,
-            title: { display: true, text: "Horas" },
-          },
-          x: {
-            title: { display: true, text: "Colaborador" },
-          },
+          y: { beginAtZero: true, title: { display: true, text: "Horas" } },
+          x: { title: { display: true, text: "Colaborador" } },
         },
         plugins: {
-          legend: {
-            display: true, // Pode ser false se só tiver um dataset
-            position: "top",
-          },
-          title: {
-            display: false, // O título já está no widget
-            text: "Resumo de Horas por Colaborador",
+          legend: { display: labels.length > 1, position: "top" },
+          title: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                let label = context.dataset.label || "";
+                if (label) label += ": ";
+                if (context.parsed.y !== null) {
+                  label += context.parsed.y.toFixed(2).replace(".", ",") + "h";
+                }
+                return label;
+              },
+            },
           },
         },
       },
@@ -362,12 +341,8 @@ function atualizarGraficoResumoHoras(turnos) {
   }
 }
 
-/**
- * Função para carregar os dados iniciais dos turnos do servidor.
- */
 function carregarTurnosDoServidor() {
-  // ... (função como antes, mas agora chama para atualizar gráfico também) ...
-  fetch("salvar_turnos.php") // Assumindo que GET em salvar_turnos.php retorna os turnos
+  fetch("salvar_turnos.php")
     .then((response) => {
       if (!response.ok) {
         return response
@@ -377,7 +352,7 @@ function carregarTurnosDoServidor() {
           })
           .catch(() => {
             throw new Error(
-              `Erro HTTP: ${response.status}. Resposta do servidor não é JSON válido ao carregar turnos.`
+              `Erro HTTP: ${response.status}. Resposta inválida.`
             );
           });
       }
@@ -387,7 +362,7 @@ function carregarTurnosDoServidor() {
       if (data.success && data.data) {
         popularTabelaTurnos(data.data);
         atualizarTabelaResumoColaboradores(data.data);
-        atualizarGraficoResumoHoras(data.data); // Adicionado
+        atualizarGraficoResumoHoras(data.data);
       } else {
         alert(
           "Aviso ao carregar dados: " +
@@ -395,7 +370,7 @@ function carregarTurnosDoServidor() {
         );
         popularTabelaTurnos([]);
         atualizarTabelaResumoColaboradores([]);
-        atualizarGraficoResumoHoras([]); // Adicionado
+        atualizarGraficoResumoHoras([]);
       }
     })
     .catch((error) => {
@@ -409,15 +384,11 @@ function carregarTurnosDoServidor() {
       );
       popularTabelaTurnos([]);
       atualizarTabelaResumoColaboradores([]);
-      atualizarGraficoResumoHoras([]); // Adicionado
+      atualizarGraficoResumoHoras([]);
     });
 }
 
-/**
- * Função para excluir turnos selecionados no servidor.
- */
 function excluirTurnosNoServidor(idsDosTurnosParaExcluir) {
-  // ... (função como antes) ...
   if (!idsDosTurnosParaExcluir || idsDosTurnosParaExcluir.length === 0) {
     alert("Nenhum turno selecionado para exclusão.");
     return;
@@ -443,14 +414,11 @@ function excluirTurnosNoServidor(idsDosTurnosParaExcluir) {
         return response
           .json()
           .then((errData) => {
-            throw new Error(
-              errData.message ||
-                `Erro HTTP: ${response.status} ao excluir turnos.`
-            );
+            throw new Error(errData.message || `Erro HTTP: ${response.status}`);
           })
           .catch(() => {
             throw new Error(
-              `Erro HTTP: ${response.status}. Resposta do servidor não é JSON válido ao excluir turnos.`
+              `Erro HTTP: ${response.status}. Resposta inválida.`
             );
           });
       }
@@ -459,7 +427,7 @@ function excluirTurnosNoServidor(idsDosTurnosParaExcluir) {
     .then((data) => {
       if (data.success) {
         alert(data.message || "Turnos excluídos com sucesso!");
-        carregarTurnosDoServidor(); // Recarrega todos os dados, incluindo tabelas e gráfico
+        carregarTurnosDoServidor();
       } else {
         alert(
           "Erro ao excluir turnos: " +
@@ -476,14 +444,11 @@ function excluirTurnosNoServidor(idsDosTurnosParaExcluir) {
     });
 }
 
-// --- EVENT LISTENERS E CÓDIGO EXECUTADO NO DOMContentLoaded ---
 document.addEventListener("DOMContentLoaded", function () {
-  // Carrega os dados iniciais se a tabela de turnos existir
   if (document.getElementById("shifts-table-may")) {
     carregarTurnosDoServidor();
   }
 
-  // Botão Salvar Alterações nos Turnos
   const botaoSalvarTurnos = document.getElementById("save-shifts-button");
   if (botaoSalvarTurnos) {
     botaoSalvarTurnos.addEventListener("click", function () {
@@ -491,7 +456,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (dadosColetados.length > 0) {
         salvarDadosTurnosNoServidor(dadosColetados);
       } else {
-        // Verifica se a mensagem "Nenhum turno programado" está presente
         if (document.querySelector("#shifts-table-may tbody tr td[colspan]")) {
           alert("Não há turnos para salvar. Adicione um novo turno.");
         } else {
@@ -503,7 +467,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Botão Adicionar Novo Turno
   const botaoAdicionarTurno = document.getElementById("add-shift-row-button");
   if (botaoAdicionarTurno) {
     botaoAdicionarTurno.addEventListener("click", function () {
@@ -511,24 +474,19 @@ document.addEventListener("DOMContentLoaded", function () {
         "#shifts-table-may tbody"
       );
       if (corpoTabelaTurnos) {
-        // Remove a mensagem "Nenhum turno programado..." se existir
         const linhaVaziaExistente =
           corpoTabelaTurnos.querySelector("td[colspan]");
         if (linhaVaziaExistente) corpoTabelaTurnos.innerHTML = "";
 
-        // Cria uma nova linha com ID temporário para "novo" turno
         const turnoPlaceholder = {
-          id: "new-" + Date.now(), // ID temporário para novos turnos
+          id: "new-" + Date.now(),
           data: "",
           hora: "",
           colaborador: "",
           google_calendar_event_id: "Pendente",
         };
-        // Usa a função popularTabelaTurnos para adicionar a linha, mas com um array de um item
-        // Isso mantém a criação de linha consistente. Ou crie a linha manualmente aqui.
-        // Para simplificar, vamos criar manualmente, já que popularTabelaTurnos espera um array completo.
 
-        const novaLinha = corpoTabelaTurnos.insertRow(); // Insere no final por padrão
+        const novaLinha = corpoTabelaTurnos.insertRow();
         novaLinha.setAttribute("data-turno-id", turnoPlaceholder.id);
 
         const celulaCheckbox = novaLinha.insertCell();
@@ -541,39 +499,37 @@ document.addEventListener("DOMContentLoaded", function () {
         const inputData = document.createElement("input");
         inputData.type = "text";
         inputData.className = "shift-date";
-        inputData.placeholder = "dd/Mês"; // Ajuste o placeholder
+        inputData.placeholder = "dd/Mês";
         celulaData.appendChild(inputData);
-        inputData.focus(); // Foco no campo de data
+        inputData.focus();
 
-        const celulaHora = novaLinha.insertCell();
-        const inputHora = document.createElement("input");
-        inputHora.type = "time";
-        inputHora.className = "shift-time";
-        celulaHora.appendChild(inputHora);
+        const celulaHoraDuracao = novaLinha.insertCell();
+        const inputHoraDuracao = document.createElement("input");
+        inputHoraDuracao.type = "time";
+        inputHoraDuracao.className = "shift-time";
+        celulaHoraDuracao.appendChild(inputHoraDuracao);
 
         const celulaColaborador = novaLinha.insertCell();
         const inputColaborador = document.createElement("input");
         inputColaborador.type = "text";
         inputColaborador.className = "shift-employee";
-        inputColaborador.placeholder = "Nome do Colaborador";
+        inputColaborador.placeholder = "Nome Colaborador";
         celulaColaborador.appendChild(inputColaborador);
 
-        const celulaGoogleEventId = novaLinha.insertCell(); // Célula para GCal ID (oculta)
+        const celulaGoogleEventId = novaLinha.insertCell();
         celulaGoogleEventId.className = "shift-google-event-id";
         celulaGoogleEventId.textContent = "Pendente";
 
-        const celulaAcoes = novaLinha.insertCell(); // Célula para botões de ação
+        const celulaAcoes = novaLinha.insertCell();
         celulaAcoes.className = "actions-cell";
-        // Botão de excluir para a nova linha (não funcional até salvar)
         const btnExcluirNovaLinha = document.createElement("button");
         btnExcluirNovaLinha.innerHTML = '<i class="fas fa-trash-alt"></i>';
-        btnExcluirNovaLinha.title = "Remover esta linha (não salva)";
+        btnExcluirNovaLinha.title = "Remover esta linha";
         btnExcluirNovaLinha.className = "btn-table-action delete";
         btnExcluirNovaLinha.onclick = function () {
-          novaLinha.remove(); // Simplesmente remove a linha da UI
-          // Se for a última linha, mostrar mensagem de "nenhum turno" novamente
+          novaLinha.remove();
           if (corpoTabelaTurnos.rows.length === 0) {
-            popularTabelaTurnos([]); // Chama para mostrar a mensagem
+            popularTabelaTurnos([]);
           }
         };
         celulaAcoes.appendChild(btnExcluirNovaLinha);
@@ -581,7 +537,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Checkbox "Selecionar Todos"
   const selectAllCheckbox = document.getElementById("select-all-shifts");
   if (selectAllCheckbox) {
     selectAllCheckbox.addEventListener("change", function () {
@@ -593,48 +548,44 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Botão Excluir Selecionados
   const botaoExcluirTurnos = document.getElementById(
     "delete-selected-shifts-button"
   );
   if (botaoExcluirTurnos) {
     botaoExcluirTurnos.addEventListener("click", function () {
       const idsSelecionados = [];
+      let algumaLinhaNovaRemovida = false;
       document
         .querySelectorAll(".shift-select-checkbox:checked")
         .forEach((checkbox) => {
-          // Apenas adiciona IDs de turnos que não são "novos" (já existem no backend)
-          const turnoId = checkbox.closest("tr").getAttribute("data-turno-id");
+          const turnoTr = checkbox.closest("tr");
+          const turnoId = turnoTr.getAttribute("data-turno-id");
           if (turnoId && !turnoId.startsWith("new-")) {
             idsSelecionados.push(turnoId);
           } else if (turnoId && turnoId.startsWith("new-")) {
-            // Se um turno novo (não salvo) estiver selecionado, apenas o remove da UI
-            checkbox.closest("tr").remove();
+            turnoTr.remove();
+            algumaLinhaNovaRemovida = true;
           }
         });
+
       if (idsSelecionados.length > 0) {
         excluirTurnosNoServidor(idsSelecionados);
-      } else {
-        // Verifica se alguma linha "nova" foi removida e se a tabela ficou vazia
+      } else if (algumaLinhaNovaRemovida) {
+        alert(
+          "Linhas novas (não salvas) foram removidas. Nenhum turno existente foi selecionado para exclusão do servidor."
+        );
         const corpoTabelaTurnos = document.querySelector(
           "#shifts-table-may tbody"
         );
         if (corpoTabelaTurnos && corpoTabelaTurnos.rows.length === 0) {
           popularTabelaTurnos([]);
-        } else if (
-          document.querySelectorAll(".shift-select-checkbox:checked").length > 0
-        ) {
-          alert(
-            "As linhas novas selecionadas foram removidas. Nenhum turno existente foi selecionado para exclusão do servidor."
-          );
-        } else {
-          alert("Nenhum turno existente selecionado para exclusão.");
         }
+      } else {
+        alert("Nenhum turno existente selecionado para exclusão.");
       }
     });
   }
 
-  // Lógica Google Calendar (mantida como antes)
   const urlParams = new URLSearchParams(window.location.search);
   const gcalStatus = urlParams.get("gcal_status");
   const gcalMsg = urlParams.get("gcal_msg");
@@ -643,16 +594,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const disconnectBtn = document.getElementById("disconnect-gcal-btn");
 
   function checkGCalConnectionStatus() {
-    // ... (função como antes, apenas ajuste se necessário o seletor dos botões) ...
     if (!statusMessageEl || !connectBtn || !disconnectBtn) return;
+    let isConnected = false;
 
-    // Idealmente, o status de conexão deveria vir do backend.
-    // Esta é uma simulação baseada em query params ou uma variável global que o PHP poderia definir.
-    let isConnected = false; // Deveria ser determinado por uma chamada ao backend ou variável PHP
-
+    // A verificação de 'isConnected' idealmente viria do backend
+    // Aqui, usamos o status da URL para a configuração inicial dos botões
     if (gcalStatus === "success") {
       statusMessageEl.textContent = "Google Calendar conectado com sucesso!";
-      statusMessageEl.style.color = "var(--success-color)"; // Usando variável CSS
+      statusMessageEl.style.color = "var(--success-color)";
       isConnected = true;
     } else if (gcalStatus === "error") {
       statusMessageEl.textContent =
@@ -663,16 +612,23 @@ document.addEventListener("DOMContentLoaded", function () {
       statusMessageEl.textContent = "Google Calendar desconectado.";
       statusMessageEl.style.color = "var(--warning-color)";
     } else {
-      // Aqui você faria uma verificação no backend para saber o status real
-      // fetch('/api/check_gcal_status.php').then(res => res.json()).then(data => { ... });
-      statusMessageEl.textContent =
-        "Verifique o status da conexão com o Google Calendar.";
+      // Se não houver status na URL, pode-se tentar verificar se já existe um token (ex: via localStorage ou chamada backend)
+      // Por ora, apenas deixa a mensagem padrão se houver uma, ou limpa.
+      // if (statusMessageEl.textContent.trim() === "Verifique o status da conexão ou conecte sua conta.") {
+      //     // Não faz nada, mantém a mensagem padrão
+      // } else if (!statusMessageEl.textContent.trim()) {
+      //    statusMessageEl.textContent = "Conecte sua conta para sincronizar com Google Calendar.";
+      // }
     }
 
+    // Lógica para exibir/ocultar botões baseada no status e se o usuário já pode ter conectado antes
+    // Esta parte pode precisar de um indicador mais persistente do estado de conexão (ex: vindo do PHP/sessão)
     if (isConnected) {
       connectBtn.style.display = "none";
-      disconnectBtn.style.display = "inline-flex"; // display: flex para botões com ícones
+      disconnectBtn.style.display = "inline-flex";
     } else {
+      // Se não for 'success' na URL, assume que não está conectado ou o estado é incerto.
+      // Melhorar esta lógica se você tiver um estado de conexão persistente.
       connectBtn.style.display = "inline-flex";
       disconnectBtn.style.display = "none";
     }
@@ -692,35 +648,33 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Lógica de Logout (mantida)
   const logoutLink = document.getElementById("logout-link");
   if (logoutLink) {
     logoutLink.addEventListener("click", function (e) {
       e.preventDefault();
-      // Idealmente, chamar um script PHP para destruir a sessão no backend
-      // Ex: window.location.href = 'logout.php';
-      alert("Sessão encerrada (simulação). Redirecionando para o login.");
-      window.location.href = "index.html";
+      // Para um logout real, redirecione para um script PHP que destrói a sessão:
+      // window.location.href = 'logout.php';
+      // O script logout.php faria session_destroy() e então redirecionaria para index.html
+      alert("Saindo do sistema..."); // Mensagem de simulação
+      window.location.href = "index.html"; // Simula o redirecionamento após o logout
     });
   }
 
-  // Efeito placeholder flutuante (mantido para inputs de login/cadastro)
+  // Efeito de placeholder flutuante para campos de input
   document.querySelectorAll(".input-field").forEach((input) => {
     if (input.tagName.toLowerCase() === "select") return; // Ignora selects
-    input.addEventListener("blur", () => {
+    const checkVal = () =>
       input.classList.toggle("has-val", input.value.trim() !== "");
-    });
-    // Verifica no carregamento se já tem valor (autocomplete)
-    if (input.value.trim() !== "") input.classList.add("has-val");
+    input.addEventListener("blur", checkVal);
+    input.addEventListener("input", checkVal); // Adiciona para cobrir preenchimento automático que não dispara blur
+    checkVal(); // Verifica no carregamento
   });
 
-  // Adicionar nome do usuário no header (exemplo, precisaria que o PHP passasse esse dado)
-  const userInfoDiv = document.getElementById("user-info");
-  if (userInfoDiv) {
-    // Supondo que o PHP injetou o nome do usuário em um data attribute ou você faz um fetch
-    // Exemplo: <div id="user-info" data-username="<?php echo htmlspecialchars($_SESSION['usuario_nome_completo']); ?>">
-    // const userName = userInfoDiv.dataset.username || "Usuário";
-    const userName = "Nome do Usuário"; // Placeholder
-    userInfoDiv.innerHTML = `Olá, ${userName} <i class="fas fa-user-circle"></i>`;
-  }
+  // O nome do usuário agora é inserido diretamente pelo PHP nos arquivos .php
+  // O código JS abaixo para user-info não é mais necessário para definir o nome.
+  // const userInfoDiv = document.getElementById("user-info");
+  // if (userInfoDiv) {
+  //   const userName = userInfoDiv.dataset.username || "Usuário";
+  //   userInfoDiv.innerHTML = `Olá, ${userName} <i class="fas fa-user-circle"></i>`;
+  // }
 });

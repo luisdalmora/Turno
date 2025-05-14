@@ -35,6 +35,7 @@
   --font-family-primary: "Poppins", sans-serif;
   --base-font-size: 16px;
   --border-radius: 6px; /* Raio de borda padrão */
+  --spacing-medium: 40px; /* Variável para espaçamento principal */
 }
 
 /* Reset Básico de CSS */
@@ -50,39 +51,169 @@ html {
   font-family: var(--font-family-primary);
   font-size: var(--base-font-size);
   color: var(--primary-text-color);
-  background-color: var(--dashboard-background); /* Fundo geral */
+  background-color: var(--dashboard-background); /* Fundo geral padrão */
 }
-/* ... (restante do seu reset básico e estilos de login) ... */
 
-/* Estilos da Página de Login (`index.html`) - Mantidos como antes */
+/* Estilos da Página de Login e Cadastro */
 .login-page-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 15px;
+  padding: 15px; /* Espaçamento das bordas da tela */
   background-color: var(
     --background-color-light
-  ); /* ou var(--dashboard-background) se preferir */
+  ); /* Fundo específico para login/cadastro */
 }
 
 .login-content-wrapper {
   display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 1200px;
+  align-items: center; /* Alinha verticalmente o formulário e a imagem */
   justify-content: center;
+  width: 100%;
+  max-width: 1100px; /* Largura máxima do conteúdo de login/cadastro */
   background-color: var(--widget-background-color);
-  padding: 40px;
+  padding: var(--spacing-medium);
   border-radius: var(--border-radius);
   box-shadow: 0 10px 25px var(--widget-shadow-color);
+  gap: var(--spacing-medium); /* Espaçamento entre o formulário e a imagem */
 }
-/* ... (Restante dos estilos de login existentes) ... */
+
+.login-form-wrapper {
+  flex: 1 1 450px; /* Base de 450px, pode crescer/encolher */
+  max-width: 500px; /* Largura máxima para o formulário */
+  display: flex;
+  flex-direction: column;
+}
+
+.login-image {
+  flex: 1 1 50%; /* Pode crescer/encolher, com base em 50% do espaço flexível restante */
+  max-width: 550px; /* Largura máxima para a imagem */
+  height: auto; /* Mantém a proporção da imagem */
+  object-fit: contain; /* Garante que toda a imagem seja visível. 'cover' preenche e pode cortar. */
+  border-radius: var(--border-radius);
+}
+
+.login-form {
+  width: 100%; /* Formulário ocupa todo o espaço do seu wrapper */
+}
+
+.login-form-title {
+  font-size: 2em;
+  color: var(--highlight-text-color);
+  margin-bottom: 30px;
+  text-align: center;
+  display: block;
+}
+
+.input-group {
+  width: 100%;
+  position: relative;
+  border-bottom: 2px solid var(--input-border-color);
+}
+/* Classes de margem utilitárias para os input-group, se usadas no HTML */
+.input-group.margin-top-35 {
+  margin-top: 35px;
+}
+.input-group.margin-bottom-35 {
+  margin-bottom: 35px;
+}
+
+.input-field {
+  width: 100%;
+  height: 52px;
+  padding: 0 5px;
+  background: transparent;
+  font-size: 18px;
+  color: var(--input-field-text-color);
+  font-weight: 600;
+  border: none;
+  outline: none;
+}
+
+.input-focus-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.input-focus-effect::after {
+  content: attr(data-placeholder);
+  position: absolute;
+  top: 15px;
+  left: 5px;
+  font-size: 18px;
+  color: var(--secondary-text-color);
+  transition: all 0.4s ease;
+}
+
+.input-field:focus + .input-focus-effect::after,
+.input-field.has-val + .input-focus-effect::after {
+  top: -20px;
+  font-size: 15px;
+}
+
+.login-form-button-container {
+  margin-top: 30px;
+  width: 100%;
+}
+
+.login-form-button {
+  background-color: var(--primary-color);
+  color: var(--background-color-light);
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-form-button i {
+  margin-right: 8px;
+}
+
+.login-form-button:hover {
+  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.login-utility-links {
+  list-style: none;
+  padding: 0;
+  margin-top: 25px;
+  text-align: center;
+}
+.login-utility-links li {
+  margin-bottom: 10px;
+}
+.login-utility-links .utility-text-primary {
+  color: var(--primary-text-color);
+  font-size: 0.9em;
+}
+.login-utility-links .utility-text-secondary {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+.login-utility-links .utility-text-secondary:hover {
+  text-decoration: underline;
+}
 
 /* Estilos da Página do Dashboard (`home.html`) */
 body.dashboard-body-background {
   background-color: var(--dashboard-background);
-  display: flex;
+  display: flex; /* Mantém o display flex para o layout do dashboard */
 }
 
 .dashboard-layout-container {
@@ -397,8 +528,7 @@ body.dashboard-body-background {
 }
 
 /* Esconder a coluna Google Event ID na tabela de turnos */
-/* Se você adicionou a coluna de Ações no final, ajuste o :nth-child ou use uma classe específica */
-#shifts-table-may th:nth-child(5),  /* Assumindo que GCal ID é a 5a coluna */
+#shifts-table-may th:nth-child(5),
 #shifts-table-may td:nth-child(5) {
   display: none;
 }
@@ -444,18 +574,25 @@ body.dashboard-body-background {
 }
 
 @media (max-width: 992px) {
-  /* Telas médias, como tablets */
+  /* Telas médias (tablets) */
   .login-content-wrapper {
-    flex-direction: column;
+    flex-direction: column; /* Empilha o formulário e a imagem */
+    /* 'gap' definido anteriormente ainda aplicará espaçamento vertical aqui */
   }
+
   .login-form-wrapper {
-    margin-right: 0;
-    margin-bottom: 30px;
+    width: 100%; /* Ocupa a largura total no modo coluna */
+    max-width: 500px; /* Mantém uma largura máxima razoável */
+    order: 1; /* Garante que o formulário venha primeiro se a ordem natural mudar */
   }
+
   .login-image {
-    margin-left: 0;
-    max-width: 80%;
+    width: 100%; /* Ocupa a largura total no modo coluna */
+    max-width: 80%; /* Controla o tamanho máximo da imagem quando empilhada */
+    margin-top: 0; /* 'gap' no container deve cuidar disso */
+    order: 2; /* Garante que a imagem venha depois do formulário */
   }
+
   .dashboard-sidebar {
     width: 220px; /* Sidebar um pouco menor */
   }
@@ -465,7 +602,17 @@ body.dashboard-body-background {
 }
 
 @media (max-width: 768px) {
-  /* Telas menores, como smartphones */
+  /* Telas menores (smartphones) */
+  .login-content-wrapper {
+    padding: 20px; /* Menor padding em telas pequenas */
+    gap: 20px; /* Menor espaçamento vertical quando empilhado */
+  }
+  /* .login-form-wrapper herda de 992px ou pode ter ajustes específicos */
+  .login-image {
+    max-width: 90%; /* Imagem pode ser um pouco maior em proporção à largura do form */
+    /* margin-top já tratado pelo gap ou pode ser ajustado aqui se necessário */
+  }
+
   .dashboard-layout-container {
     flex-direction: column;
   }
@@ -497,49 +644,266 @@ body.dashboard-body-background {
     width: 100%; /* Botões ocupam largura total */
     margin-bottom: 5px; /* Espaçamento se empilhados */
   }
-  .login-form-wrapper {
-    width: 100%;
-    padding: 0 15px;
+  /* .login-form-wrapper já deve ser width: 100% de resoluções maiores */
+}
+/* Estilos para a Página de Calendário em Tela Cheia */
+
+.calendar-fullscreen-main-content {
+  padding: 0; /* Remove o padding padrão do .dashboard-main-content para ocupar mais espaço */
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Faz o conteúdo principal ocupar toda a altura da viewport */
+}
+
+.calendar-fullscreen-main-content .calendar-fullscreen-header {
+  flex-shrink: 0; /* Impede que o header encolha */
+  margin-bottom: 0; /* Remove a margem inferior padrão do header */
+  border-radius: 0; /* Remove o border-radius se o header tocar as bordas */
+  border-bottom: 1px solid var(--widget-border-color); /* Adiciona uma linha sutil abaixo do header */
+}
+
+.fullscreen-calendar-iframe-container {
+  flex-grow: 1; /* Faz este container ocupar todo o espaço vertical restante */
+  width: 100%;
+  overflow: hidden; /* Garante que o iframe não cause scroll indesejado no container */
+}
+
+.fullscreen-calendar-iframe-container iframe {
+  width: 100%;
+  height: 100%; /* Faz o iframe preencher completamente seu container */
+  border: none; /* Remove qualquer borda do iframe */
+}
+
+/* Em telas menores, o header da página de calendário pode precisar de ajustes */
+@media (max-width: 768px) {
+  .calendar-fullscreen-main-content .calendar-fullscreen-header {
+    padding: 10px 15px; /* Menor padding no header em telas pequenas */
+  }
+  .calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
+    font-size: 1.2em; /* Menor tamanho de fonte para o título */
+  }
+}
+/* Estilos para a Página de Relatório de Turnos */
+.report-page-main {
+  display: grid;
+  gap: 25px; /* Espaçamento entre widgets de filtro e resultado */
+}
+
+.filters-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  align-items: end; /* Alinha os itens (especialmente o botão) ao final */
+}
+
+.filters-form-grid .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-form-grid .form-group label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.form-control-filter {
+  padding: 8px 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family-primary);
+  font-size: 0.95em;
+  background-color: #fff; /* Fundo branco para inputs */
+}
+
+.filters-form-grid .form-group-submit {
+  /* O botão já usa .action-button, que deve se ajustar */
+  /* Se precisar de alinhamento específico para o botão: */
+  /* display: flex; justify-content: flex-start; padding-top:20px; */ /* Exemplo */
+}
+
+.report-summary-info {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: var(--light-color);
+  border: 1px solid var(--widget-border-color);
+  border-radius: var(--border-radius);
+  font-size: 0.95em;
+}
+.report-summary-info p {
+  margin: 5px 0;
+  font-weight: 500;
+}
+
+/* Reutilizando .widget-table ou uma classe específica para tabelas de relatório */
+#report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+
+#report-table th,
+#report-table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+#report-table th {
+  background: var(--table-header-background);
+  color: var(--background-color-light);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
+}
+
+.report-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end; /* Alinha botões de exportação à direita */
+}
+/* Estilos para a Página de Calendário em Tela Cheia (da etapa anterior, se ainda não adicionou) */
+.calendar-fullscreen-main-content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.calendar-fullscreen-main-content .calendar-fullscreen-header {
+  flex-shrink: 0;
+  margin-bottom: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--widget-border-color);
+}
+.fullscreen-calendar-iframe-container {
+  flex-grow: 1;
+  width: 100%;
+  overflow: hidden;
+}
+.fullscreen-calendar-iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+@media (max-width: 768px) {
+  .calendar-fullscreen-main-content .calendar-fullscreen-header {
+    padding: 10px 15px;
+  }
+  .calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
+    font-size: 1.2em;
   }
 }
 
-/* Estilos para placeholder flutuante - Mantidos como antes */
-.input-group {
-  width: 100%;
-  position: relative;
-  border-bottom: 2px solid var(--input-border-color);
+/* Estilos para a Página de Relatório de Turnos */
+.report-page-main {
+  display: grid;
+  gap: 25px;
 }
-.input-field {
-  /* Este é para os inputs de login, pode precisar de ajustes se reutilizado */
+
+.report-filters-widget,
+.report-display-widget {
+  /* Herda estilos de .dashboard-widget, mas pode adicionar específicos se necessário */
+}
+
+.filters-form-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  ); /* Ajustado para mais colunas se necessário */
+  gap: 20px; /* Espaçamento entre os campos de filtro */
+  align-items: end;
+}
+
+.filters-form-grid .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-form-grid .form-group label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.9em;
+  color: var(--primary-text-color);
+}
+
+.form-control-filter {
+  padding: 10px 12px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family-primary);
+  font-size: 1em; /* Tamanho de fonte consistente */
+  background-color: #fff;
+  box-sizing: border-box;
+  width: 100%; /* Ocupa todo o espaço do grid cell */
+}
+.filters-form-grid .form-group-submit button.action-button {
+  padding-top: 12px; /* Ajuste para alinhar melhor com inputs */
+  padding-bottom: 12px;
+  width: 100%; /* Botão ocupa toda a célula do grid */
+}
+
+.report-summary-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: var(--light-color);
+  border: 1px solid var(--widget-border-color);
+  border-radius: var(--border-radius);
+  font-size: 1em;
+}
+.report-summary-info p {
+  margin: 5px 0;
+  font-weight: 500;
+  color: var(--highlight-text-color);
+}
+.report-summary-info p strong {
+  color: var(--primary-color);
+}
+.report-summary-info small {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.85em;
+  color: var(--secondary-text-color);
+}
+
+#report-table {
+  /* Reutilizando estilos de tabela já existentes, se houver widget-table */
   width: 100%;
-  height: 52px;
-  padding: 0 5px;
-  background: transparent;
-  font-size: 18px;
-  color: var(--input-field-text-color);
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 0.9em;
+}
+
+#report-table th,
+#report-table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+#report-table th {
+  background: var(--table-header-background);
+  color: var(--background-color-light);
+  text-align: center; /* Centraliza cabeçalhos */
   font-weight: 600;
-  border: none;
-  outline: none;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
 }
-.input-focus-effect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+#report-table td:nth-child(3) {
+  /* Duração */
+  text-align: center;
 }
-.input-focus-effect::after {
-  content: attr(data-placeholder);
-  position: absolute;
-  top: 15px;
-  left: 5px;
-  font-size: 18px;
-  color: var(--secondary-text-color); /* Alterado para secondary */
-  transition: all 0.4s ease;
-}
-.input-field:focus + .input-focus-effect::after,
-.input-field.has-val + .input-focus-effect::after {
-  top: -20px;
-  font-size: 15px;
+
+.report-actions {
+  margin-top: 25px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
 }
