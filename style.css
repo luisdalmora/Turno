@@ -823,3 +823,129 @@ body.dashboard-body-background {
     padding: 6px 10px;
   }
 }
+/* Adicione estas regras ao final do seu style.css */
+
+/* Estilos para a página de Gerenciar Colaboradores */
+.manage-collaborators-main .dashboard-widget h2 {
+  margin-bottom: 0; /* Ajusta se o botão estiver na mesma linha do h2 */
+}
+
+/* #collaborators-table th,*/
+/* #collaborators-table td {*/
+/* white-space: normal; Permite quebra de linha se o nome for muito longo */
+/* vertical-align: middle; */
+
+#collaborators-table .status-ativo {
+  color: var(--success-color);
+  font-weight: bold;
+}
+#collaborators-table .status-inativo {
+  color: var(--danger-color);
+  font-style: italic;
+}
+
+#collaborators-table .actions-cell button {
+  margin-right: 5px;
+  padding: 5px 8px; /* Botões de ação da tabela um pouco menores */
+  font-size: 0.85em;
+}
+#collaborators-table .actions-cell button i {
+  margin-right: 4px;
+}
+
+/* Estilos para o Modal de Edição */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Acima de outros conteúdos */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+.modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 500px; /* Largura máxima do modal */
+  position: relative;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.show .modal-content {
+  transform: scale(1);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: var(--highlight-text-color);
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.form-group-modal {
+  margin-bottom: 20px;
+}
+.form-group-modal label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--primary-text-color);
+}
+.form-group-modal input[type="text"],
+.form-group-modal input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius);
+  font-size: 1em;
+  box-sizing: border-box;
+}
+.form-group-modal input[type="text"]:focus,
+.form-group-modal input[type="email"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--primary-color) 25%, transparent);
+  outline: none;
+}
+
+.modal-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-actions .action-button.secondary {
+  background-color: var(--secondary-color);
+}
+.modal-actions .action-button.secondary:hover {
+  background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 1.8em;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close-button:hover {
+  color: var(--danger-color);
+}

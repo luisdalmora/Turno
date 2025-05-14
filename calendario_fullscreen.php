@@ -6,6 +6,7 @@ if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
     exit;
 }
 $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
+$emailUsuarioLogado = $_SESSION['usuario_email'] ?? 'primary'; // Usa email do usuário para o calendário principal
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -19,7 +20,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  </head>
+</head>
 
 <body class="dashboard-body-background">
   <div class="dashboard-layout-container">
@@ -31,8 +32,8 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         <ul>
           <li class="sidebar-nav-item"><a href="home.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
           <li class="sidebar-nav-item"><a href="relatorio_turnos.php"><i class="fas fa-file-alt"></i> Relatórios</a></li>
-          <li class="sidebar-nav-item"><a href="#"><i class="fas fa-users"></i> Colaboradores</a></li> 
-          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.html"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
+          <li class="sidebar-nav-item"><a href="gerenciar_colaboradores.php"><i class="fas fa-users"></i> Colaboradores</a></li> 
+          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.php"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
           <li class="sidebar-nav-item active"><a href="calendario_fullscreen.php"><i class="fab fa-google"></i> Google Calendar</a></li>
         </ul>
       </nav>
@@ -51,7 +52,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         </div>
       </header>
       <main class="fullscreen-calendar-iframe-container">
-        <iframe src="https://calendar.google.com/calendar/embed?src=<?php echo urlencode($_SESSION['usuario_email'] ?? 'primary'); ?>&src=pt-br.brazilian%23holiday%40group.v.calendar.google.com&ctz=America%2FSao_Paulo"
+        <iframe src="https://calendar.google.com/calendar/embed?src=<?php echo urlencode($emailUsuarioLogado); ?>&src=pt-br.brazilian%23holiday%40group.v.calendar.google.com&ctz=America%2FSao_Paulo"
                 width="100%" height="100%" style="border:none;" frameborder="0" scrolling="no"></iframe>
       </main>
     </div>

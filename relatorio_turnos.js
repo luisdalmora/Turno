@@ -7,56 +7,51 @@ document.addEventListener("DOMContentLoaded", function () {
   const generateReportButton = document.getElementById(
     "generate-report-button"
   );
-  // const exportCsvButton = document.getElementById('export-csv-button'); // Desabilitado por enquanto
+  const csrfTokenReportPage = document.getElementById("csrf-token-reports"); // Token CSRF específico desta página
 
-  // Tenta usar a função global de script.js, se disponível, ou define uma local
-  const buscarColaboradoresGlobal =
+  // Usa funções globais de script.js se disponíveis
+  const buscarColaboradoresGlobais =
     typeof buscarEArmazenarColaboradores === "function"
       ? buscarEArmazenarColaboradores
       : null;
-  const showToastGlobal = typeof showToast === "function" ? showToast : alert; // Fallback para alert se showToast não estiver global
+  const showToastGlobal =
+    typeof showToast === "function"
+      ? showToast
+      : (message, type) => alert(`${type}: ${message}`);
 
-  async function carregarColaboradoresParaFiltro() {
+  async function carregarColaboradoresParaFiltroRelatorio() {
     let colaboradores = [];
-    if (buscarColaboradoresGlobal) {
-      colaboradores = await buscarColaboradoresGlobal();
+    if (buscarColaboradoresGlobais) {
+      colaboradores = await buscarColaboradoresGlobais(); // Reutiliza a função e cache global
     } else {
-      // Fallback se a função global não estiver disponível (improvável se script.js é carregado antes)
+      // Fallback muito básico se a função global não estiver carregada (improvável)
       try {
         const response = await fetch("obter_colaboradores.php");
         const data = await response.json();
-        if (data.success && data.colaboradores) {
+        if (data.success && data.colaboradores)
           colaboradores = data.colaboradores;
-        } else {
-          showToastGlobal(
-            "Falha ao carregar colaboradores para filtro: " +
-              (data.message || "Erro desconhecido"),
-            "error"
-          );
-        }
       } catch (e) {
-        showToastGlobal(
-          "Erro crítico ao carregar colaboradores para filtro: " + e.message,
-          "error"
-        );
+        console.error("Fallback: Erro ao buscar colaboradores", e);
       }
     }
 
     if (filtroColaboradorSelect) {
       filtroColaboradorSelect.innerHTML =
-        '<option value="">Todos os Colaboradores</option>'; // Limpa e adiciona default
-      colaboradores.forEach((colab) => {
-        const option = document.createElement("option");
-        option.value = colab.nome_completo; // Backend filtrará por nome_completo
-        option.textContent = colab.nome_completo;
-        filtroColaboradorSelect.appendChild(option);
-      });
+        '<option value="">Todos os Colaboradores</option>';
+      if (Array.isArray(colaboradores)) {
+        colaboradores.forEach((colab) => {
+          const option = document.createElement("option");
+          option.value = colab.nome_completo; // Assumindo que o backend filtra por nome
+          option.textContent = colab.nome_completo;
+          filtroColaboradorSelect.appendChild(option);
+        });
+      }
     }
   }
 
   function exibirDadosRelatorio(turnos, totalHoras, totalTurnos) {
     if (!reportTableBody) return;
-    reportTableBody.innerHTML = ""; // Limpa a tabela
+    reportTableBody.innerHTML = "";
 
     if (turnos && turnos.length > 0) {
       turnos.forEach((turno) => {
@@ -65,12 +60,12 @@ document.addEventListener("DOMContentLoaded", function () {
         row.insertCell().textContent = turno.colaborador;
         row.insertCell().textContent = turno.hora_inicio_formatada;
         row.insertCell().textContent = turno.hora_fim_formatada;
-        row.insertCell().textContent = turno.duracao_formatada; // Ex: "04h30min"
+        row.insertCell().textContent = turno.duracao_formatada;
       });
     } else {
       const row = reportTableBody.insertRow();
       const cell = row.insertCell();
-      cell.colSpan = 5; // Ajustado para 5 colunas
+      cell.colSpan = 5;
       cell.textContent =
         "Nenhum turno encontrado para os filtros selecionados.";
       cell.style.textAlign = "center";
@@ -90,12 +85,12 @@ document.addEventListener("DOMContentLoaded", function () {
           "<p>Nenhum turno encontrado para exibir o resumo.</p>";
       }
     }
-    // if (exportCsvButton) exportCsvButton.style.display = (turnos && turnos.length > 0) ? 'inline-flex' : 'none';
   }
 
   if (reportFiltersForm) {
     reportFiltersForm.addEventListener("submit", async function (event) {
       event.preventDefault();
+      const originalButtonHtml = generateReportButton.innerHTML;
       if (generateReportButton) {
         generateReportButton.disabled = true;
         generateReportButton.innerHTML =
@@ -107,8 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const colaborador = filtroColaboradorSelect
         ? filtroColaboradorSelect.value
         : "";
-      const csrfTokenEl = document.getElementById("csrf-token-reports");
-      const csrfToken = csrfTokenEl ? csrfTokenEl.value : null;
+      const csrfToken = csrfTokenReportPage ? csrfTokenReportPage.value : null;
 
       if (!dataInicio || !dataFim) {
         showToastGlobal(
@@ -117,8 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         if (generateReportButton) {
           generateReportButton.disabled = false;
-          generateReportButton.innerHTML =
-            '<i class="fas fa-search"></i> Gerar Relatório';
+          generateReportButton.innerHTML = originalButtonHtml;
         }
         return;
       }
@@ -129,8 +122,18 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         if (generateReportButton) {
           generateReportButton.disabled = false;
-          generateReportButton.innerHTML =
-            '<i class="fas fa-search"></i> Gerar Relatório';
+          generateReportButton.innerHTML = originalButtonHtml;
+        }
+        return;
+      }
+      if (!csrfToken) {
+        showToastGlobal(
+          "Erro de segurança (token ausente). Recarregue a página.",
+          "error"
+        );
+        if (generateReportButton) {
+          generateReportButton.disabled = false;
+          generateReportButton.innerHTML = originalButtonHtml;
         }
         return;
       }
@@ -139,19 +142,15 @@ document.addEventListener("DOMContentLoaded", function () {
         data_inicio: dataInicio,
         data_fim: dataFim,
         colaborador: colaborador,
-        csrf_token: csrfToken, // CSRF token também como parâmetro GET para consistência com POST, ou adaptar backend
+        csrf_token: csrfToken,
       });
 
-      // Ou enviar como POST se preferir para não expor filtros na URL, ajustando o backend
-      // const payload = { data_inicio: dataInicio, data_fim: dataFim, colaborador: colaborador, csrf_token: csrfToken};
+      reportTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Buscando dados... <i class="fas fa-spinner fa-spin"></i></td></tr>`;
 
       try {
-        // const response = await fetch('gerar_relatorio_turnos.php', {
-        //    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
-        // });
         const response = await fetch(
           `gerar_relatorio_turnos.php?${params.toString()}`
-        ); // Usando GET por simplicidade
+        ); // Usando GET
         const data = await response.json();
 
         if (!response.ok) {
@@ -164,9 +163,9 @@ document.addEventListener("DOMContentLoaded", function () {
             data.total_geral_horas,
             data.total_turnos
           );
-          if (data.csrf_token && csrfTokenEl) {
-            // Atualiza o token CSRF da página de relatório
-            csrfTokenEl.value = data.csrf_token;
+          if (data.csrf_token && csrfTokenReportPage) {
+            // Atualiza o token CSRF da página
+            csrfTokenReportPage.value = data.csrf_token;
           }
         } else {
           showToastGlobal(
@@ -179,41 +178,31 @@ document.addEventListener("DOMContentLoaded", function () {
       } catch (error) {
         console.error("Erro na requisição do relatório:", error);
         showToastGlobal(
-          `Erro crítico ao buscar dados do relatório: ${error.message}`,
+          `Erro crítico ao buscar dados: ${error.message}`,
           "error"
         );
         exibirDadosRelatorio([], 0, 0);
       } finally {
         if (generateReportButton) {
           generateReportButton.disabled = false;
-          generateReportButton.innerHTML =
-            '<i class="fas fa-search"></i> Gerar Relatório';
+          generateReportButton.innerHTML = originalButtonHtml;
         }
       }
     });
   }
 
   // Inicialização da página de relatórios
-  if (filtroColaboradorSelect) {
-    // Se estiver na página de relatórios
-    carregarColaboradoresParaFiltro();
+  if (document.getElementById("report-filters-form")) {
+    // Só executa se estiver na página de relatórios
+    carregarColaboradoresParaFiltroRelatorio();
 
-    // Define datas padrão para os filtros (ex: mês atual)
     const hoje = new Date();
     const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     const ultimoDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-
     const dataInicioInput = document.getElementById("filtro-data-inicio");
     const dataFimInput = document.getElementById("filtro-data-fim");
 
     if (dataInicioInput) dataInicioInput.valueAsDate = primeiroDiaDoMes;
     if (dataFimInput) dataFimInput.valueAsDate = ultimoDiaDoMes;
   }
-
-  // if (exportCsvButton) {
-  //     exportCsvButton.addEventListener('click', function() {
-  //         // Lógica para exportar CSV (pegar dados da tabela ou fazer nova requisição com flag de exportação)
-  //         showToastGlobal("Funcionalidade de Exportar CSV a ser implementada.", "info");
-  //     });
-  // }
 });

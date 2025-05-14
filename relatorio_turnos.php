@@ -12,11 +12,11 @@ if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
     exit;
 }
 
-// Gerar/obter token CSRF
-if (empty($_SESSION['csrf_token']) || $_SERVER['REQUEST_METHOD'] === 'GET') { // Garante um token para GET também
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+// Gerar/obter token CSRF para esta página
+if (empty($_SESSION['csrf_token_reports'])) { // Usando um nome de token específico para esta página/formulário
+    $_SESSION['csrf_token_reports'] = bin2hex(random_bytes(32));
 }
-$csrfToken = $_SESSION['csrf_token'];
+$csrfTokenReports = $_SESSION['csrf_token_reports'];
 
 $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
 ?>
@@ -32,7 +32,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  </head>
+</head>
 
 <body class="dashboard-body-background">
   <div class="dashboard-layout-container">
@@ -44,8 +44,8 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         <ul>
           <li class="sidebar-nav-item"><a href="home.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
           <li class="sidebar-nav-item active"><a href="relatorio_turnos.php"><i class="fas fa-file-alt"></i> Relatórios</a></li>
-          <li class="sidebar-nav-item"><a href="#"><i class="fas fa-users"></i> Colaboradores</a></li> 
-          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.html"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
+          <li class="sidebar-nav-item"><a href="gerenciar_colaboradores.php"><i class="fas fa-users"></i> Colaboradores</a></li> 
+          <li class="sidebar-nav-item"><a href="cadastrar_colaborador.php"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li>
           <li class="sidebar-nav-item"><a href="calendario_fullscreen.php"><i class="fab fa-google"></i> Google Calendar</a></li>
         </ul>
       </nav>
@@ -68,7 +68,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
         <section class="dashboard-widget report-filters-widget">
           <h2><i class="fas fa-filter"></i> Filtros do Relatório</h2>
           <form id="report-filters-form" class="filters-form-grid">
-            <input type="hidden" id="csrf-token-reports" value="<?php echo htmlspecialchars($csrfToken); ?>">
+            <input type="hidden" id="csrf-token-reports" value="<?php echo htmlspecialchars($csrfTokenReports); ?>">
 
             <div class="form-group">
               <label for="filtro-data-inicio">Data Início:</label>
@@ -82,7 +82,7 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
               <label for="filtro-colaborador">Colaborador:</label>
               <select id="filtro-colaborador" name="filtro-colaborador" class="form-control-filter">
                 <option value="">Todos os Colaboradores</option>
-                </select>
+              </select>
             </div>
             <div class="form-group-submit">
               <button type="submit" id="generate-report-button" class="action-button primary"><i class="fas fa-search"></i> Gerar Relatório</button>
@@ -96,7 +96,8 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
             <p>Utilize os filtros acima e clique em "Gerar Relatório".</p>
           </div>
           <div class="table-responsive">
-            <table id="report-table" class="widget-table"> <thead>
+            <table id="report-table" class="widget-table">
+              <thead>
                 <tr>
                   <th>Data</th>
                   <th>Colaborador</th>
@@ -112,10 +113,10 @@ $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
               </tbody>
             </table>
           </div>
-          </section>
+        </section>
       </main>
     </div>
   </div>
-  <script src="script.js"></script> 
-  <script src="relatorio_turnos.js"></script> </body>
+  <script src="script.js"></script> <script src="relatorio_turnos.js"></script> 
+</body>
 </html>
