@@ -425,16 +425,17 @@ body.dashboard-body-background {
   flex-grow: 1;
   min-height: 150px;
 }
-.widget-shifts-table table,
+/* Aplicar a #shifts-table-main */
+#shifts-table-main,
 .widget-employee-summary table,
 #report-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
   font-size: 0.85em;
-} /* Fonte da tabela um pouco menor */
-.widget-shifts-table th,
-.widget-shifts-table td,
+}
+#shifts-table-main th,
+#shifts-table-main td,
 .widget-employee-summary th,
 .widget-employee-summary td,
 #report-table th,
@@ -445,7 +446,7 @@ body.dashboard-body-background {
   vertical-align: middle;
   white-space: nowrap;
 }
-.widget-shifts-table th,
+#shifts-table-main th,
 .widget-employee-summary th,
 #report-table th {
   background: var(--table-header-background);
@@ -459,10 +460,10 @@ body.dashboard-body-background {
   top: 0;
   z-index: 1;
 }
-.widget-shifts-table input[type="text"],
-.widget-shifts-table input[type="time"],
-.widget-shifts-table input[type="date"],
-.widget-shifts-table .shift-employee-select {
+#shifts-table-main input[type="text"],
+#shifts-table-main input[type="time"],
+#shifts-table-main input[type="date"],
+#shifts-table-main .shift-employee-select {
   width: 100%;
   padding: 6px 8px;
   box-sizing: border-box;
@@ -473,54 +474,56 @@ body.dashboard-body-background {
   background-color: #fff;
   min-height: 36px;
 }
-.widget-shifts-table input[type="time"] {
+#shifts-table-main input[type="time"] {
   min-width: 90px;
 }
-.widget-shifts-table input[type="text"]:focus,
-.widget-shifts-table input[type="time"]:focus,
-.widget-shifts-table input[type="date"]:focus,
-.widget-shifts-table .shift-employee-select:focus {
+#shifts-table-main input[type="text"]:focus,
+#shifts-table-main input[type="time"]:focus,
+#shifts-table-main input[type="date"]:focus,
+#shifts-table-main .shift-employee-select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px
     color-mix(in srgb, var(--primary-color) 25%, transparent);
   outline: none;
 }
-/* Colunas da tabela de turnos em home.php */
-#shifts-table-may th:nth-child(1),
-#shifts-table-may td:nth-child(1) {
+
+/* Colunas da tabela de turnos em home.php (ID #shifts-table-main) */
+#shifts-table-main th:nth-child(1),
+#shifts-table-main td:nth-child(1) {
   width: 35px;
   min-width: 35px;
   text-align: center;
 } /* Checkbox */
-#shifts-table-may th:nth-child(2),
-#shifts-table-may td:nth-child(2) {
+#shifts-table-main th:nth-child(2),
+#shifts-table-main td:nth-child(2) {
   min-width: 90px;
 } /* Dia */
-#shifts-table-may th:nth-child(3),
-#shifts-table-may td:nth-child(3) {
+#shifts-table-main th:nth-child(3),
+#shifts-table-main td:nth-child(3) {
   min-width: 90px;
 } /* Hora Início */
-#shifts-table-may th:nth-child(4),
-#shifts-table-may td:nth-child(4) {
+#shifts-table-main th:nth-child(4),
+#shifts-table-main td:nth-child(4) {
   min-width: 90px;
 } /* Hora Fim */
-#shifts-table-may th:nth-child(5),
-#shifts-table-may td:nth-child(5) {
+#shifts-table-main th:nth-child(5),
+#shifts-table-main td:nth-child(5) {
   min-width: 160px;
   width: auto;
 } /* Colaborador */
-#shifts-table-may th:nth-child(6),
-#shifts-table-may td:nth-child(6) {
-  display: none;
-} /* GCal ID */
-#shifts-table-may th:nth-child(7),
-#shifts-table-may td:nth-child(7) {
-  width: 90px;
-  min-width: 90px;
-  text-align: center;
-} /* Ações */
 
-.widget-shifts-table td.actions-cell {
+/* As colunas 6 (GCal ID) e 7 (Ações/Botões) foram removidas do JS, 
+   então os estilos específicos para elas podem ser removidos ou comentados.
+   Exemplo de como eram antes para referência (usando o ID antigo #shifts-table-may):
+*/
+/* #shifts-table-may th:nth-child(6),
+#shifts-table-may td:nth-child(6) { display: none; } 
+#shifts-table-may th:nth-child(7),
+#shifts-table-may td:nth-child(7) { width: 90px; min-width: 90px; text-align: center; } 
+*/
+
+#shifts-table-main td.actions-cell {
+  /* Este seletor pode não ser mais usado se a célula foi removida */
   text-align: center;
   white-space: nowrap;
 }
@@ -565,8 +568,6 @@ body.dashboard-body-background {
   max-width: 100%;
   max-height: 280px;
 }
-/*.widget-employee-summary {*/
-/* max-width: 420px; */ /* Para limitar se necessário */
 
 /* Navegação de Mês/Ano para Tabela de Turnos */
 .shifts-table-navigation {
@@ -638,9 +639,7 @@ body.dashboard-body-background {
   padding-top: 12px;
   padding-bottom: 12px;
   width: 100%;
-  margin-top: var(
-    --spacing-xsmall
-  ); /* Para alinhar com labels se não houver label */
+  margin-top: var(--spacing-xsmall);
 }
 .report-summary-info {
   margin-bottom: var(--spacing-small);
@@ -666,7 +665,7 @@ body.dashboard-body-background {
 }
 #report-table th:nth-child(3) {
   text-align: center;
-} /* Duração no relatório */
+}
 .report-actions {
   margin-top: var(--spacing-small);
   display: flex;
@@ -823,17 +822,11 @@ body.dashboard-body-background {
     padding: 6px 10px;
   }
 }
-/* Adicione estas regras ao final do seu style.css */
 
 /* Estilos para a página de Gerenciar Colaboradores */
 .manage-collaborators-main .dashboard-widget h2 {
-  margin-bottom: 0; /* Ajusta se o botão estiver na mesma linha do h2 */
+  margin-bottom: 0;
 }
-
-/* #collaborators-table th,*/
-/* #collaborators-table td {*/
-/* white-space: normal; Permite quebra de linha se o nome for muito longo */
-/* vertical-align: middle; */
 
 #collaborators-table .status-ativo {
   color: var(--success-color);
@@ -846,7 +839,7 @@ body.dashboard-body-background {
 
 #collaborators-table .actions-cell button {
   margin-right: 5px;
-  padding: 5px 8px; /* Botões de ação da tabela um pouco menores */
+  padding: 5px 8px;
   font-size: 0.85em;
 }
 #collaborators-table .actions-cell button i {
@@ -864,7 +857,7 @@ body.dashboard-body-background {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Acima de outros conteúdos */
+  z-index: 1000;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0s 0.3s;
@@ -881,7 +874,7 @@ body.dashboard-body-background {
   border-radius: var(--border-radius);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 500px; /* Largura máxima do modal */
+  max-width: 500px;
   position: relative;
   transform: scale(0.9);
   transition: transform 0.3s ease;

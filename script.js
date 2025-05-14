@@ -149,7 +149,7 @@ async function popularTabelaTurnos(turnos) {
   if (!turnos || turnos.length === 0) {
     const r = corpoTabela.insertRow();
     const c = r.insertCell();
-    c.colSpan = 7;
+    c.colSpan = 5; // Ajustado de 7 para 5
     c.textContent = "Nenhum turno programado para este período.";
     c.style.textAlign = "center";
     return;
@@ -191,33 +191,34 @@ async function popularTabelaTurnos(turnos) {
     popularSelectColaborador(selColab, turno.colaborador);
     cellColab.appendChild(selColab);
 
-    const cellGCal = nLinha.insertCell();
-    cellGCal.className = "shift-google-event-id";
-    cellGCal.textContent = turno.google_calendar_event_id || "N/A";
+    // REMOÇÃO DA CÉLULA DE GCAL ID E CÉLULA DE AÇÕES
+    // const cellGCal = nLinha.insertCell();
+    // cellGCal.className = "shift-google-event-id";
+    // cellGCal.textContent = turno.google_calendar_event_id || "N/A";
 
-    const cellAcoes = nLinha.insertCell();
-    cellAcoes.className = "actions-cell";
-    const btnEdit = document.createElement("button");
-    btnEdit.innerHTML = '<i class="fas fa-edit"></i>';
-    btnEdit.title = "Editar";
-    btnEdit.className = "btn-table-action edit";
-    btnEdit.onclick = () =>
-      showToast(
-        "Modifique os campos na linha e clique em 'Salvar Alterações'.",
-        "info"
-      );
-    cellAcoes.appendChild(btnEdit);
-    const btnDel = document.createElement("button");
-    btnDel.innerHTML = '<i class="fas fa-trash-alt"></i>';
-    btnDel.title = "Excluir";
-    btnDel.className = "btn-table-action delete";
-    const csrfTokenEl = document.getElementById("csrf-token-shifts");
-    btnDel.onclick = () =>
-      excluirTurnosNoServidor(
-        [turno.id],
-        csrfTokenEl ? csrfTokenEl.value : null
-      );
-    cellAcoes.appendChild(btnDel);
+    // const cellAcoes = nLinha.insertCell();
+    // cellAcoes.className = "actions-cell";
+    // const btnEdit = document.createElement("button");
+    // btnEdit.innerHTML = '<i class="fas fa-edit"></i>';
+    // btnEdit.title = "Editar";
+    // btnEdit.className = "btn-table-action edit";
+    // btnEdit.onclick = () =>
+    //   showToast(
+    //     "Modifique os campos na linha e clique em 'Salvar Alterações'.",
+    //     "info"
+    //   );
+    // cellAcoes.appendChild(btnEdit);
+    // const btnDel = document.createElement("button");
+    // btnDel.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    // btnDel.title = "Excluir";
+    // btnDel.className = "btn-table-action delete";
+    // const csrfTokenEl = document.getElementById("csrf-token-shifts");
+    // btnDel.onclick = () =>
+    //   excluirTurnosNoServidor(
+    //     [turno.id],
+    //     csrfTokenEl ? csrfTokenEl.value : null
+    //   );
+    // cellAcoes.appendChild(btnDel);
   });
 }
 
@@ -287,7 +288,9 @@ function coletarDadosDaTabelaDeTurnos() {
       : new Date().getFullYear();
 
   linhas.forEach((linha) => {
+    // Verifica se a linha é a de "Nenhum turno..." ou "Carregando..."
     if (linha.cells.length === 1 && linha.cells[0].colSpan > 1) return;
+
     const dataIn = linha.querySelector(".shift-date");
     const horaInicioIn = linha.querySelector(".shift-time-inicio");
     const horaFimIn = linha.querySelector(".shift-time-fim");
@@ -482,7 +485,6 @@ function updateCurrentMonthYearDisplay() {
     "employee-summary-period"
   );
   if (displayElement) {
-    // nomesMeses é 1-indexado para o nome do mês, currentDisplayMonth também é 1-12
     const monthName =
       nomesMeses[currentDisplayMonth] || `Mês ${currentDisplayMonth}`;
     const displayHTML = `<i class="fas fa-tasks"></i> Turnos - ${monthName} ${currentDisplayYear}`;
@@ -502,7 +504,8 @@ async function carregarTurnosDoServidor(
 ) {
   const shiftsTableBody = document.querySelector("#shifts-table-main tbody");
   if (shiftsTableBody) {
-    shiftsTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Carregando turnos... <i class="fas fa-spinner fa-spin"></i></td></tr>`;
+    // Ajustado colspan de 7 para 5
+    shiftsTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Carregando turnos... <i class="fas fa-spinner fa-spin"></i></td></tr>`;
   } else {
     return;
   }
@@ -731,23 +734,22 @@ document.addEventListener("DOMContentLoaded", async function () {
       popularSelectColaborador(selColab);
       cell.appendChild(selColab);
 
-      // GCal ID (oculto)
-      cell = nLinha.insertCell();
-      cell.className = "shift-google-event-id";
-      cell.textContent = "Pendente";
+      // REMOÇÃO DA CÉLULA DE GCAL ID E AÇÕES
+      // cell = nLinha.insertCell();
+      // cell.className = "shift-google-event-id";
+      // cell.textContent = "Pendente";
 
-      // Ações
-      cell = nLinha.insertCell();
-      cell.className = "actions-cell";
-      const btnDel = document.createElement("button");
-      btnDel.innerHTML = '<i class="fas fa-trash-alt"></i>';
-      btnDel.title = "Remover";
-      btnDel.className = "btn-table-action delete";
-      btnDel.onclick = () => {
-        nLinha.remove();
-        if (tbody.rows.length === 0) popularTabelaTurnos([]);
-      };
-      cell.appendChild(btnDel);
+      // cell = nLinha.insertCell();
+      // cell.className = "actions-cell";
+      // const btnDel = document.createElement("button");
+      // btnDel.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      // btnDel.title = "Remover";
+      // btnDel.className = "btn-table-action delete";
+      // btnDel.onclick = () => {
+      //   nLinha.remove();
+      //   if (tbody.rows.length === 0) popularTabelaTurnos([]);
+      // };
+      // cell.appendChild(btnDel);
     });
   }
 
@@ -883,8 +885,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const chk = () => inp.classList.toggle("has-val", inp.value.trim() !== "");
     inp.addEventListener("blur", chk);
     inp.addEventListener("input", chk);
-    // Verifica no carregamento (útil para campos preenchidos por autocomplete do navegador)
-    // Usar um pequeno timeout para dar chance ao autocomplete de preencher
     setTimeout(chk, 100);
   });
 });
