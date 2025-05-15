@@ -1,7 +1,7 @@
 <?php
 // gerenciar_observacao_geral.php
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/conexao.php';
+require_once __DIR__ . '/conexao.php'; // SQLSRV
 require_once __DIR__ . '/LogHelper.php';
 
 $logger = new LogHelper($conexao);
@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 
 $settingKey = 'observacoes_gerais';
 $novoCsrfTokenParaCliente = null;
-$csrfTokenSessionKey = 'csrf_token_obs_geral'; // Token específico
+$csrfTokenSessionKey = 'csrf_token_obs_geral';
 
 // --- Verificação de Sessão e CSRF Token ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,32 +43,53 @@ $userId = $_SESSION['usuario_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $sql = "SELECT setting_value FROM system_settings WHERE setting_key = ?";
-    $stmt = mysqli_prepare($conexao, $sql);
-    mysqli_stmt_bind_param($stmt, "s", $settingKey);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $row = mysqli_fetch_assoc($result);
-    mysqli_stmt_close($stmt);
+    $params = array($settingKey);
+    $stmt = sqlsrv_query($conexao, $sql, $params); // Para SELECT com parâmetros simples
 
-    $observacao = $row ? $row['setting_value'] : '';
-    echo json_encode(['success' => true, 'observacao' => $observacao, 'csrf_token' => $novoCsrfTokenParaCliente]);
+    if ($stmt) {
+        $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        sqlsrv_free_stmt($stmt);
+        $observacao = $row ? $row['setting_value'] : '';
+        echo json_encode(['success' => true, 'observacao' => $observacao, 'csrf_token' => $novoCsrfTokenParaCliente]);
+    } else {
+        $errors = sqlsrv_errors(SQLSRV_ERR_ALL);
+        $logger->log('ERROR', 'Falha ao buscar observação geral (SQLSRV).', ['user_id' => $userId, 'setting_key' => $settingKey, 'errors_sqlsrv' => $errors]);
+        echo json_encode(['success' => false, 'message' => 'Erro ao buscar observação.', 'csrf_token' => $novoCsrfTokenParaCliente]);
+    }
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $observacaoConteudo = $input['observacao'] ?? '';
 
-    $sql = "INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)";
-    $stmt = mysqli_prepare($conexao, $sql);
-    mysqli_stmt_bind_param($stmt, "ss", $settingKey, $observacaoConteudo);
+    // SQL Server MERGE statement para funcionalidade "upsert"
+    $sql_merge = "
+        MERGE system_settings AS Target
+        USING (VALUES (?, ?)) AS Source (setting_key_s, setting_value_s)
+        ON Target.setting_key = Source.setting_key_s
+        WHEN MATCHED THEN
+            UPDATE SET Target.setting_value = Source.setting_value_s
+        WHEN NOT MATCHED BY TARGET THEN
+            INSERT (setting_key, setting_value) VALUES (Source.setting_key_s, Source.setting_value_s);
+    ";
+    $params_merge = array($settingKey, $observacaoConteudo);
+    $stmt_merge = sqlsrv_prepare($conexao, $sql_merge, $params_merge);
 
-    if (mysqli_stmt_execute($stmt)) {
-        $logger->log('INFO', 'Observação geral salva.', ['user_id' => $userId, 'setting_key' => $settingKey]);
-        echo json_encode(['success' => true, 'message' => 'Observação geral salva com sucesso!', 'csrf_token' => $novoCsrfTokenParaCliente]);
+    if ($stmt_merge) {
+        if (sqlsrv_execute($stmt_merge)) {
+            $logger->log('INFO', 'Observação geral salva (SQLSRV).', ['user_id' => $userId, 'setting_key' => $settingKey]);
+            echo json_encode(['success' => true, 'message' => 'Observação geral salva com sucesso!', 'csrf_token' => $novoCsrfTokenParaCliente]);
+        } else {
+            $errors = sqlsrv_errors(SQLSRV_ERR_ALL);
+            $logger->log('ERROR', 'Falha ao salvar observação geral (SQLSRV execute).', ['user_id' => $userId, 'errors_sqlsrv' => $errors]);
+            echo json_encode(['success' => false, 'message' => 'Erro ao salvar observação geral.', 'csrf_token' => $novoCsrfTokenParaCliente]);
+        }
+        sqlsrv_free_stmt($stmt_merge);
     } else {
-        $logger->log('ERROR', 'Falha ao salvar observação geral.', ['user_id' => $userId, 'error' => mysqli_stmt_error($stmt)]);
-        echo json_encode(['success' => false, 'message' => 'Erro ao salvar observação geral.', 'csrf_token' => $novoCsrfTokenParaCliente]);
+        $errors = sqlsrv_errors(SQLSRV_ERR_ALL);
+        $logger->log('ERROR', 'Falha ao preparar MERGE para observação geral (SQLSRV).', ['user_id' => $userId, 'errors_sqlsrv' => $errors]);
+        echo json_encode(['success' => false, 'message' => 'Erro no sistema ao tentar salvar observação.', 'csrf_token' => $novoCsrfTokenParaCliente]);
     }
-    mysqli_stmt_close($stmt);
 }
 
-mysqli_close($conexao);
+if ($conexao) {
+    sqlsrv_close($conexao);
+}

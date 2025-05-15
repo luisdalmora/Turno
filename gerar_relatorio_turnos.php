@@ -1,28 +1,24 @@
 <?php
 // gerar_relatorio_turnos.php
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/conexao.php';
+require_once __DIR__ . '/conexao.php'; // SQLSRV
 require_once __DIR__ . '/LogHelper.php';
 
 $logger = new LogHelper($conexao);
 header('Content-Type: application/json');
 
-// --- Verificação de Sessão e CSRF Token (para GET neste caso) ---
+// --- Verificação de Sessão e CSRF Token ---
 if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
     echo json_encode(['success' => false, 'message' => 'Acesso negado. Sessão inválida.']); exit;
 }
 $userId = $_SESSION['usuario_id'];
 
-// Validação CSRF para GET (opcional, mas adiciona uma camada se o token for passado na URL)
 if (!isset($_GET['csrf_token']) || !isset($_SESSION['csrf_token_reports']) || !hash_equals($_SESSION['csrf_token_reports'], $_GET['csrf_token'])) {
     $logger->log('SECURITY_WARNING', 'Falha CSRF token em gerar_relatorio_turnos (GET).', ['user_id' => $userId]);
-    // Não vamos ser tão estritos com GET, mas podemos logar. Em POST seria fatal.
-    // echo json_encode(['success' => false, 'message' => 'Erro de segurança (token inválido).']); exit; 
+    // Não seremos tão estritos com GET para este exemplo, mas em produção considere o impacto.
 }
-// Para GET, geralmente não se regenera o token da sessão, mas se o cliente espera um novo:
-$_SESSION['csrf_token_reports'] = bin2hex(random_bytes(32)); // Regenera para a próxima
+$_SESSION['csrf_token_reports'] = bin2hex(random_bytes(32));
 $novoCsrfTokenParaCliente = $_SESSION['csrf_token_reports'];
-
 
 $data_inicio_str = $_GET['data_inicio'] ?? null;
 $data_fim_str = $_GET['data_fim'] ?? null;
@@ -43,46 +39,46 @@ try {
     echo json_encode(['success' => false, 'message' => 'Formato de data inválido (esperado YYYY-MM-DD).', 'csrf_token' => $novoCsrfTokenParaCliente]); exit;
 }
 
+// Ajustes para SQL Server: FORMAT para data e hora
 $sql = "SELECT 
             t.data, /* Data original para cálculo preciso da duração */
-            DATE_FORMAT(t.data, '%d/%m/%Y') AS data_formatada, 
+            FORMAT(t.data, 'dd/MM/yyyy') AS data_formatada, 
             t.colaborador, 
             t.hora_inicio,
             t.hora_fim,
-            TIME_FORMAT(t.hora_inicio, '%H:%i') AS hora_inicio_formatada,
-            TIME_FORMAT(t.hora_fim, '%H:%i') AS hora_fim_formatada
+            FORMAT(CAST(t.hora_inicio AS TIME), 'HH:mm') AS hora_inicio_formatada, /* Cast para TIME antes de formatar se hora_inicio for DATETIME */
+            FORMAT(CAST(t.hora_fim AS TIME), 'HH:mm') AS hora_fim_formatada     /* Cast para TIME antes de formatar se hora_fim for DATETIME */
         FROM 
             turnos t
         WHERE 
             t.data BETWEEN ? AND ? 
             AND t.criado_por_usuario_id = ? ";
 
-$params = [$data_inicio_obj->format('Y-m-d'), $data_fim_obj->format('Y-m-d'), $userId];
-$types = "ssi";
+$params_query = array($data_inicio_obj->format('Y-m-d'), $data_fim_obj->format('Y-m-d'), $userId);
 
 if (!empty($colaborador_filtro)) {
     $sql .= " AND t.colaborador = ? ";
-    $params[] = $colaborador_filtro;
-    $types .= "s";
+    $params_query[] = $colaborador_filtro;
 }
 $sql .= " ORDER BY t.data ASC, t.colaborador ASC, t.hora_inicio ASC";
 
-$stmt = mysqli_prepare($conexao, $sql);
-if (!$stmt) {
-    $logger->log('ERROR', 'Falha ao preparar statement para gerar relatório.', ['error' => mysqli_error($conexao), 'user_id' => $userId]);
-    echo json_encode(['success' => false, 'message' => 'Erro interno ao preparar consulta.', 'csrf_token' => $novoCsrfTokenParaCliente]); exit;
+// Para SELECTs, sqlsrv_query é frequentemente usado.
+// Se for usar sqlsrv_prepare, o fluxo é sqlsrv_prepare -> sqlsrv_execute
+$stmt = sqlsrv_query($conexao, $sql, $params_query);
+
+if ($stmt === false) {
+    $errors = sqlsrv_errors(SQLSRV_ERR_ALL);
+    $logger->log('ERROR', 'Falha ao executar query para gerar relatório.', ['errors' => $errors, 'user_id' => $userId]);
+    echo json_encode(['success' => false, 'message' => 'Erro interno ao executar consulta.', 'csrf_token' => $novoCsrfTokenParaCliente]); 
+    if ($conexao) sqlsrv_close($conexao);
+    exit;
 }
 
-mysqli_stmt_bind_param($stmt, $types, ...$params);
-if (!mysqli_stmt_execute($stmt)) {
-    $logger->log('ERROR', 'Falha ao executar statement para gerar relatório.', ['error' => mysqli_stmt_error($stmt), 'user_id' => $userId]);
-    echo json_encode(['success' => false, 'message' => 'Erro interno ao executar consulta.', 'csrf_token' => $novoCsrfTokenParaCliente]);
-    mysqli_stmt_close($stmt); exit;
+$turnos_db = [];
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    $turnos_db[] = $row;
 }
-
-$result = mysqli_stmt_get_result($stmt);
-$turnos_db = mysqli_fetch_all($result, MYSQLI_ASSOC);
-mysqli_stmt_close($stmt);
+sqlsrv_free_stmt($stmt);
 
 $turnos_processados = [];
 $total_geral_horas_decimal = 0;
@@ -91,19 +87,30 @@ foreach ($turnos_db as $turno_db_row) {
     $duracao_decimal = 0;
     $duracao_formatada_str = "00h00min";
 
+    // As colunas hora_inicio e hora_fim já vêm do banco.
+    // Se forem do tipo TIME no SQL Server, o objeto DateTime pode ser criado diretamente.
+    // Se forem DATETIME, a conversão para string 'HH:mm' já foi feita na query.
+    // Para cálculo, precisamos da data completa.
     if ($turno_db_row['hora_inicio'] && $turno_db_row['hora_fim']) {
         try {
-            // Usar a data original do turno para construir os objetos DateTime para cálculo preciso da duração
-            $data_do_turno_original = $turno_db_row['data']; // YYYY-MM-DD
-            $inicio = new DateTime($data_do_turno_original . ' ' . $turno_db_row['hora_inicio']);
-            $fim = new DateTime($data_do_turno_original . ' ' . $turno_db_row['hora_fim']);
+            // $turno_db_row['data'] é um objeto DateTime se o tipo da coluna no SQL Server for DATE/DATETIME
+            // Se for string, precisaremos converter. Assumindo que o driver retorna como objeto DateTime para colunas DATE/DATETIME
+            $data_original_turno = ($turno_db_row['data'] instanceof DateTimeInterface) ? $turno_db_row['data']->format('Y-m-d') : $turno_db_row['data'];
+            
+            // $turno_db_row['hora_inicio'] e ['hora_fim'] são objetos DateTime se o tipo no SQL Server for TIME.
+            // Se forem strings 'HH:mm:ss.microssegundos' (comum para tipo TIME do SQL Server via sqlsrv)
+            $hora_inicio_str = ($turno_db_row['hora_inicio'] instanceof DateTimeInterface) ? $turno_db_row['hora_inicio']->format('H:i:s') : $turno_db_row['hora_inicio'];
+            $hora_fim_str = ($turno_db_row['hora_fim'] instanceof DateTimeInterface) ? $turno_db_row['hora_fim']->format('H:i:s') : $turno_db_row['hora_fim'];
 
-            if ($fim <= $inicio) { // Turno atravessa meia-noite
-                $fim->add(new DateInterval('P1D')); // Adiciona 1 dia ao horário de fim
+            $inicio = new DateTime($data_original_turno . ' ' . $hora_inicio_str);
+            $fim = new DateTime($data_original_turno . ' ' . $hora_fim_str);
+
+            if ($fim <= $inicio) {
+                $fim->add(new DateInterval('P1D')); 
             }
             $intervalo = $inicio->diff($fim);
             $duracao_decimal = $intervalo->h + ($intervalo->i / 60.0);
-            if ($intervalo->days > 0) { // Se o intervalo tem dias (ex: turno de 24h ou mais)
+            if ($intervalo->days > 0) { 
                 $duracao_decimal += $intervalo->days * 24;
             }
             
@@ -112,15 +119,14 @@ foreach ($turnos_db as $turno_db_row) {
 
         } catch (Exception $e) {
             $logger->log('WARNING', 'Erro ao calcular duração de turno para relatório.', ['turno_data' => $turno_db_row, 'error' => $e->getMessage(), 'user_id' => $userId]);
-            // Deixa duração como 00h00min se houver erro no cálculo
         }
     }
 
     $turnos_processados[] = [
         'data_formatada'        => $turno_db_row['data_formatada'],
         'colaborador'           => $turno_db_row['colaborador'],
-        'hora_inicio_formatada' => $turno_db_row['hora_inicio_formatada'],
-        'hora_fim_formatada'    => $turno_db_row['hora_fim_formatada'],
+        'hora_inicio_formatada' => $turno_db_row['hora_inicio_formatada'], // Já formatado na query SQL
+        'hora_fim_formatada'    => $turno_db_row['hora_fim_formatada'],   // Já formatado na query SQL
         'duracao_formatada'     => $duracao_formatada_str
     ];
 }
@@ -133,4 +139,6 @@ echo json_encode([
     'csrf_token'          => $novoCsrfTokenParaCliente 
 ]);
 
-mysqli_close($conexao);
+if ($conexao) {
+    sqlsrv_close($conexao);
+}
