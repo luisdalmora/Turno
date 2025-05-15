@@ -46,8 +46,8 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
   <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="dashboard-body-background">
@@ -74,14 +74,14 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
         </ul>
       </nav>
       <div class="sidebar-footer">
-        <li class="sidebar-nav-item gcal-sidebar-button-container menu-item">
-            <a href="google_auth_redirect.php" class="action-button gcal-button" id="connect-gcal-btn">
-                <i data-lucide="link"></i> G Conectar  {/* Lucide 'link' ou 'plug' */}
-            </a>
-            <button id="disconnect-gcal-btn" class="action-button red gcal-button" style="display: none;">
-                <i data-lucide="unlink-2"></i> G Desconectar {/* Lucide 'unlink-2' ou 'plug-zap' */}
-            </button>
-        </li>
+        <ul style="padding: 0; list-style: none;"> <li class="sidebar-nav-item gcal-sidebar-button-container menu-item" style="margin: 4px 10px;"> <a href="google_auth_redirect.php" class="action-button gcal-button" id="connect-gcal-btn" style="width: 100%; margin-bottom: 5px;">
+                    <i data-lucide="link"></i> Conectar ao Google
+                </a>
+                <button id="disconnect-gcal-btn" class="action-button red gcal-button" style="display: none; width: 100%;">
+                    <i data-lucide="unlink-2"></i> Desconectar Google
+                </button>
+            </li>
+        </ul>
         <div class="logout-container">
             <a href="logout.php" id="logout-link" class="sair-btn">
                 <i data-lucide="log-out"></i> Sair
@@ -105,15 +105,14 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
           <h2><i data-lucide="calendar-check-2"></i> Calendário de Eventos (Google)</h2>
           <div class="calendar-integration-placeholder">
             <iframe src="https://calendar.google.com/calendar/embed?src=<?php echo urlencode($emailUsuarioLogado); ?>&src=pt-br.brazilian%23holiday%40group.v.calendar.google.com&ctz=America%2FSao_Paulo"
-              style="border:solid 1px #777" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
+              style="border:solid 1px #e5e7eb; border-radius: var(--border-radius);" width="100%" height="350" frameborder="0" scrolling="no"></iframe>
           </div>
           
           <div class="widget-feriados" style="margin-top: 20px;">
-            <h3 class="shifts-table-navigation" style="justify-content: center; margin-bottom:10px; padding: 5px; font-size: 1.1em; border-bottom: 1px solid #eee;">
+            <h3 class="shifts-table-navigation" style="justify-content: center; margin-bottom:10px; padding: 8px; font-size: 1.05em; border-bottom: 1px solid var(--widget-border-color);">
                <span id="feriados-mes-ano-display"><i data-lucide="calendar-heart"></i> Feriados - Carregando...</span>
             </h3>
-            <div class="table-responsive" style="max-height: 200px;">
-              <table id="feriados-table" class="widget-table">
+            <div class="table-responsive" style="max-height: 180px;"> <table id="feriados-table" class="widget-table">
                 <thead>
                   <tr>
                     <th>DATA</th>
@@ -154,7 +153,7 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
                   </tr>
                 </thead>
                 <tbody>
-                </tbody>
+                    </tbody>
             </table>
           </div>
         </section>
@@ -166,15 +165,15 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
             (<span id="employee-summary-period"><?php echo $nomeMesExibicao; ?></span>)
           </h2>
           <div class="summary-container">
-            <div class="summary-table-container">
-              <table id="employee-summary-table" class="widget-table">
+            <div class="summary-table-container table-responsive" style="max-height: 280px;"> <table id="employee-summary-table" class="widget-table">
                 <thead>
                   <tr>
                     <th>Colaborador</th>
                     <th>Total de Horas</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                    </tbody>
               </table>
             </div>
             <div class="summary-chart-container">
@@ -188,7 +187,7 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
           <div class="shifts-table-navigation">
             <button id="prev-month-implantacoes-button" class="action-button"><i data-lucide="chevron-left"></i> Anterior</button>
             <h2 id="current-month-year-implantacoes-display">
-                <i data-lucide="settings-2"></i> Implantações - Mês Ano
+                <i data-lucide="settings-2"></i> Implantações - <?php echo $nomeMesExibicao . ' ' . $anoExibicao; ?>
             </h2>
             <button id="next-month-implantacoes-button" class="action-button">Próximo <i data-lucide="chevron-right"></i></button>
           </div>
@@ -218,18 +217,41 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
           <h2><i data-lucide="notebook-pen"></i> Observações Gerais</h2>
           <input type="hidden" id="csrf-token-obs-geral" value="<?php echo htmlspecialchars($csrfTokenObsGeral); ?>">
           <textarea id="observacoes-gerais-textarea" rows="5" placeholder="Digite aqui qualquer informação importante..."></textarea>
-          <button id="salvar-observacoes-gerais-btn" class="action-button primary"><i data-lucide="save"></i> Salvar Observações</button>
+          <button id="salvar-observacoes-gerais-btn" class="action-button primary" style="margin-top:10px;"><i data-lucide="save"></i> Salvar Observações</button>
         </section>
 
       </main>
     </div>
   </div>
+  
   <script src="script.js"></script>
   <script>
-    // Inicializa Lucide Icons após o DOM estar pronto
+    // Inicializa Lucide Icons após o DOM estar pronto e script.js carregado
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+      }
+      // Lógica para GCal status e mensagens (já estava no seu script.js, pode manter lá ou aqui)
+      const urlParams = new URLSearchParams(window.location.search);
+      const gcalStatus = urlParams.get('gcal_status');
+      const gcalMsg = urlParams.get('gcal_msg');
+      if (gcalStatus === 'success') {
+          if(typeof showToast === 'function') showToast('Google Calendar conectado com sucesso!', 'success');
+          localStorage.setItem('gcal_connected_simposto', 'true');
+      } else if (gcalStatus === 'error') {
+          if(typeof showToast === 'function') showToast('Falha conexão GCal: ' + (gcalMsg || 'Tente novamente.'), 'error');
+          localStorage.removeItem('gcal_connected_simposto');
+      } else if (gcalStatus === 'disconnected') {
+          if(typeof showToast === 'function') showToast('Google Calendar desconectado.', 'info');
+          localStorage.removeItem('gcal_connected_simposto');
+      }
+      // Atualiza visualização dos botões GCal baseado no status
+      if(typeof checkGCalConnectionStatus === 'function') checkGCalConnectionStatus();
+
+      // Remover parâmetros da URL após leitura para evitar reexibição da mensagem em refresh manual
+      if (gcalStatus || gcalMsg) {
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
       }
     });
   </script>

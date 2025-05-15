@@ -17,38 +17,42 @@ $emailUsuarioLogado = $_SESSION['usuario_email'] ?? 'primary'; // Usa email do u
   <title>Calendário Google - Tela Cheia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 
 <body class="dashboard-body-background">
   <div class="dashboard-layout-container">
     <aside class="dashboard-sidebar">
-      <div class="sidebar-header">
-        <h3><i class="fas fa-bars"></i> Menu Principal</h3>
+      <div class="sidebar-header menu-header">
+        <i data-lucide="gauge-circle" class="sidebar-logo-icon"></i>
+        <h2>Sim Posto</h2>
       </div>
       <nav>
         <ul>
-          <li class="sidebar-nav-item"><a href="home.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-          <li class="sidebar-nav-item"><a href="relatorio_turnos.php"><i class="fas fa-file-alt"></i> Relatórios</a></li>
-          <li class="sidebar-nav-item"><a href="gerenciar_colaboradores.php"><i class="fas fa-users"></i> Colaboradores</a></li> 
-          <!-- <li class="sidebar-nav-item"><a href="cadastrar_colaborador.php"><i class="fas fa-user-plus"></i> Cadastrar Colaborador</a></li> --> <!--Remover esse menu por hora-->
-          <li class="sidebar-nav-item active"><a href="calendario_fullscreen.php"><i class="fab fa-google"></i> Google Calendar</a></li>
+          <li class="sidebar-nav-item menu-item"><a href="home.php"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+          <li class="sidebar-nav-item menu-item"><a href="relatorio_turnos.php"><i data-lucide="file-text"></i> Relatórios</a></li>
+          <li class="sidebar-nav-item menu-item"><a href="gerenciar_colaboradores.php"><i data-lucide="users"></i> Colaboradores</a></li> 
+          <li class="sidebar-nav-item menu-item active"><a href="calendario_fullscreen.php"><i data-lucide="calendar-days"></i> Google Calendar</a></li>
         </ul>
       </nav>
       <div class="sidebar-footer">
-        <a href="logout.php" id="logout-link" class="sidebar-nav-item"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        <div class="logout-container">
+            <a href="logout.php" id="logout-link" class="sair-btn">
+                <i data-lucide="log-out"></i> Sair
+            </a>
+        </div>
       </div>
     </aside>
 
     <div class="dashboard-main-content calendar-fullscreen-main-content">
       <header class="dashboard-header calendar-fullscreen-header">
         <div class="header-title-container">
-          <h1><i class="fab fa-google"></i> Calendário Google - Visualização Combinada</h1>
+          <h1><i data-lucide="calendar"></i> Calendário Google - Visualização Combinada</h1>
         </div>
         <div id="user-info" class="user-profile-area">
-             Olá, <?php echo htmlspecialchars($nomeUsuarioLogado); ?> <i class="fas fa-user-circle"></i>
+             Olá, <?php echo htmlspecialchars($nomeUsuarioLogado); ?> <i data-lucide="circle-user-round"></i>
         </div>
       </header>
       <main class="fullscreen-calendar-iframe-container">
@@ -57,5 +61,14 @@ $emailUsuarioLogado = $_SESSION['usuario_email'] ?? 'primary'; // Usa email do u
       </main>
     </div>
   </div>
-  <script src="script.js"></script> </body>
+  <script src="script.js"></script> 
+  <script>
+    // Inicializa Lucide Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
 </html>

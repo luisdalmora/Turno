@@ -7,51 +7,75 @@
   <title>Criar Conta - Sim Posto</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 
 <body class="login-page-container">
   <div class="login-content-wrapper">
-    <div class="login-form-wrapper">
-      <span class="login-form-title"><i class="fas fa-user-plus"></i> Criar Conta</span>
+    <div class="login-form-wrapper"> <span class="login-form-title">
+        <i data-lucide="user-plus" style="margin-right: 10px;"></i> Criar Conta
+      </span>
       <form method="POST" action="cadastrar.php">
         <div class="input-group margin-bottom-35">
           <input class="input-field" type="text" name="nome_completo" required aria-label="Nome Completo" />
-          <span class="input-focus-effect" data-placeholder="Nome Completo"></span>
+          <span class="input-focus-effect" data-placeholder="Nome Completo*"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
           <input class="input-field" type="email" name="email" required aria-label="E-mail" />
-          <span class="input-focus-effect" data-placeholder="E-mail"></span>
+          <span class="input-focus-effect" data-placeholder="E-mail*"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="text" name="usuario" required aria-label="Usuário" />
-          <span class="input-focus-effect" data-placeholder="Usuário"></span>
+          <input class="input-field" type="text" name="usuario" required autocomplete="username" aria-label="Usuário" />
+          <span class="input-focus-effect" data-placeholder="Usuário*"></span>
         </div>
 
         <div class="input-group margin-bottom-35">
-          <input class="input-field" type="password" name="senha" required aria-label="Senha" />
-          <span class="input-focus-effect" data-placeholder="Senha"></span>
+          <input class="input-field" type="password" name="senha" required autocomplete="new-password"
+            aria-label="Senha" />
+          <span class="input-focus-effect" data-placeholder="Senha*"></span>
         </div>
 
         <div class="login-form-button-container">
           <button class="login-form-button" type="submit">
-            <i class="fas fa-user-plus"></i> Cadastrar
+            <i data-lucide="check-circle"></i> Cadastrar
           </button>
         </div>
       </form>
 
       <ul class="login-utility-links">
-        <li><a href="index.html" class="utility-text-secondary"><i class="fas fa-arrow-left"></i> Voltar para Login</a>
+        <li>
+          <a href="index.html" class="utility-text-secondary">
+            <i data-lucide="arrow-left" style="vertical-align: middle; margin-right: 4px;"></i> Voltar para Login
+          </a>
         </li>
       </ul>
     </div>
 
     <img src="images/index.png" alt="Imagem ilustrativa para cadastro" class="login-image" />
   </div>
+
+  <script>
+    // Script para efeito flutuante do placeholder
+    document.querySelectorAll('.input-field').forEach(input => {
+      const checkValue = () => {
+        input.classList.toggle("has-val", input.value.trim() !== "");
+      };
+      input.addEventListener("blur", checkValue);
+      input.addEventListener("input", checkValue);
+      checkValue();
+    });
+
+    // Inicializa Lucide Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
 </body>
 
 </html>

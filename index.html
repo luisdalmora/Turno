@@ -7,8 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 
 <body>
@@ -19,18 +20,19 @@
           <span class="login-form-title">Faça o login</span>
 
           <div class="input-group margin-top-35 margin-bottom-35">
-            <input class="input-field" type="text" name="usuario" required autocomplete="off" aria-label="Usuário">
+            <input class="input-field" type="text" name="usuario" required autocomplete="username" aria-label="Usuário">
             <span class="input-focus-effect" data-placeholder="Usuário"></span>
           </div>
 
           <div class="input-group margin-bottom-35">
-            <input class="input-field" type="password" name="senha" required aria-label="Senha">
+            <input class="input-field" type="password" name="senha" required autocomplete="current-password"
+              aria-label="Senha">
             <span class="input-focus-effect" data-placeholder="Senha"></span>
           </div>
 
           <div class="login-form-button-container">
             <button class="login-form-button" type="submit">
-              <i class="fas fa-sign-in-alt"></i> Login
+              <i data-lucide="log-in"></i> Login
             </button>
           </div>
 
@@ -51,13 +53,50 @@
   </div>
 
   <script>
-    // Script para efeito flutuante
+    // Script para efeito flutuante do placeholder
     document.querySelectorAll('.input-field').forEach(input => {
-      input.addEventListener("blur", () => {
+      const checkValue = () => {
         input.classList.toggle("has-val", input.value.trim() !== "");
-      });
-      if (input.value.trim() !== "") {
-        input.classList.add("has-val");
+      };
+      input.addEventListener("blur", checkValue);
+      input.addEventListener("input", checkValue); // Adicionado para checar enquanto digita
+      checkValue(); // Checa no carregamento da página caso haja valor preenchido (ex: autocomplete)
+    });
+
+    // Inicializa Lucide Icons após o DOM estar pronto
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Exibir mensagem de erro do login (se houver via GET)
+      const urlParams = new URLSearchParams(window.location.search);
+      const erroLogin = urlParams.get('erro');
+      if (erroLogin) {
+        // Tenta usar a função showToast global, se disponível
+        if (typeof showToast === 'function') {
+          showToast(decodeURIComponent(erroLogin), 'error');
+        } else {
+          // Fallback para alert se showToast não estiver no escopo desta página
+          alert("Erro: " + decodeURIComponent(erroLogin));
+        }
+        // Opcional: remover o parâmetro da URL após exibir o erro
+        // window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      const statusMsg = urlParams.get('status');
+      if (statusMsg === 'logout_success') {
+        if (typeof showToast === 'function') {
+          showToast('Logout realizado com sucesso!', 'success');
+        } else {
+          alert('Logout realizado com sucesso!');
+        }
+      }
+      if (statusMsg === 'cadastro_sucesso_email_enviado') {
+        if (typeof showToast === 'function') {
+          showToast('Cadastro realizado com sucesso! Verifique seu e-mail.', 'success', 5000);
+        } else {
+          alert('Cadastro realizado com sucesso! Verifique seu e-mail.');
+        }
       }
     });
   </script>

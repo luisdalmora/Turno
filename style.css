@@ -119,8 +119,20 @@ html {
   color: var(--highlight-text-color);
   margin-bottom: 30px;
   text-align: center;
-  display: block;
+  display: block; /* Alterado de flex para block para centralizar texto */
+  /* Se precisar alinhar um ícone com o título, volte para flex e ajuste:
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; */
 }
+.login-form-title svg {
+  /* Para estilizar ícone Lucide no título do login, se houver */
+  width: 28px; /* Ajuste conforme necessário */
+  height: 28px; /* Ajuste conforme necessário */
+  stroke-width: var(--lucide-icon-stroke);
+}
+
 .input-group {
   width: 100%;
   position: relative;
@@ -187,9 +199,8 @@ html {
   align-items: center;
   justify-content: center;
 }
-.login-form-button svg, /* Lucide */
-.login-form-button i {
-  /* FA */
+.login-form-button svg {
+  /* Apenas Lucide agora */
   margin-right: 8px;
   width: var(--lucide-icon-size);
   height: var(--lucide-icon-size);
@@ -220,6 +231,14 @@ html {
 }
 .login-utility-links .utility-text-secondary:hover {
   text-decoration: underline;
+}
+.login-utility-links .utility-text-secondary svg {
+  /* Para ícones Lucide em links */
+  width: 1em; /* Ajustar conforme o tamanho do texto */
+  height: 1em;
+  stroke-width: var(--lucide-icon-stroke);
+  margin-right: 4px;
+  vertical-align: text-bottom; /* Melhorar alinhamento */
 }
 
 /* Estilos Dashboard */
@@ -256,8 +275,8 @@ body.dashboard-body-background {
   align-items: center;
   gap: 12px;
 }
-.sidebar-logo-icon svg,
-.sidebar-logo-icon i.fas {
+.sidebar-logo-icon svg {
+  /* Apenas Lucide */
   width: 32px;
   height: 32px;
   color: var(--sidebar-header-color);
@@ -271,6 +290,7 @@ body.dashboard-body-background {
   line-height: 1.2;
 }
 .dashboard-sidebar .sidebar-header h3 {
+  /* Removido, pois o h3 não é usado com Lucide */
   display: none;
 }
 
@@ -289,6 +309,7 @@ body.dashboard-body-background {
 
 .sidebar-nav-item.menu-item a,
 .sidebar-nav-item.menu-item .gcal-button {
+  /* gcal-button é a classe para os botões do GCal */
   display: flex;
   align-items: center;
   padding: 12px 16px;
@@ -300,11 +321,9 @@ body.dashboard-body-background {
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-.sidebar-nav-item.menu-item a svg,
-.sidebar-nav-item.menu-item a i.fas,
-.sidebar-nav-item.menu-item .gcal-button svg,
-.sidebar-nav-item.menu-item .gcal-button i.fab,
-.sidebar-nav-item.menu-item .gcal-button i.fas {
+.sidebar-nav-item.menu-item a svg, /* Lucide para links de navegação */
+.sidebar-nav-item.menu-item .gcal-button svg {
+  /* Lucide para botões GCal */
   margin-right: 12px;
   width: var(--lucide-icon-size);
   height: var(--lucide-icon-size);
@@ -336,7 +355,7 @@ body.dashboard-body-background {
   list-style-type: none;
   padding: 0;
 }
-/* General style for buttons in sidebar footer, including GCal and Sair */
+/* Estilo geral para botões no rodapé da sidebar, incluindo GCal e Sair */
 .sidebar-footer .gcal-sidebar-button-container .gcal-button,
 .sidebar-footer .logout-container .sair-btn {
   display: flex;
@@ -349,16 +368,15 @@ body.dashboard-body-background {
   font-size: 1rem;
   font-weight: 500;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-  width: calc(100% - 20px);
+  width: calc(100% - 20px); /* Ocupa largura, menos margens */
   box-sizing: border-box;
-  justify-content: flex-start;
-  border: none;
-  cursor: pointer;
+  justify-content: flex-start; /* Alinha conteúdo (ícone + texto) à esquerda */
+  border: none; /* Remove borda padrão de button */
+  cursor: pointer; /* Cursor de link para buttons */
 }
-.sidebar-footer .gcal-sidebar-button-container .gcal-button svg,
-.sidebar-footer .gcal-sidebar-button-container .gcal-button i,
-.sidebar-footer .logout-container .sair-btn svg,
-.sidebar-footer .logout-container .sair-btn i {
+.sidebar-footer .gcal-sidebar-button-container .gcal-button svg, /* Ícones Lucide para GCal */
+.sidebar-footer .logout-container .sair-btn svg {
+  /* Ícone Lucide para Sair */
   margin-right: 12px;
   width: var(--lucide-icon-size);
   height: var(--lucide-icon-size);
@@ -368,6 +386,7 @@ body.dashboard-body-background {
 
 /* Botão Conectar GCal na Sidebar */
 .sidebar-footer a#connect-gcal-btn {
+  /* Ainda é um link <a> */
   background-color: var(--success-color);
   color: white;
 }
@@ -378,8 +397,11 @@ body.dashboard-body-background {
 
 /* Botão Desconectar GCal na Sidebar */
 .sidebar-footer button#disconnect-gcal-btn {
+  /* É um <button> */
   background-color: var(--warning-color);
-  color: var(--highlight-text-color);
+  color: var(
+    --highlight-text-color
+  ); /* Cor de texto mais escura para contraste */
 }
 .sidebar-footer button#disconnect-gcal-btn:hover {
   background-color: color-mix(in srgb, var(--warning-color) 85%, black);
@@ -387,10 +409,11 @@ body.dashboard-body-background {
 }
 
 .logout-container {
-  margin-top: 8px;
+  margin-top: 8px; /* Espaçamento acima do botão Sair */
 }
 .sair-btn {
-  padding: 12px 16px !important;
+  /* Especificidade para o botão de Sair, se necessário */
+  padding: 12px 16px !important; /* !important para garantir sobreposição se houver conflitos */
   background-color: var(--danger-color) !important;
   color: white !important;
   gap: 8px !important; /* Espaçamento entre ícone e texto já coberto pelo margin-right do ícone */
@@ -425,8 +448,8 @@ body.dashboard-body-background {
   display: flex;
   align-items: center;
 }
-.dashboard-header h1 svg,
-.dashboard-header h1 i {
+.dashboard-header h1 svg {
+  /* Apenas Lucide */
   width: 28px;
   height: 28px;
   stroke-width: var(--lucide-icon-stroke);
@@ -441,8 +464,8 @@ body.dashboard-body-background {
   display: flex;
   align-items: center;
 }
-.user-profile-area svg,
-.user-profile-area i {
+.user-profile-area svg {
+  /* Apenas Lucide */
   width: 22px;
   height: 22px;
   stroke-width: var(--lucide-icon-stroke);
@@ -475,20 +498,20 @@ body.dashboard-body-background {
   padding-bottom: 10px;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Para evitar que encolham com conteúdo flexível */
 }
-.dashboard-widget h2 svg,
-.dashboard-widget h2 i,
-.dashboard-widget h3 svg,
-.dashboard-widget h3 i {
+.dashboard-widget h2 svg, /* Lucide */
+.dashboard-widget h3 svg {
+  /* Lucide */
   margin-right: 10px;
   color: var(--primary-color);
   width: var(--lucide-icon-size);
   height: var(--lucide-icon-size);
   stroke-width: var(--lucide-icon-stroke);
 }
+/* Se você tiver texto e spans dentro de h2 como antes */
 .dashboard-widget h2 .widget-title-text {
-  margin-right: 0.3em;
+  margin-right: 0.3em; /* Ou o que for necessário */
 }
 .dashboard-widget h2 span#employee-summary-period {
   font-weight: normal;
@@ -499,17 +522,17 @@ body.dashboard-body-background {
   width: 100%;
   border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
-  min-height: 320px;
+  min-height: 320px; /* Ou altura desejada */
 }
 
 /* Botões de Ação Gerais */
 .button-group {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Permite que botões quebrem linha em telas menores */
   gap: 10px;
   margin-bottom: 15px;
-  align-items: center;
-  flex-shrink: 0;
+  align-items: center; /* Alinha botões na linha */
+  flex-shrink: 0; /* Para evitar que encolham com conteúdo flexível */
 }
 .action-button {
   background-color: var(--primary-color);
@@ -524,28 +547,41 @@ body.dashboard-body-background {
   letter-spacing: 0.5px;
   transition: background-color 0.3s ease, box-shadow 0.2s ease,
     opacity 0.2s ease;
-  display: inline-flex;
+  display: inline-flex; /* Importante para alinhar svg com texto */
   align-items: center;
   justify-content: center;
-  text-decoration: none;
+  text-decoration: none; /* Caso use <a> como botão */
 }
 .action-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
-.action-button svg, /* Lucide */
-.action-button i {
-  /* FA */
+.action-button svg {
+  /* Apenas Lucide */
   margin-right: 8px;
-  width: 18px;
+  width: 18px; /* Tamanho para ícones em botões */
   height: 18px;
-  stroke-width: 2px;
+  stroke-width: 2px; /* Linha um pouco mais grossa para botões */
 }
-.action-button i.fa-spinner {
-  animation: fa-spin 1s infinite linear;
+/* ANIMAÇÃO DE SPIN PARA LUCIDE */
+@keyframes lucide-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.lucide-spin {
+  /* Classe para ser adicionada via JS */
+  animation: lucide-spin 1s linear infinite;
 }
 .action-button:hover:not(:disabled) {
-  background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+  background-color: color-mix(
+    in srgb,
+    var(--primary-color) 85%,
+    black
+  ); /* Escurece a cor primária */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .action-button.primary {
@@ -566,51 +602,77 @@ body.dashboard-body-background {
 .action-button.red:hover:not(:disabled) {
   background-color: color-mix(in srgb, var(--danger-color) 85%, black);
 }
-
-.table-responsive {
-  overflow-x: auto;
-  flex-grow: 1;
-  min-height: 150px; /* Ajuste conforme necessário */
+.action-button.info {
+  background-color: var(--info-color);
+} /* Botão de info (ex: Editar) */
+.action-button.info:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--info-color) 85%, black);
+}
+.action-button.warning {
+  background-color: var(--warning-color);
+  color: var(--highlight-text-color);
+} /* Botão de aviso (ex: Desativar) */
+.action-button.warning:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--warning-color) 85%, black);
+}
+.action-button.secondary {
+  background-color: var(--secondary-color);
+} /* Botão secundário (ex: Cancelar) */
+.action-button.secondary:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
 }
 
+.table-responsive {
+  overflow-x: auto; /* Permite scroll horizontal se a tabela for muito larga */
+  flex-grow: 1; /* Faz a tabela ocupar o espaço restante no widget */
+  min-height: 150px; /* Altura mínima para visualização, ajuste conforme necessário */
+}
+
+/* Estilos para todas as tabelas principais dos widgets */
 #shifts-table-main,
 .widget-employee-summary table, /* Aplicar a .widget-table se for genérico */
 #report-table,
 #feriados-table, /* Aplicar também à tabela de feriados */
-#implantacoes-table-main {
+#implantacoes-table-main,
+#collaborators-table {
+  /* Adicionado para a tabela de colaboradores */
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  font-size: 0.85em;
+  font-size: 0.85em; /* Tamanho de fonte menor para tabelas densas */
 }
 
 #shifts-table-main th, #shifts-table-main td,
 .widget-employee-summary table th, .widget-employee-summary table td, /* widget-table */
 #report-table th, #report-table td,
 #feriados-table th, #feriados-table td,
-#implantacoes-table-main th, #implantacoes-table-main td {
+#implantacoes-table-main th, #implantacoes-table-main td,
+#collaborators-table th, #collaborators-table td {
   border: 1px solid var(--widget-border-color);
   padding: 8px 10px;
   text-align: left;
-  vertical-align: middle;
-  white-space: nowrap;
+  vertical-align: middle; /* Alinha conteúdo verticalmente ao centro */
+  white-space: nowrap; /* Evita quebra de linha em células */
 }
 
 #shifts-table-main th,
 .widget-employee-summary table th, /* widget-table */
 #report-table th,
 #feriados-table th,
-#implantacoes-table-main th {
+#implantacoes-table-main th,
+#collaborators-table th {
   background: var(--table-header-background);
-  color: var(--sidebar-header-color); /* Usando cor clara */
-  text-align: center;
+  color: var(
+    --sidebar-header-color
+  ); /* Usando cor clara para contraste com fundo escuro */
+  text-align: center; /* Cabeçalhos centralizados */
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.75em;
+  font-size: 0.75em; /* Fonte menor para cabeçalhos */
   letter-spacing: 0.5px;
-  position: sticky;
+  position: sticky; /* Cabeçalho fixo ao rolar */
   top: 0;
-  z-index: 1;
+  z-index: 1; /* Para sobrepor conteúdo da tabela ao rolar */
 }
 
 /* Inputs dentro de tabelas */
@@ -627,8 +689,8 @@ body.dashboard-body-background {
   border-radius: var(--border-radius);
   font-family: var(--font-family-primary);
   font-size: 0.9em; /* Ajustado para inputs de tabela */
-  background-color: var(--background-color-light);
-  min-height: 38px;
+  background-color: var(--background-color-light); /* Fundo claro para inputs */
+  min-height: 38px; /* Altura mínima consistente */
 }
 #shifts-table-main input[type="time"] {
   min-width: 95px;
@@ -642,44 +704,44 @@ body.dashboard-body-background {
 #shifts-table-main select.shift-employee-select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--primary-color) 20%, transparent);
+    color-mix(in srgb, var(--primary-color) 20%, transparent); /* Sombra de foco sutil */
   outline: none;
 }
 
-/* Colunas da tabela de turnos */
-#shifts-table-main th:nth-child(1),
+/* Colunas da tabela de turnos - Específicas */
+#shifts-table-main th:nth-child(1), /* Checkbox */
 #shifts-table-main td:nth-child(1) {
   width: 35px;
   min-width: 35px;
   text-align: center;
-} /* Checkbox */
-#shifts-table-main th:nth-child(2),
+}
+#shifts-table-main th:nth-child(2), /* Dia */
 #shifts-table-main td:nth-child(2) {
   min-width: 90px;
-} /* Dia */
-#shifts-table-main th:nth-child(3),
+}
+#shifts-table-main th:nth-child(3), /* Hora Início */
 #shifts-table-main td:nth-child(3) {
   min-width: 90px;
-} /* Hora Início */
-#shifts-table-main th:nth-child(4),
+}
+#shifts-table-main th:nth-child(4), /* Hora Fim */
 #shifts-table-main td:nth-child(4) {
   min-width: 90px;
-} /* Hora Fim */
-#shifts-table-main th:nth-child(5),
+}
+#shifts-table-main th:nth-child(5), /* Colaborador */
 #shifts-table-main td:nth-child(5) {
   min-width: 160px;
-  width: auto;
-} /* Colaborador */
+  width: auto; /* Permite que esta coluna se expanda mais */
+}
 
 .summary-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Quebra linha em telas menores */
   gap: 15px;
 }
 .summary-table-container,
 .summary-chart-container {
-  flex: 1 1 260px;
-  min-height: 230px;
+  flex: 1 1 260px; /* Base flexível, permite crescer e encolher */
+  min-height: 230px; /* Garante altura mínima */
 }
 .summary-chart-container {
   display: flex;
@@ -688,7 +750,7 @@ body.dashboard-body-background {
 }
 #employee-hours-chart {
   max-width: 100%;
-  max-height: 280px;
+  max-height: 280px; /* Altura máxima para o gráfico */
 }
 
 /* Navegação de Mês/Ano para Tabelas */
@@ -698,7 +760,7 @@ body.dashboard-body-background {
   align-items: center;
   margin-bottom: 15px;
   padding: 10px;
-  background-color: #f9f9f9; /* Fundo levemente diferente */
+  background-color: #f9f9f9; /* Fundo levemente diferente para destaque */
   border-radius: var(--border-radius);
   border: 1px solid var(--widget-border-color);
 }
@@ -713,24 +775,19 @@ body.dashboard-body-background {
   display: inline-flex; /* Para alinhar ícone e texto */
   align-items: center;
 }
-.shifts-table-navigation button svg, /* Lucide */
-.shifts-table-navigation button i {
-  /* FA */
+.shifts-table-navigation button svg {
+  /* Apenas Lucide */
   /* Ícones dentro dos botões de navegação */
   width: 16px;
   height: 16px;
   stroke-width: 2px;
 }
-.shifts-table-navigation button i.fa-chevron-left, /* FA específico */
 .shifts-table-navigation button svg[data-lucide="chevron-left"] {
   margin-right: 6px;
 }
-
-.shifts-table-navigation button i.fa-chevron-right, /* FA específico */
 .shifts-table-navigation button svg[data-lucide="chevron-right"] {
   margin-left: 6px;
 }
-
 .shifts-table-navigation button:hover {
   background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
 }
@@ -742,25 +799,26 @@ body.dashboard-body-background {
   color: var(--highlight-text-color);
   margin: 0;
   padding: 0;
-  border: none;
+  border: none; /* Reset de estilos de h2 de widget */
   display: flex;
   align-items: center;
 }
-.shifts-table-navigation h2 svg, /* Lucide */
-.shifts-table-navigation h2 i,   /* FA */
-.shifts-table-navigation span#feriados-mes-ano-display svg,
-.shifts-table-navigation span#feriados-mes-ano-display i {
+.shifts-table-navigation h2 svg, /* Lucide para título da navegação */
+.shifts-table-navigation span#feriados-mes-ano-display svg {
+  /* Lucide para título de feriados */
   margin-right: 8px;
   width: var(--lucide-icon-size);
   height: var(--lucide-icon-size);
   stroke-width: var(--lucide-icon-stroke);
 }
+
 .widget-feriados .shifts-table-navigation {
-  border-bottom: 1px solid var(--widget-border-color);
+  /* Ajustes específicos se a navegação for usada no widget de feriados */
+  border-bottom: 1px solid var(--widget-border-color); /* Se houver, se não, remover */
   margin-bottom: 15px;
 }
 .widget-feriados .table-responsive {
-  max-height: 250px;
+  max-height: 250px; /* Controla altura da tabela de feriados */
   overflow-y: auto;
 }
 
@@ -768,51 +826,244 @@ body.dashboard-body-background {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--input-border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: var(--border-radius-lg); /* Raio de borda maior */
   font-family: var(--font-family-primary);
   font-size: 0.95em;
   margin-bottom: 10px;
   box-sizing: border-box;
-  resize: vertical;
+  resize: vertical; /* Permite redimensionamento vertical */
   min-height: 100px;
 }
 
-/* Estilos Página de Relatório (manter os originais, ajustar ícones se necessário) */
+/* --- Página de Relatório --- */
 .report-page-main {
-  /* ... */
+  /* Layout da página principal de relatório, se necessário */
 }
 .filters-form-grid {
-  /* ... */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  align-items: end; /* Alinha itens ao final do eixo transversal (útil para botões) */
+  margin-bottom: 20px;
 }
-/* ... (etc. seus estilos de relatório) ... */
-.filters-form-grid .form-group-submit button.action-button svg,
-.filters-form-grid .form-group-submit button.action-button i {
-  /* Ícones nos botões de filtro de relatório */
+.filters-form-grid .form-group {
+  display: flex;
+  flex-direction: column;
+}
+.filters-form-grid label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+.form-control-filter {
+  /* Estilo para inputs e selects nos filtros */
+  padding: 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius);
+  font-size: 0.95em;
+  background-color: var(--background-color-light);
+}
+.form-control-filter:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--primary-color) 20%, transparent);
+  outline: none;
+}
+.filters-form-grid .form-group-submit {
+  /* grid-column: span 2;  Opcional: fazer o botão ocupar mais colunas */
+  /* align-self: end;  Garantir que o botão fique alinhado com a base dos inputs */
+}
+.filters-form-grid .form-group-submit button.action-button svg {
+  /* Estilo específico para ícones em botões de filtro de relatório, se necessário */
+  /* Por padrão, herda de .action-button svg */
+}
+.report-summary-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #e9ecef; /* Fundo levemente destacado para o sumário */
+  border-radius: var(--border-radius);
+  font-size: 0.95em;
+}
+.report-summary-info p {
+  margin: 5px 0;
 }
 
-/* Estilos Página Calendário Fullscreen (manter os originais, ajustar ícones se necessário) */
+/* --- Página Calendário Fullscreen --- */
 .calendar-fullscreen-main-content {
-  /* ... */
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    100vh - var(--header-height, 60px)
+  ); /* Ajustar se tiver cabeçalho fixo */
+  padding: 0; /* Remover padding para ocupar tela toda */
 }
-/* ... (etc. seus estilos de calendário fullscreen) ... */
+.calendar-fullscreen-main-content .calendar-fullscreen-header {
+  /* Estilos para o header dentro da página de calendário, se diferente do global */
+  padding: 10px 15px; /* Padding menor para tela cheia */
+}
+.calendar-fullscreen-main-content .calendar-fullscreen-header h1 {
+  font-size: 1.2em; /* Fonte menor para header de tela cheia */
+}
+.fullscreen-calendar-iframe-container {
+  flex-grow: 1; /* Ocupa todo o espaço vertical restante */
+  overflow: hidden; /* Para evitar barras de rolagem desnecessárias no container */
+}
+.fullscreen-calendar-iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 
-/* Estilos para Notificações Toast (manter original) */
+/* --- Notificações Toast --- */
 .toast-notification {
-  /* ... */
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px); /* Começa fora da tela em baixo */
+  padding: 12px 25px;
+  border-radius: var(--border-radius-lg);
+  color: white;
+  font-size: 0.95em;
+  font-weight: 500;
+  z-index: 1050; /* Acima da maioria dos elementos */
+  opacity: 0;
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  min-width: 250px;
+  text-align: center;
 }
-/* ... (etc. seus estilos de toast) ... */
+.toast-notification.show {
+  transform: translateX(-50%) translateY(0); /* Move para a posição final */
+  opacity: 1;
+}
+.toast-notification.info {
+  background-color: var(--info-color);
+}
+.toast-notification.success {
+  background-color: var(--success-color);
+}
+.toast-notification.warning {
+  background-color: var(--warning-color);
+  color: var(--highlight-text-color);
+}
+.toast-notification.error {
+  background-color: var(--danger-color);
+}
 
-/* Estilos para a página de Gerenciar Colaboradores (manter original, ajustar ícones nos botões de ação) */
+/* --- Página Gerenciar Colaboradores --- */
 .manage-collaborators-main .dashboard-widget h2 {
-  /* ... */
+  /* Estilos específicos para h2 nesta página, se necessário. */
+  /* Geralmente herda de .dashboard-widget h2 */
 }
-/* ... (etc. seus estilos de gerenciar colaboradores) ... */
+.actions-cell {
+  /* Célula de ações na tabela de colaboradores */
+  text-align: center !important; /* Forçar centralização para botões */
+  white-space: nowrap; /* Evita que botões quebrem linha */
+}
+.actions-cell .action-button {
+  margin: 2px 4px; /* Pequeno espaçamento entre botões */
+  padding: 6px 10px; /* Botões menores */
+  font-size: 0.8em; /* Texto menor nos botões */
+}
+.actions-cell .action-button svg {
+  width: 14px; /* Ícones menores nos botões de ação da tabela */
+  height: 14px;
+  margin-right: 5px;
+}
+.status-ativo {
+  color: var(--success-color);
+  font-weight: bold;
+}
+.status-inativo {
+  color: var(--danger-color);
+  font-weight: bold;
+}
 
-/* Estilos para o Modal de Edição (manter original) */
+/* --- Modal de Edição --- */
 .modal-overlay {
-  /* ... */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: none; /* Escondido por padrão, JS controla a exibição */
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Acima de outros conteúdos */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 }
-/* ... (etc. seus estilos de modal) ... */
+.modal-overlay.show {
+  display: flex; /* Mostrar quando a classe 'show' é adicionada */
+  opacity: 1;
+}
+.modal-content {
+  background-color: var(--widget-background-color);
+  padding: var(--spacing-small);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px; /* Largura máxima do modal */
+  position: relative;
+  transform: scale(0.95);
+  transition: transform 0.3s ease-in-out;
+}
+.modal-overlay.show .modal-content {
+  transform: scale(1);
+}
+.modal-close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8em;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close-button:hover {
+  color: var(--primary-text-color);
+}
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  color: var(--highlight-text-color);
+  border-bottom: 1px solid var(--widget-border-color);
+  padding-bottom: 10px;
+}
+.form-group-modal {
+  margin-bottom: 18px;
+}
+.form-group-modal label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--primary-text-color);
+  font-size: 0.9em;
+}
+.form-group-modal input[type="text"],
+.form-group-modal input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  font-size: 0.95em;
+}
+.form-group-modal input[type="text"]:focus,
+.form-group-modal input[type="email"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--primary-color) 20%, transparent);
+  outline: none;
+}
+.modal-actions {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end; /* Alinha botões à direita */
+  gap: 10px;
+}
 
 /* Media Queries (Revisar com os novos estilos) */
 @media (max-width: 1200px) {
@@ -823,32 +1074,40 @@ body.dashboard-body-background {
 @media (max-width: 992px) {
   .login-content-wrapper {
     flex-direction: column;
+    padding: var(--spacing-small); /* Menor padding em telas médias */
   }
   .login-form-wrapper {
     width: 100%;
     max-width: 500px;
-    order: 1;
+    order: 1; /* Formulário primeiro */
   }
   .login-image {
     width: 100%;
-    max-width: 80%;
+    max-width: 80%; /* Imagem um pouco menor */
     margin-top: var(--spacing-medium);
-    order: 2;
+    order: 2; /* Imagem depois */
   }
+
   .dashboard-sidebar {
-    width: 220px;
+    width: 220px; /* Sidebar mais estreita */
   }
   .summary-container {
-    flex-direction: column;
+    flex-direction: column; /* Tabela e gráfico em coluna */
   }
   .shifts-table-navigation {
-    flex-direction: column;
+    flex-direction: column; /* Navegação em coluna */
     gap: 10px;
+    align-items: stretch; /* Botões ocupam toda a largura */
+  }
+  .shifts-table-navigation h2,
+  .shifts-table-navigation span#feriados-mes-ano-display {
+    text-align: center; /* Centraliza título na navegação em coluna */
   }
   .dashboard-header h1 {
     font-size: 1.4em;
   }
 }
+
 @media (max-width: 768px) {
   .login-content-wrapper {
     padding: 20px;
@@ -858,28 +1117,29 @@ body.dashboard-body-background {
     max-width: 90%;
     margin-top: 20px;
   }
+
   .dashboard-layout-container {
-    flex-direction: column;
+    flex-direction: column; /* Layout principal em coluna */
   }
   .dashboard-sidebar {
-    width: 100%;
-    height: auto;
+    width: 100%; /* Sidebar ocupa toda a largura */
+    height: auto; /* Altura automática */
+    /* Para sidebar colapsável, você precisaria de JS e mais CSS */
   }
   .dashboard-sidebar nav {
-    max-height: 250px;
+    max-height: 250px; /* Limita altura do menu e adiciona scroll */
     overflow-y: auto;
   }
   .sidebar-header.menu-header h2 {
     font-size: 1.2em;
   }
-  .sidebar-logo-icon svg,
-  .sidebar-logo-icon i.fas {
+  .sidebar-logo-icon svg {
     width: 28px;
     height: 28px;
   }
 
   .dashboard-main-content {
-    padding: 15px;
+    padding: 15px; /* Menor padding no conteúdo principal */
   }
   .dashboard-header {
     flex-direction: column;
@@ -889,20 +1149,23 @@ body.dashboard-body-background {
   .dashboard-header h1 {
     font-size: 1.3em;
   }
+  .user-profile-area {
+    align-self: flex-end; /* Alinha info do usuário à direita */
+  }
   .dashboard-widget h2,
   .dashboard-widget h3 {
     font-size: 1.1em;
   }
   .button-group {
     flex-direction: column;
-    align-items: stretch;
+    align-items: stretch; /* Botões ocupam largura total */
   }
   .action-button {
     width: 100%;
-    margin-bottom: 5px;
+    margin-bottom: 5px; /* Adiciona espaço se empilhados */
   }
   .filters-form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Filtros em coluna única */
   }
   .calendar-fullscreen-main-content .calendar-fullscreen-header {
     padding: 10px 15px;
@@ -912,8 +1175,8 @@ body.dashboard-body-background {
   }
   .shifts-table-navigation h2,
   .shifts-table-navigation span {
-    font-size: 1em !important;
-  } /* Forçar para títulos de navegação */
+    font-size: 1em !important; /* Forçar para títulos de navegação */
+  }
   .shifts-table-navigation button {
     font-size: 0.8em;
     padding: 6px 10px;

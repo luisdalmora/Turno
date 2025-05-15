@@ -8,30 +8,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const modalCloseButton = document.getElementById("modal-close-btn");
   const cancelEditButton = document.getElementById("cancel-edit-colab-button");
 
-  // Use a função global showToast de script.js, ou um fallback
   const notify =
     typeof showToast === "function"
       ? showToast
       : (message, type) => alert(`${type}: ${message}`);
 
-  // Função para buscar e exibir colaboradores
   async function carregarColaboradoresNaTabela() {
     if (!collaboratorsTableBody) return;
-    collaboratorsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Carregando... <i class="fas fa-spinner fa-spin"></i></td></tr>`;
-
-    // O token CSRF da página para o GET é opcional, mas pode ser adicionado se o backend exigir.
-    // const csrfTokenPage = document.getElementById('csrf-token-colab-manage') ? document.getElementById('csrf-token-colab-manage').value : '';
+    collaboratorsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Carregando... <i data-lucide="loader-circle" class="lucide-spin"></i></td></tr>`;
+    if (typeof lucide !== "undefined") lucide.createIcons();
 
     try {
-      // const response = await fetch(`listar_colaboradores.php?csrf_token=${csrfTokenPage}`); // Exemplo se enviar token no GET
       const response = await fetch(`listar_colaboradores.php`);
       const data = await response.json();
-
-      collaboratorsTableBody.innerHTML = ""; // Limpa o "Carregando..."
+      collaboratorsTableBody.innerHTML = "";
 
       if (data.success && data.colaboradores) {
         if (data.colaboradores.length === 0) {
-          collaboratorsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum colaborador cadastrado. <a href="cadastrar_colaborador.html">Adicionar novo</a>.</td></tr>`;
+          collaboratorsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Nenhum colaborador cadastrado. <a href="cadastrar_colaborador.php">Adicionar novo</a>.</td></tr>`;
           return;
         }
         data.colaboradores.forEach((colab) => {
@@ -51,15 +45,16 @@ document.addEventListener("DOMContentLoaded", function () {
           actionsCell.className = "actions-cell";
 
           const editButton = document.createElement("button");
-          editButton.innerHTML = '<i class="fas fa-edit"></i> Editar';
-          editButton.className = "action-button info btn-sm"; // Usar classes de botão existentes
+          // Usar data-lucide para o ícone, e a classe `action-button info btn-sm`
+          editButton.innerHTML = '<i data-lucide="edit-3"></i> Editar';
+          editButton.className = "action-button info btn-sm";
           editButton.onclick = () => abrirModalEdicao(colab);
           actionsCell.appendChild(editButton);
 
           const toggleStatusButton = document.createElement("button");
           toggleStatusButton.innerHTML = colab.ativo
-            ? '<i class="fas fa-toggle-off"></i> Desativar'
-            : '<i class="fas fa-toggle-on"></i> Ativar';
+            ? '<i data-lucide="toggle-left"></i> Desativar'
+            : '<i data-lucide="toggle-right"></i> Ativar';
           toggleStatusButton.className = colab.ativo
             ? "action-button warning btn-sm"
             : "action-button success btn-sm";
@@ -67,15 +62,11 @@ document.addEventListener("DOMContentLoaded", function () {
             alternarStatusColaborador(colab.id, !colab.ativo);
           actionsCell.appendChild(toggleStatusButton);
         });
+        if (typeof lucide !== "undefined") lucide.createIcons(); // Renderiza os ícones adicionados
       } else {
-        collaboratorsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Erro ao carregar colaboradores: ${
-          data.message || "Erro desconhecido"
-        }</td></tr>`;
-        notify(
-          "Erro ao carregar colaboradores: " +
-            (data.message || "Erro desconhecido"),
-          "error"
-        );
+        const errorMessage = data.message || "Erro desconhecido";
+        collaboratorsTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Erro ao carregar colaboradores: ${errorMessage}</td></tr>`;
+        notify("Erro ao carregar colaboradores: " + errorMessage, "error");
       }
     } catch (error) {
       console.error("Erro ao buscar colaboradores:", error);
@@ -87,44 +78,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Função para abrir o modal de edição
   function abrirModalEdicao(colaborador) {
     if (!editModal || !editForm) return;
-
-    editForm.reset(); // Limpa o formulário
+    editForm.reset();
     document.getElementById("edit-colab-id").value = colaborador.id;
     document.getElementById("edit-nome_completo").value =
       colaborador.nome_completo;
     document.getElementById("edit-email").value = colaborador.email || "";
     document.getElementById("edit-cargo").value = colaborador.cargo || "";
 
-    // Atualiza o token CSRF no formulário do modal, caso ele tenha sido regenerado
     const csrfTokenPageInput = document.getElementById(
       "csrf-token-colab-manage"
-    );
+    ); // Este ID deve estar no gerenciar_colaboradores.php
     if (csrfTokenPageInput) {
       document.getElementById("edit-csrf-token").value =
         csrfTokenPageInput.value;
     }
 
     editModal.classList.add("show");
-    editModal.style.display = "flex"; // Garante visibilidade se 'show' só controla opacidade/transform
+    editModal.style.display = "flex";
+    if (typeof lucide !== "undefined") lucide.createIcons(); // Recria ícones dentro do modal se houver
   }
 
-  // Função para fechar o modal
   function fecharModalEdicao() {
     if (!editModal) return;
     editModal.classList.remove("show");
-    // Adiciona um pequeno delay para a animação de saída antes de esconder
     setTimeout(() => {
       if (!editModal.classList.contains("show")) {
-        // Verifica se ainda não foi reaberto
         editModal.style.display = "none";
       }
-    }, 300); // Mesmo tempo da transição CSS
+    }, 300);
   }
 
-  // Event listener para salvar edição do colaborador
   if (editForm) {
     editForm.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -132,7 +117,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const originalButtonHtml = saveButton.innerHTML;
       saveButton.disabled = true;
       saveButton.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        '<i data-lucide="loader-circle" class="lucide-spin"></i> Salvando...';
+      if (typeof lucide !== "undefined") lucide.createIcons();
 
       const formData = new FormData(editForm);
       const dataPayload = Object.fromEntries(formData.entries());
@@ -152,9 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (result.success) {
           notify(result.message || "Colaborador atualizado!", "success");
           fecharModalEdicao();
-          carregarColaboradoresNaTabela(); // Recarrega a lista
+          carregarColaboradoresNaTabela();
           if (result.csrf_token) {
-            // Atualiza o token CSRF da página principal
             const csrfTokenPageInput = document.getElementById(
               "csrf-token-colab-manage"
             );
@@ -172,12 +157,12 @@ document.addEventListener("DOMContentLoaded", function () {
         notify("Erro crítico ao salvar: " + error.message, "error");
       } finally {
         saveButton.disabled = false;
-        saveButton.innerHTML = originalButtonHtml;
+        saveButton.innerHTML = originalButtonHtml; // Restaura o HTML original
+        if (typeof lucide !== "undefined") lucide.createIcons(); // Recria ícones no botão
       }
     });
   }
 
-  // Função para alternar status (Ativar/Desativar)
   async function alternarStatusColaborador(colabId, novoStatusBool) {
     const acaoTexto = novoStatusBool ? "ativar" : "desativar";
     if (!confirm(`Tem certeza que deseja ${acaoTexto} este colaborador?`))
@@ -212,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (result.success) {
         notify(result.message || `Status alterado com sucesso!`, "success");
-        carregarColaboradoresNaTabela(); // Recarrega a lista para refletir a mudança
+        carregarColaboradoresNaTabela();
         if (result.csrf_token && csrfTokenPageInput) {
           csrfTokenPageInput.value = result.csrf_token;
         }
@@ -228,24 +213,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Event listeners para fechar o modal
   if (modalCloseButton)
     modalCloseButton.addEventListener("click", fecharModalEdicao);
   if (cancelEditButton)
     cancelEditButton.addEventListener("click", fecharModalEdicao);
   if (editModal) {
-    // Fechar se clicar fora do conteúdo do modal
     editModal.addEventListener("click", function (event) {
       if (event.target === editModal) {
-        // Só fecha se o clique foi no overlay diretamente
         fecharModalEdicao();
       }
     });
   }
 
-  // Carregar colaboradores ao iniciar a página
   if (collaboratorsTableBody) {
-    // Só carrega se a tabela estiver na página
     carregarColaboradoresNaTabela();
   }
 });

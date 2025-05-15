@@ -7,9 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const generateReportButton = document.getElementById(
     "generate-report-button"
   );
-  const csrfTokenReportPage = document.getElementById("csrf-token-reports"); // Token CSRF específico desta página
+  const csrfTokenReportPage = document.getElementById("csrf-token-reports");
 
-  // Usa funções globais de script.js se disponíveis
   const buscarColaboradoresGlobais =
     typeof buscarEArmazenarColaboradores === "function"
       ? buscarEArmazenarColaboradores
@@ -22,9 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
   async function carregarColaboradoresParaFiltroRelatorio() {
     let colaboradores = [];
     if (buscarColaboradoresGlobais) {
-      colaboradores = await buscarColaboradoresGlobais(); // Reutiliza a função e cache global
+      colaboradores = await buscarColaboradoresGlobais();
     } else {
-      // Fallback muito básico se a função global não estiver carregada (improvável)
       try {
         const response = await fetch("obter_colaboradores.php");
         const data = await response.json();
@@ -41,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (Array.isArray(colaboradores)) {
         colaboradores.forEach((colab) => {
           const option = document.createElement("option");
-          option.value = colab.nome_completo; // Assumindo que o backend filtra por nome
+          option.value = colab.nome_completo;
           option.textContent = colab.nome_completo;
           filtroColaboradorSelect.appendChild(option);
         });
@@ -74,12 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (reportSummaryDiv) {
       if (totalTurnos > 0) {
         reportSummaryDiv.innerHTML = `<p>Total de Turnos no período: <strong>${totalTurnos}</strong></p>
-                                             <p>Total de Horas Trabalhadas: <strong>${totalHoras
-                                               .toFixed(2)
-                                               .replace(
-                                                 ".",
-                                                 ","
-                                               )}h</strong></p>`;
+                                       <p>Total de Horas Trabalhadas: <strong>${totalHoras
+                                         .toFixed(2)
+                                         .replace(".", ",")}h</strong></p>`;
       } else {
         reportSummaryDiv.innerHTML =
           "<p>Nenhum turno encontrado para exibir o resumo.</p>";
@@ -90,11 +85,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (reportFiltersForm) {
     reportFiltersForm.addEventListener("submit", async function (event) {
       event.preventDefault();
-      const originalButtonHtml = generateReportButton.innerHTML;
+      const originalButtonHtml = generateReportButton.innerHTML; // Salva o HTML original do botão
+
       if (generateReportButton) {
         generateReportButton.disabled = true;
         generateReportButton.innerHTML =
-          '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+          '<i data-lucide="loader-circle" class="lucide-spin"></i> Gerando...';
+        if (typeof lucide !== "undefined") lucide.createIcons();
       }
 
       const dataInicio = document.getElementById("filtro-data-inicio").value;
@@ -111,7 +108,8 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         if (generateReportButton) {
           generateReportButton.disabled = false;
-          generateReportButton.innerHTML = originalButtonHtml;
+          generateReportButton.innerHTML = originalButtonHtml; // Restaura o HTML original (com ícone Lucide)
+          if (typeof lucide !== "undefined") lucide.createIcons(); // Re-renderiza o ícone
         }
         return;
       }
@@ -123,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (generateReportButton) {
           generateReportButton.disabled = false;
           generateReportButton.innerHTML = originalButtonHtml;
+          if (typeof lucide !== "undefined") lucide.createIcons();
         }
         return;
       }
@@ -134,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (generateReportButton) {
           generateReportButton.disabled = false;
           generateReportButton.innerHTML = originalButtonHtml;
+          if (typeof lucide !== "undefined") lucide.createIcons();
         }
         return;
       }
@@ -145,12 +145,13 @@ document.addEventListener("DOMContentLoaded", function () {
         csrf_token: csrfToken,
       });
 
-      reportTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Buscando dados... <i class="fas fa-spinner fa-spin"></i></td></tr>`;
+      reportTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Buscando dados... <i data-lucide="loader-circle" class="lucide-spin"></i></td></tr>`;
+      if (typeof lucide !== "undefined") lucide.createIcons();
 
       try {
         const response = await fetch(
           `gerar_relatorio_turnos.php?${params.toString()}`
-        ); // Usando GET
+        );
         const data = await response.json();
 
         if (!response.ok) {
@@ -164,7 +165,6 @@ document.addEventListener("DOMContentLoaded", function () {
             data.total_turnos
           );
           if (data.csrf_token && csrfTokenReportPage) {
-            // Atualiza o token CSRF da página
             csrfTokenReportPage.value = data.csrf_token;
           }
         } else {
@@ -185,17 +185,15 @@ document.addEventListener("DOMContentLoaded", function () {
       } finally {
         if (generateReportButton) {
           generateReportButton.disabled = false;
-          generateReportButton.innerHTML = originalButtonHtml;
+          generateReportButton.innerHTML = originalButtonHtml; // Restaura o HTML original
+          if (typeof lucide !== "undefined") lucide.createIcons(); // Garante que o ícone seja renderizado
         }
       }
     });
   }
 
-  // Inicialização da página de relatórios
   if (document.getElementById("report-filters-form")) {
-    // Só executa se estiver na página de relatórios
     carregarColaboradoresParaFiltroRelatorio();
-
     const hoje = new Date();
     const primeiroDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     const ultimoDiaDoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
