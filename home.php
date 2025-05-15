@@ -181,7 +181,7 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
             </div>
           </div>
         </section>
-
+        
         <section class="dashboard-widget widget-implantacoes-table">
           <input type="hidden" id="csrf-token-implantacoes" value="<?php echo htmlspecialchars($csrfTokenImplantacoes); ?>">
           <div class="shifts-table-navigation">
@@ -216,8 +216,7 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao];
         <section class="dashboard-widget widget-observacoes-gerais">
           <h2><i data-lucide="notebook-pen"></i> Observações Gerais</h2>
           <input type="hidden" id="csrf-token-obs-geral" value="<?php echo htmlspecialchars($csrfTokenObsGeral); ?>">
-          <textarea id="observacoes-gerais-textarea" rows="5" placeholder="Digite aqui qualquer informação importante..."></textarea>
-          <button id="salvar-observacoes-gerais-btn" class="action-button primary" style="margin-top:10px;"><i data-lucide="save"></i> Salvar Observações</button>
+          <textarea id="observacoes-gerais-textarea" rows="4" placeholder="Digite aqui qualquer informação importante..."></textarea> <button id="salvar-observacoes-gerais-btn" class="action-button primary" style="margin-top:10px;"><i data-lucide="save"></i> Salvar Observações</button>
         </section>
 
       </main>
