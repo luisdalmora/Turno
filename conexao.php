@@ -12,7 +12,11 @@ $connectionOptions = array(
     "Database" => $db_database,
     "Uid" => $db_username,
     "PWD" => $db_password,
-    "CharacterSet" => "UTF-8" // Recomendado para suportar caracteres especiais
+    "CharacterSet" => "UTF-8", // Recomendado para suportar caracteres especiais
+    "Encrypt" => false // Opção 1: Desabilitar criptografia (menos seguro)
+    // OU
+    // "Encrypt" => true, // Manter criptografia (ou omitir, pois é o padrão para drivers mais novos)
+    // "TrustServerCertificate" => true // Opção 2: Confiar no certificado do servidor sem validação (menos seguro)
 );
 
 // Tentativa de estabelecer a conexão com o banco de dados SQL Server
