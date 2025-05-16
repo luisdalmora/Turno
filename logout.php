@@ -20,5 +20,5 @@ session_destroy();
 
 // 4. Redirecionar para a página de login (index.html)
 //    Adicionar um status pode ser útil para exibir uma mensagem na página de login.
-header('Location: index.html?status=logout_success');
+ header('Location: index.html');
 exit;

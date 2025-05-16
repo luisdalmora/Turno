@@ -12,9 +12,7 @@ $gcalHelper = new GoogleCalendarHelper($logger, $conexao); // GoogleCalendarHelp
 header('Content-Type: application/json');
 
 // --- Funções Utilitárias para este script ---
-// A função formatarDataParaMysql pode ser renomeada para formatarDataParaBanco ou similar,
-// mas a lógica interna de retornar 'Y-m-d' é compatível com SQL Server.
-function formatarDataParaBanco($dataStr, $anoReferencia) { // Nome alterado para clareza
+function formatarDataParaBanco($dataStr, $anoReferencia) { 
     if (empty($dataStr)) return null;
     $partes = explode('/', $dataStr);
     if (count($partes) < 2) return null; 
@@ -42,24 +40,22 @@ function formatarDataParaBanco($dataStr, $anoReferencia) { // Nome alterado para
     }
 
     if ($diaNum && $mesNum && checkdate((int)$mesNum, (int)$diaNum, (int)$ano)) {
-        return "$ano-$mesNum-$diaNum"; // Formato 'Y-m-d' é padrão e bom para SQL Server
+        return "$ano-$mesNum-$diaNum"; 
     }
-    // Acessando globais dentro da função para log
-    global $logger, $userIdLogging; // $userIdLogging para evitar conflito com $userId da sessão globalmente
+    global $logger, $userIdLogging; 
     if (isset($logger) && isset($userIdLogging)) {
        $logger->log('WARNING', 'Formato de data inválido recebido (formatarDataParaBanco).', ['data_str' => $dataStr, 'ano_ref' => $anoReferencia, 'user_id' => $userIdLogging]);
     }
     return null;
 }
 
-// A função formatarHoraParaMysql pode ser renomeada, mas retornar 'HH:MM:SS' é compatível com o tipo TIME do SQL Server.
-function formatarHoraParaBanco($horaStr) { // Nome alterado
+function formatarHoraParaBanco($horaStr) { 
     if (empty($horaStr)) return null;
     if (preg_match('/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/', $horaStr)) {
-        return $horaStr . ':00'; // HH:MM -> HH:MM:SS
+        return $horaStr . ':00'; 
     }
     if (preg_match('/^([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/', $horaStr)) {
-        return $horaStr; // Já está HH:MM:SS
+        return $horaStr; 
     }
     global $logger, $userIdLogging;
      if (isset($logger) && isset($userIdLogging)) {
@@ -71,7 +67,7 @@ function formatarHoraParaBanco($horaStr) { // Nome alterado
 
 // --- Verificação de Sessão e CSRF Token ---
 $novoCsrfTokenParaCliente = null; 
-$userIdLogging = $_SESSION['usuario_id'] ?? null; // Para uso nas funções de formatação de log
+$userIdLogging = $_SESSION['usuario_id'] ?? null; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
@@ -115,11 +111,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if ($conexao) sqlsrv_close($conexao);
         exit;
     }
-    // SQL Server: FORMAT para data e hora
     $sql = "SELECT id, FORMAT(data, 'dd/MM') AS data_formatada, data, 
-                   FORMAT(CAST(hora_inicio AS TIME), 'HH:mm') AS hora_inicio, /* Cast para TIME se for DATETIME */
-                   FORMAT(CAST(hora_fim AS TIME), 'HH:mm') AS hora_fim,       /* Cast para TIME se for DATETIME */
-                   colaborador, google_calendar_event_id 
+                   FORMAT(CAST(hora_inicio AS TIME), 'HH:mm') AS hora_inicio, 
+                   FORMAT(CAST(hora_fim AS TIME), 'HH:mm') AS hora_fim,       
+                   colaborador, google_calendar_event_id, ano 
             FROM turnos 
             WHERE criado_por_usuario_id = ? AND YEAR(data) = ? AND MONTH(data) = ?
             ORDER BY data ASC, hora_inicio ASC";
@@ -137,8 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
     $turnos_carregados = [];
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        // Se 'data' for um objeto DateTime do SQLSRV, formate-o se necessário para consistência (já formatado na query como data_formatada)
-        // $row['data'] aqui seria o valor original da coluna 'data'
         $turnos_carregados[] = $row;
     }
     sqlsrv_free_stmt($stmt);
@@ -166,12 +159,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $googleAccessToken = $gcalHelper->getAccessTokenForUser($userId);
 
-        // Construir array de parâmetros para a cláusula IN
         $params_gcal_select = $idsValidos;
-        $params_gcal_select[] = $userId; // Adiciona o user_id ao final
+        array_push($params_gcal_select, $userId); // Adiciona user_id ao final dos parâmetros
 
-        // Obter google_calendar_event_id antes de deletar do BD
-        $sql_get_gcal = "SELECT google_calendar_event_id FROM turnos WHERE id IN (" . implode(',', array_fill(0, count($idsValidos), '?')) . ") AND criado_por_usuario_id = ?";
+        $sql_get_gcal = "SELECT google_calendar_event_id FROM turnos WHERE id IN (" . $placeholders . ") AND criado_por_usuario_id = ?";
         $stmt_gcal = sqlsrv_query($conexao, $sql_get_gcal, $params_gcal_select);
 
         if ($stmt_gcal) {
@@ -185,12 +176,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              $logger->log('ERROR', 'Falha ao buscar IDs GCal para exclusão (SQLSRV).', ['user_id' => $userId, 'errors' => sqlsrv_errors()]);
         }
 
-
         $sql_delete = "DELETE FROM turnos WHERE id IN ($placeholders) AND criado_por_usuario_id = ?";
-        $params_delete = $idsValidos; // Os IDs
-        $params_delete[] = $userId;   // O ID do usuário
+        $params_delete = $idsValidos; 
+        array_push($params_delete, $userId);   
         
-        $stmt_delete = sqlsrv_prepare($conexao, $sql_delete, $params_delete); // Use prepare para DELETE com múltiplos params
+        $stmt_delete = sqlsrv_prepare($conexao, $sql_delete, $params_delete); 
         
         if ($stmt_delete && sqlsrv_execute($stmt_delete)) {
             $numLinhasAfetadas = sqlsrv_rows_affected($stmt_delete);
@@ -212,24 +202,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $googleAccessToken = $gcalHelper->getAccessTokenForUser($userId);
         $errosOperacao = [];
         $anoReferenciaTurnosSalvos = null; 
+        $mesReferenciaRecarga = date('m'); // Default para o mês atual
 
-        // SQL Server: Adicionar OUTPUT INSERTED.id para obter o ID do novo turno
-        $sql_insert = "INSERT INTO turnos (data, hora_inicio, hora_fim, colaborador, google_calendar_event_id, criado_por_usuario_id, ano) OUTPUT INSERTED.id VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $sql_update = "UPDATE turnos SET data = ?, hora_inicio = ?, hora_fim = ?, colaborador = ?, google_calendar_event_id = ?, ano = ? WHERE id = ? AND criado_por_usuario_id = ?";
+        // ***** ALTERAÇÃO AQUI: Removida a coluna 'ano' do INSERT e UPDATE *****
+        $sql_insert = "INSERT INTO turnos (data, hora_inicio, hora_fim, colaborador, google_calendar_event_id, criado_por_usuario_id) OUTPUT INSERTED.id VALUES (?, ?, ?, ?, ?, ?)";
+        $sql_update = "UPDATE turnos SET data = ?, hora_inicio = ?, hora_fim = ?, colaborador = ?, google_calendar_event_id = ? WHERE id = ? AND criado_por_usuario_id = ?";
 
         foreach ($dadosTurnosRecebidos as $turno) {
-            $turnoIdCliente = $turno['id'] ?? null; // Pode ser "new-X" ou um ID numérico
+            $turnoIdCliente = $turno['id'] ?? null; 
             $dataStr = $turno['data'] ?? null;
-            $anoForm = $turno['ano'] ?? date('Y'); 
+            // $anoForm não é mais usado diretamente no INSERT/UPDATE para a coluna 'ano'
+            $anoForm = $turno['ano'] ?? date('Y'); // Ainda pode ser usado para formatarDataParaBanco
+            
             $horaInicioStr = $turno['hora_inicio'] ?? null;
             $horaFimStr = $turno['hora_fim'] ?? null;
             $colaboradorNome = isset($turno['colaborador']) ? trim($turno['colaborador']) : null;
             
             if (!$anoReferenciaTurnosSalvos) $anoReferenciaTurnosSalvos = $anoForm;
+            if(empty($mesReferenciaRecarga) && !empty($dataStr)) { // Define o mês de recarga com base no primeiro turno válido
+                 $dataPrimeiroTurno = formatarDataParaBanco($dataStr, $anoForm);
+                 if($dataPrimeiroTurno) {
+                    try {
+                       $dtObjRecarga = new DateTime($dataPrimeiroTurno);
+                       $mesReferenciaRecarga = $dtObjRecarga->format('m');
+                    } catch(Exception $e) { /* mantém o default */ }
+                 }
+            }
 
-            $dataFormatadaBanco = formatarDataParaBanco($dataStr, $anoForm); // YYYY-MM-DD
-            $horaInicioDb = formatarHoraParaBanco($horaInicioStr);       // HH:MM:SS
-            $horaFimDb = formatarHoraParaBanco($horaFimStr);             // HH:MM:SS
+
+            $dataFormatadaBanco = formatarDataParaBanco($dataStr, $anoForm); 
+            $horaInicioDb = formatarHoraParaBanco($horaInicioStr);       
+            $horaFimDb = formatarHoraParaBanco($horaFimStr);             
 
             if (!$dataFormatadaBanco || !$horaInicioDb || !$horaFimDb || empty($colaboradorNome)) {
                 $errosOperacao[] = "Turno para '{$colaboradorNome}' em '{$dataStr}' com dados incompletos/inválidos."; continue;
@@ -246,9 +249,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            $googleEventIdParaSalvar = $turno['google_calendar_event_id_original'] ?? null; // Preserva o ID se não for mexer no GCal ou se falhar
+            $googleEventIdParaSalvar = $turno['google_calendar_event_id_original'] ?? null; 
 
-            if ($googleAccessToken && ($turno['gcal_sync_needed'] ?? false)) { // Se o JS indicar que precisa sincronizar
+            if ($googleAccessToken && ($turno['gcal_sync_needed'] ?? false)) { 
                 try {
                     $fusoHorario = 'America/Sao_Paulo';
                     $dateTimeInicioGCal = new DateTime($dataFormatadaBanco . ' ' . $horaInicioDb, new DateTimeZone($fusoHorario));
@@ -263,23 +266,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $oldGcalId = $turno['google_calendar_event_id_original'] ?? null;
                     if ($turnoIdCliente && !str_starts_with((string)$turnoIdCliente, "new-") && $oldGcalId) {
-                        $gcalHelper->deleteEvent($userId, $oldGcalId); // Deleta o antigo se existir para "atualizar"
+                        $gcalHelper->deleteEvent($userId, $oldGcalId); 
                     }
                     $googleEventIdParaSalvar = $gcalHelper->createEvent($userId, $summary, $description, $dateTimeInicioGCal->format(DateTime::RFC3339), $dateTimeFimGCal->format(DateTime::RFC3339), $fusoHorario);
                 } catch (Exception $e) {
                     $logger->log('GCAL_ERROR', 'Exceção GCal ao salvar turno: '.$e->getMessage(), ['uid'=>$userId, 'turno_data_cliente'=>$turno]);
                     $errosOperacao[] = "Falha GCal para {$colaboradorNome} em {$dataStr}: ".substr($e->getMessage(),0,50);
-                    // Mantém o googleEventIdParaSalvar como o original se a operação GCal falhou
                 }
             }
 
-
             if ($turnoIdCliente && !str_starts_with((string)$turnoIdCliente, "new-")) { // UPDATE
                 $turnoIdRealDb = (int)$turnoIdCliente;
-                $params_update = array($dataFormatadaBanco, $horaInicioDb, $horaFimDb, $colaboradorNome, $googleEventIdParaSalvar, $anoForm, $turnoIdRealDb, $userId);
+                // ***** ALTERAÇÃO AQUI: Removido $anoForm dos parâmetros de update *****
+                $params_update = array($dataFormatadaBanco, $horaInicioDb, $horaFimDb, $colaboradorNome, $googleEventIdParaSalvar, $turnoIdRealDb, $userId);
                 $stmt_update = sqlsrv_prepare($conexao, $sql_update, $params_update);
                 if ($stmt_update && sqlsrv_execute($stmt_update)) {
-                    // Sucesso no update
                     sqlsrv_free_stmt($stmt_update);
                 } else {
                     $errors = sqlsrv_errors(SQLSRV_ERR_ALL);
@@ -287,15 +288,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if($stmt_update) sqlsrv_free_stmt($stmt_update);
                 }
             } else { // INSERT
-                $params_insert = array($dataFormatadaBanco, $horaInicioDb, $horaFimDb, $colaboradorNome, $googleEventIdParaSalvar, $userId, $anoForm);
-                $stmt_insert = sqlsrv_query($conexao, $sql_insert, $params_insert); // sqlsrv_query para INSERT com OUTPUT
+                // ***** ALTERAÇÃO AQUI: Removido $userId e $anoForm dos parâmetros de insert, $userId já está em criado_por_usuario_id. A coluna 'ano' é computada. *****
+                $params_insert = array($dataFormatadaBanco, $horaInicioDb, $horaFimDb, $colaboradorNome, $googleEventIdParaSalvar, $userId);
+                $stmt_insert = sqlsrv_query($conexao, $sql_insert, $params_insert); 
                 
                 if ($stmt_insert) {
                     if (sqlsrv_fetch($stmt_insert) === true) {
-                        // $novoTurnoId = sqlsrv_get_field($stmt_insert, 0); // ID do turno inserido
-                        // Sucesso no insert
+                        // $novoTurnoId = sqlsrv_get_field($stmt_insert, 0); 
                     } else {
-                        // Falha ao obter o ID, mas o insert pode ter ocorrido ou falhado.
                         $errors_fetch = sqlsrv_errors(SQLSRV_ERR_ALL);
                         $errosOperacao[] = "Erro ao INSERIR turno para {$colaboradorNome} em {$dataStr} (fetch ID): " . ($errors_fetch[0]['message'] ?? 'Não obteve ID');
                     }
@@ -307,25 +307,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Recarregar turnos para retornar ao cliente
-        $mesReferenciaRecarga = date('m');
         $anoReferenciaRecarga = $anoReferenciaTurnosSalvos ?? date('Y');
-        if(isset($dadosTurnosRecebidos[0]['data'])) {
-            $dataPrimeiroTurnoSalvo = formatarDataParaBanco($dadosTurnosRecebidos[0]['data'], $anoReferenciaRecarga);
-            if($dataPrimeiroTurnoSalvo) {
-                try {
-                    $dtObj = new DateTime($dataPrimeiroTurnoSalvo);
-                    $mesReferenciaRecarga = $dtObj->format('m');
-                    // $anoReferenciaRecarga já foi definido acima e deve ser usado
-                } catch(Exception $e) { /* Mantém o default se a data for inválida */ }
-            }
-        }
+        // A lógica para $mesReferenciaRecarga já está no início do loop.
         
-        // SQL para recarregar, já ajustado para SQL Server FORMAT
         $sql_recarregar = "SELECT id, FORMAT(data, 'dd/MM') AS data_formatada, data, 
                                   FORMAT(CAST(hora_inicio AS TIME), 'HH:mm') AS hora_inicio, 
                                   FORMAT(CAST(hora_fim AS TIME), 'HH:mm') AS hora_fim, 
-                                  colaborador, google_calendar_event_id 
+                                  colaborador, google_calendar_event_id, ano 
                            FROM turnos WHERE criado_por_usuario_id = ? AND YEAR(data) = ? AND MONTH(data) = ? 
                            ORDER BY data ASC, hora_inicio ASC";
         $params_recarregar = array($userId, (int)$anoReferenciaRecarga, (int)$mesReferenciaRecarga);
@@ -341,7 +329,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $logger->log('ERROR', 'Falha ao recarregar turnos após salvar (SQLSRV).', ['user_id' => $userId, 'errors' => sqlsrv_errors()]);
         }
 
-
         if (!empty($errosOperacao)) {
              echo json_encode(['success'=>false, 'message'=>'Ocorreram erros: '.implode("; ",$errosOperacao), 'data'=>$turnosRetorno, 'csrf_token'=>$novoCsrfTokenParaCliente]);
         } else {
@@ -355,7 +342,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Se chegou aqui, método não tratado ou GET sem parâmetros válidos
 $logger->log('ERROR', 'Método não tratado ou GET sem parâmetros válidos em salvar_turnos.', ['method' => $_SERVER['REQUEST_METHOD'] ?? 'N/A']);
 echo json_encode(['success' => false, 'message' => 'Requisição inválida.', 'csrf_token' => $novoCsrfTokenParaCliente ?? bin2hex(random_bytes(32)) ]);
-if ($conexao) sqlsrv_close($conexao); // Adicionado para fechar conexão em caminhos de erro
+if ($conexao) sqlsrv_close($conexao); 
+

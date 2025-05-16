@@ -16,7 +16,13 @@ if (!isset($_SESSION['logado']) || $_SESSION['logado'] !== true) {
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-$csrfToken = $_SESSION['csrf_token'];
+$csrfToken = $_SESSION['csrf_token']; // Usado para turnos e outras ações gerais do dashboard
+
+if (empty($_SESSION['csrf_token_backup'])) { // Token específico para backup
+    $_SESSION['csrf_token_backup'] = bin2hex(random_bytes(32));
+}
+$csrfTokenBackup = $_SESSION['csrf_token_backup'];
+
 
 if (empty($_SESSION['csrf_token_implantacoes'])) {
     $_SESSION['csrf_token_implantacoes'] = bin2hex(random_bytes(32));
@@ -30,7 +36,7 @@ $csrfTokenObsGeral = $_SESSION['csrf_token_obs_geral'];
 
 // Informações do usuário e data
 $nomeUsuarioLogado = $_SESSION['usuario_nome_completo'] ?? 'Usuário';
-$emailUsuarioLogado = $_SESSION['usuario_email'] ?? 'primary'; // Usado no iframe do GCal
+$emailUsuarioLogado = $_SESSION['usuario_email'] ?? 'primary'; 
 
 $anoExibicao = date('Y');
 $mesExibicao = date('m');
@@ -46,24 +52,71 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao] ?? '';
   <title>Dashboard - Gestão de Turnos</title>
   <link href="src/output.css" rel="stylesheet"> 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Estilos mínimos para o gráfico ou elementos não facilmente cobertos pelo Tailwind */
-    #employee-hours-chart-container {
-        height: 280px;
-        position: relative; 
-    }
-    /* Para garantir que os inputs/selects dentro das tabelas tenham um tamanho mínimo */
+    #employee-hours-chart-container { height: 280px; position: relative; }
     #shifts-table-main input, #shifts-table-main select,
-    #implantacoes-table-main input, #implantacoes-table-main select {
-        min-width: 80px; /* Ajuste conforme necessário */
+    #implantacoes-table-main input, #implantacoes-table-main select { min-width: 80px; }
+
+    .modal-backdrop {
+        position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1050; opacity: 0; transition: opacity 0.3s ease-out; pointer-events: none;
+    }
+    .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+    .modal-content-backup {
+        background-color: white; padding: 2rem; border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        width: 90%; max-width: 400px; text-align: center;
+        transform: scale(0.95); transition: transform 0.3s ease-out;
+    }
+    .modal-backdrop.show .modal-content-backup { transform: scale(1); }
+    .progress-bar-container {
+        width: 100%; background-color: #e5e7eb; border-radius: 0.25rem; overflow: hidden; margin-top: 1rem; margin-bottom: 1rem;
+    }
+    .progress-bar {
+        width: 0%; 
+        height: 1.25rem; background-color: #3b82f6; /* Azul */
+        text-align: center; line-height: 1.25rem; color: white; font-size: 0.75rem;
+        transition: width 0.5s ease;
+    }
+    .progress-bar.indeterminate {
+        background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+        background-size: 1rem 1rem;
+        animation: progress-bar-stripes 1s linear infinite;
+        width: 100% !important; 
+    }
+    @keyframes progress-bar-stripes {
+        from { background-position: 1rem 0; }
+        to { background-position: 0 0; }
     }
   </style>
 </head>
 <body class="bg-gray-100 font-poppins text-gray-700">
+
+  <div id="backup-modal-backdrop" class="modal-backdrop">
+    <div class="modal-content-backup">
+      <h3 id="backup-modal-title" class="text-lg font-medium text-gray-900">Backup do Banco de Dados</h3>
+      <div id="backup-modal-message" class="mt-2 text-sm text-gray-600">
+        Iniciando o processo de backup...
+      </div>
+      <div class="progress-bar-container" id="backup-progress-bar-container" style="display: none;">
+        <div class="progress-bar" id="backup-progress-bar">0%</div>
+      </div>
+      <div class="mt-4">
+        <button type="button" id="backup-modal-close-btn" class="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2" style="display: none;">
+          Fechar
+        </button>
+         <a href="#" id="backup-download-link" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Baixar Backup
+        </a>
+      </div>
+    </div>
+  </div>
+
   <div class="flex h-screen overflow-hidden">
     <aside class="w-64 bg-gradient-to-b from-blue-800 to-blue-700 text-indigo-100 flex flex-col flex-shrink-0">
       <div class="h-16 flex items-center px-4 md:px-6 border-b border-white/10">
@@ -85,15 +138,21 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao] ?? '';
         </a>
       </nav>
       <div class="p-2 border-t border-white/10">
-        <div class="px-2 py-1">
-            <a href="google_auth_redirect.php" class="flex items-center justify-center w-full px-3 py-2 mb-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium transition-colors text-sm" id="connect-gcal-btn">
+        <input type="hidden" id="csrf-token-backup" value="<?php echo htmlspecialchars($csrfTokenBackup); ?>">
+
+        <div class="px-2 py-1 space-y-1.5">
+            <a href="#" id="backup-db-btn" class="flex items-center justify-center w-full px-3 py-2 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-medium transition-colors text-sm">
+                <i data-lucide="database-backup" class="w-4 h-4 mr-2"></i> Backup Banco de Dados
+            </a>
+            
+            <a href="google_auth_redirect.php" class="flex items-center justify-center w-full px-3 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium transition-colors text-sm" id="connect-gcal-btn" style="display: none;">
                 <i data-lucide="link" class="w-4 h-4 mr-2"></i> Conectar Google
             </a>
-            <button id="disconnect-gcal-btn" class="flex items-center justify-center w-full px-3 py-2 mb-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium transition-colors text-sm" style="display: none;">
+            <button id="disconnect-gcal-btn" class="flex items-center justify-center w-full px-3 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-gray-800 font-medium transition-colors text-sm" style="display: none;">
                 <i data-lucide="unlink-2" class="w-4 h-4 mr-2"></i> Desconectar Google
             </button>
         </div>
-        <div class="px-2 py-1">
+        <div class="px-2 py-1 mt-1.5">
             <a href="logout.php" id="logout-link" class="flex items-center justify-center w-full px-3 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors text-sm">
                 <i data-lucide="log-out" class="w-4 h-4 mr-2"></i> Sair
             </a>
@@ -263,7 +322,6 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao] ?? '';
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
-      // Lógica para GCal status e mensagens (do seu script.js existente)
       const urlParams = new URLSearchParams(window.location.search);
       const gcalStatus = urlParams.get('gcal_status');
       const gcalMsg = urlParams.get('gcal_msg');
@@ -271,7 +329,7 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao] ?? '';
           if(typeof showToast === 'function') showToast('Google Calendar conectado com sucesso!', 'success');
           localStorage.setItem('gcal_connected_simposto', 'true');
       } else if (gcalStatus === 'error') {
-          if(typeof showToast === 'function') showToast('Falha conexão GCal: ' + (gcalMsg || 'Tente novamente.'), 'error');
+          if(typeof showToast === 'function') showToast('Falha conexão GCal: ' + (decodeURIComponent(gcalMsg || '') || 'Tente novamente.'), 'error');
           localStorage.removeItem('gcal_connected_simposto');
       } else if (gcalStatus === 'disconnected') {
           if(typeof showToast === 'function') showToast('Google Calendar desconectado.', 'info');
@@ -279,19 +337,10 @@ $nomeMesExibicao = $nomesMeses[(int)$mesExibicao] ?? '';
       }
       if(typeof checkGCalConnectionStatus === 'function') checkGCalConnectionStatus();
 
-      if (gcalStatus || gcalMsg) { // Limpa a URL dos parâmetros do GCal
+      if (gcalStatus || gcalMsg) { 
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
       }
-
-      // IMPORTANTE: Lembre-se de modificar seu script.js para adicionar classes Tailwind
-      // aos inputs e selects que são criados dinamicamente para as tabelas.
-      // Exemplo (a ser colocado dentro das funções apropriadas em script.js):
-      // const novoInput = document.createElement('input');
-      // novoInput.className = 'form-input p-1.5 border border-gray-300 rounded-md text-xs w-full box-border focus:ring-indigo-500 focus:border-indigo-500';
-      //
-      // const novoSelect = document.createElement('select');
-      // novoSelect.className = 'form-select p-1.5 border border-gray-300 rounded-md text-xs w-full box-border focus:ring-indigo-500 focus:border-indigo-500';
     });
   </script>
 </body>
