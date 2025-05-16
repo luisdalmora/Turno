@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
    setting_key VARCHAR(100) PRIMARY KEY,
     setting_value TEXT
 );
-INSERT INTO system_settings (setting_key, setting_value) VALUES ('site_url', 'http://localhost/seu_projeto_raiz') ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value);
+INSERT INTO system_settings (setting_key, setting_value) VALUES ('site_url', 'http://localhost/turno') ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value);
 
 
 -- Fim do script.

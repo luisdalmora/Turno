@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Escala de Trabalho</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="dashboard-layout-container">
+    <aside class="dashboard-sidebar">
+      <h3>Menu Principal</h3>
+      <nav>
+        <ul>
+          <li class="sidebar-nav-item active"><a href="#">Dashboard</a></li>
+          <li class="sidebar-nav-item"><a href="#">Gerenciar Turnos</a></li>
+          <li class="sidebar-nav-item"><a href="#">Colaboradores</a></li>
+          <li class="sidebar-nav-item"><a href="#">Relatórios</a></li>
+          <li class="sidebar-nav-item"><a href="index.html">Sair</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="dashboard-main-content">
+      <header class="dashboard-header">
+        <h1>Sim Posto - Gestão de Turnos</h1>
+      </header>
+
+      <main class="dashboard-grid">
+        <section class="dashboard-widget widget-calendar">
+          <h2>Calendário de Eventos</h2>
+          <div class="calendar-integration-placeholder">
+            <iframe src="https://calendar.google.com/calendar/embed?src=postosim8%40gmail.com&ctz=America%2FSao_Paulo"
+              style="border:solid 1px #777" width="100%" height="400" frameborder="0" scrolling="no"></iframe>
+          </div>
+        </section>
+
+        <section class="dashboard-widget widget-shifts-table">
+          <h2>Turnos Programados - Maio 2025</h2>
+          <table id="shifts-table-may">
+            <thead>
+              <tr>
+                <th>Dia</th>
+                <th>Turno</th>
+                <th>Colaborador</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" class="shift-date" value="03/mai"></td>
+                <td><input type="time" class="shift-time" value="04:00:00"></td>
+                <td><input type="text" class="shift-employee" value="Roger"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="shift-date" value="10/mai"></td>
+                <td><input type="time" class="shift-time" value="04:00:00"></td>
+                <td><input type="text" class="shift-employee" value="Vinicius"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="shift-date" value="17/mai"></td>
+                <td><input type="time" class="shift-time" value="04:00:00"></td>
+                <td><input type="text" class="shift-employee" value="Luis Henrique"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="shift-date" value="24/mai"></td>
+                <td><input type="time" class="shift-time" value="04:00:00"></td>
+                <td><input type="text" class="shift-employee" value="Roger"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="shift-date" value="31/mai"></td>
+                <td><input type="time" class="shift-time" value="04:00:00"></td>
+                <td><input type="text" class="shift-employee" value="Vinicius"></td>
+              </tr>
+            </tbody>
+          </table>
+          <button id="save-shifts-button" class="action-button">Salvar Alterações nos Turnos</button>
+        </section>
+
+        <section class="dashboard-widget widget-employee-summary">
+          <h2>Resumo de Horas por Colaborador</h2>
+          <table id="employee-summary-table">
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Total de Horas</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

@@ -18,8 +18,8 @@ if (session_status() == PHP_SESSION_NONE) { // Só configura se a sessão não t
 }
 
 // --- Configurações do Google API ---
-define('GOOGLE_CLIENT_ID', '868632842122-ksbsm15rm7eat6oq0o186g7jmkic313e.apps.googleusercontent.com'); // Mantenha seu Client ID
-define('GOOGLE_CLIENT_SECRET', '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'); // Mantenha seu Client Secret
+define('GOOGLE_CLIENT_ID', '868632842122-nd9rc37fi8llcc5aqge2l66ijtm6i7k4.apps.googleusercontent.com'); // Mantenha seu Client ID
+define('GOOGLE_CLIENT_SECRET', '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'); // Mantenha seu Client Secret
 define('GOOGLE_REDIRECT_URI', 'http://localhost/turno/google_oauth_callback.php'); // Verifique se esta é a URL correta para seu ambiente
 define('GOOGLE_APPLICATION_NAME', 'Sim Posto Gestao de Turnos');
 define('PATH_TO_CLIENT_SECRET_JSON', __DIR__ . '/client_secret.json'); // Caminho para seu arquivo de credenciais
